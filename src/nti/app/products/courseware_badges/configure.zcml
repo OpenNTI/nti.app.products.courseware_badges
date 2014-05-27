@@ -9,4 +9,19 @@
 	<include package="zope.component" />
 	<include package="zope.security" />
 	
+	<!-- Adapters -->
+	
+	<adapter factory=".courses._CourseBadgeCatalog"
+			 for="nti.contenttypes.courses.interfaces.ICourseInstance"
+			 provides=".interfaces.ICourseBadgeCatalog" />
+	
+	<adapter factory=".courses._CourseBadgeCatalog"
+			 for="nti.app.products.courseware.interfaces.ICourseInstanceEnrollment"
+			 provides=".interfaces.ICourseBadgeCatalog" />
+			 
+	<!-- Subscribers -->
+	
+	<subscriber	factory=".courses._CourseErnableBadges"
+				provides="nti.app.products.badges.interfaces.IPrincipalErnableBadges"/>
+				
 </configure>
