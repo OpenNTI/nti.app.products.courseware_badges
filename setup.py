@@ -14,11 +14,11 @@ IS_PYPY = py_impl() == 'PyPy'
 
 
 setup(
-    name='nti.app.products.badges',
+    name='nti.app.products.courseware_badges',
     version=VERSION,
     author='Jason Madden',
     author_email='jason@nextthought.com',
-    description="NTI Badges Product Integration",
+    description="NTI Badges/Courses Product Integration",
     long_description=codecs.open('README.rst', encoding='utf-8').read(),
     license='Proprietary',
     keywords='pyramid preference',
@@ -36,7 +36,8 @@ setup(
 	namespace_packages=['nti'],
 	install_requires=[
 		'setuptools',
-        'nti.badges'
+        'nti.app.products.badges',
+        'nti.app.products.courseware'
 	],
 	entry_points=entry_points
 )
