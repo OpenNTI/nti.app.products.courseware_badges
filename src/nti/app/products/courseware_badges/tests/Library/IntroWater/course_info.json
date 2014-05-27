@@ -24,6 +24,9 @@
 	},
 	"description": "This course is an introductory course on the significance of water in our world. The title of the course makes reference to (1) water as a global and local natural resource (Water), (2) water as a chemical compound with important properties and characteristics (H20), and (3) the science and technology of bringing clean water to peoples in need (WaTER, an acronym for “Water Technologies for Emerging Regions”). The course is designed to generate awareness of water’s beneficial uses as well as the challenges associated with water quality, degradation, scarcity, over-abundance (flooding), and inequities in access to clean water. It will also introduce the students to the need to consider both technological options and cultural context in determining sustainable solutions to water problems.",
 	"prerequisites": [],
+	"badges": {
+			"badge.2": "completion",
+	},
 	"instructors": [
 		{
 			"defaultphoto":"images/Sabatini.png",
