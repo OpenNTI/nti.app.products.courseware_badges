@@ -25,7 +25,7 @@ from nti.contentlibrary.interfaces import IContentPackageLibrary
 
 from nti.dataserver import users
 
-from nti.app.products.courseware_badges.tests import badges
+from nti.app.products.courseware_badges.tests.badges import generate_db
 
 from nti.dataserver.tests.mock_dataserver import WithMockDS
 from nti.dataserver.tests.mock_dataserver import mock_db_trans
@@ -54,7 +54,7 @@ def _register_sample(cls):
     import transaction
     with transaction.manager:
         bm = manager.create_badge_manager(defaultSQLite=True)
-        badges.generate_db(bm.db)
+        generate_db(bm.db)
         component.provideUtility(bm, badge_interfaces.IBadgeManager, "sample")
 
 def _do_then_enumerate_library(do):
