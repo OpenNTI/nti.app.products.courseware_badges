@@ -7,35 +7,42 @@ __docformat__ = "restructuredtext en"
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
 
-# from hamcrest import assert_that
-# from hamcrest import has_property
+from hamcrest import has_entry
+from hamcrest import has_length
+from hamcrest import assert_that
+from hamcrest import greater_than
 
-from nti.dataserver.users import User
+from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
 
-import nti.dataserver.tests.mock_dataserver as mock_dataserver
-from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
+from nti.app.testing.application_webtest import ApplicationLayerTest
 
-from nti.app.products.courseware_badges.tests import CourseBadgesTestCase
+from nti.app.testing.decorators import WithSharedApplicationMockDS
 
-class TestCourses(CourseBadgesTestCase):
+class TestCourses(ApplicationLayerTest):
 
-	def _create_user(self, username='ntiuser', password='temp001',
-					 email='ntiuser@nti.com', alias='myalias',
-					 home_page='http://www.foo.com',
-					 about="my bio"):
-		ds = mock_dataserver.current_mock_ds
-		usr = User.create_user(ds, username=username, password=password,
-							   external_value={'email': email, 'alias':alias,
-											   'home_page':home_page,
-											   'about':about})
-		return usr
+	layer = CourseBadgesApplicationTestLayer
 
+	@WithSharedApplicationMockDS(users=True, testapp=True, default_authenticate=True)
+	def test_course_legacy_badges(self):
 
-	@WithMockDSTrans
-	def test_course_badges(self):
-		pass
+		extra_env = self.testapp.extra_environ or {}
+		extra_env.update({b'HTTP_ORIGIN': b'http://janux.ou.edu'})
+		self.testapp.extra_environ = extra_env
 
-	@WithMockDSTrans
-	def test_earnable_badges(self):
-		self._create_user()
-		pass
+		# enroll in the course using its purchasable id
+		courseId = 'tag:nextthought.com,2011-10:OU-course-CLC3403LawAndJustice'
+		environ = self._make_extra_environ()
+		environ[b'HTTP_ORIGIN'] = b'http://platform.ou.edu'
+
+		path = '/dataserver2/store/enroll_course'
+		data = {'courseId': courseId}
+		self.testapp.post_json(path, data, extra_environ=environ)
+
+		res = self.testapp.get('/dataserver2/users/sjohnson@nextthought.com/Courses/EnrolledCourses')
+		assert_that(res.json_body, has_entry('Items', has_length(1)))
+
+		earned_badges_path = '/dataserver2/users/sjohnson%40nextthought.COM/Badges/EarnableBadges'
+		res = self.testapp.get(earned_badges_path,
+						  	   extra_environ=environ,
+						  	   status=200)
+		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than(0))))

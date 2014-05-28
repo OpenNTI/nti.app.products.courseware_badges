@@ -23,6 +23,8 @@ from nti.badges import interfaces as badge_interfaces
 
 from nti.contentlibrary.interfaces import IContentPackageLibrary
 
+from nti.dataserver import users
+
 from nti.app.products.badges.tests import generator, sample_size
 
 from nti.dataserver.tests.mock_dataserver import WithMockDS
@@ -73,34 +75,6 @@ def _do_then_enumerate_library(do):
 
     _create()
 
-def _setup_library(cls, *args, **kwargs):
-    cls.__old_library = component.queryUtility(IContentPackageLibrary)
-    from nti.contentlibrary.filesystem import CachedNotifyingStaticFilesystemLibrary as Library
-    lib = Library(
-        paths=(
-            os.path.join(os.path.dirname(__file__),
-                         cls._library_path,
-                         'IntroWater'),
-            os.path.join(os.path.dirname(__file__),
-                         cls._library_path,
-                         'CLC3403_LawAndJustice')))
-    component.provideUtility(lib, IContentPackageLibrary)
-    return lib
-
-def _teardown_library(cls):
-    def cleanup():
-        if cls.__old_library is None:
-            return
-        del component.getUtility(IContentPackageLibrary).contentPackages
-        try:
-            del cls.__old_library.contentPackages
-        except AttributeError:
-            pass
-        component.provideUtility(cls.__old_library, IContentPackageLibrary)
-    _do_then_enumerate_library(cleanup)
-    if cls.__old_library is None:
-        del cls.__old_library
-
 class SharedConfiguringTestLayer(ZopeComponentLayer,
                                  GCLayerMixin,
                                  ConfiguringLayerMixin,
@@ -146,10 +120,41 @@ class CourseBadgesApplicationTestLayer(ApplicationTestLayer):
             component.provideUtility(bm, badge_interfaces.IBadgeManager, "sample")
 
     @classmethod
+    def _setup_library(cls, *args, **kwargs):
+        from nti.contentlibrary.filesystem import CachedNotifyingStaticFilesystemLibrary as Library
+        lib = Library(
+            paths=(
+                os.path.join(
+                    os.path.dirname(__file__),
+                    cls._library_path,
+                    'IntroWater'),
+                os.path.join(
+                    os.path.dirname(__file__),
+                    cls._library_path,
+                    'CLC3403_LawAndJustice')))
+        return lib
+
+    @classmethod
     def setUp(cls):
-        _setup_library(cls)
+        _change_ds_dir(cls)
+        cls._register_sample()
+        # Must implement!
+        cls.__old_library = component.getUtility(IContentPackageLibrary)
+        component.provideUtility(cls._setup_library(), IContentPackageLibrary)
+        _do_then_enumerate_library(lambda: users.User.create_user(username='harp4162', password='temp001'))
 
     @classmethod
     def tearDown(cls):
-        _teardown_library(cls)
+        _restore_ds_dir(cls)
+        # Clean up any side effects of these content packages being
+        # registered
+        def cleanup():
+            del component.getUtility(IContentPackageLibrary).contentPackages
+            try:
+                del cls.__old_library.contentPackages
+            except AttributeError:
+                pass
+            component.provideUtility(cls.__old_library, IContentPackageLibrary)
 
+        _do_then_enumerate_library(cleanup)
+        del cls.__old_library

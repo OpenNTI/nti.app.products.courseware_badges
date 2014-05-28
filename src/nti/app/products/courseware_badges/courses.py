@@ -11,9 +11,11 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from nti.app.products.badges import get_badge
 from nti.app.products.badges.interfaces import IPrincipalErnableBadges
 
 from nti.app.products.courseware.interfaces import IPrincipalEnrollmentCatalog
+from nti.app.products.courseware.interfaces import ILegacyCommunityBasedCourseInstance
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
@@ -31,6 +33,24 @@ class _CourseBadgeCatalog(object):
 
     def iter_badges(self):
         return ()
+
+@component.adapter(nti_interfaces.IUser)
+@interface.implementer(interfaces.ICourseBadgeCatalog)
+class _LegacyCourseBadgeCatalog(object):
+
+    __slots__ = ('course',)
+
+    def __init__(self, course):
+        self.course = ILegacyCommunityBasedCourseInstance(course)
+
+    def iter_badges(self):
+        result = []
+        badges = self.course.LegacyBadges or {}
+        for name in badges.keys():
+            badge = get_badge(name)
+            if badge is not None:
+                result.append(badge)
+        return result
 
 @component.adapter(nti_interfaces.IUser)
 @interface.implementer(IPrincipalErnableBadges)
