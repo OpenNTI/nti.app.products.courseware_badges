@@ -34,7 +34,6 @@ class _CourseBadgeCatalog(object):
     def iter_badges(self):
         return ()
 
-@component.adapter(nti_interfaces.IUser)
 @interface.implementer(interfaces.ICourseBadgeCatalog)
 class _LegacyCourseBadgeCatalog(object):
 
