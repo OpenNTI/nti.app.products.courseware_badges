@@ -31,5 +31,10 @@
 	
 	<subscriber	factory=".courses._CourseErnableBadges"
 				provides="nti.app.products.badges.interfaces.IPrincipalErnableBadges"/>
-				
+			
+	<!-- Decorators -->
+	
+	<subscriber factory=".decorators._CourseInstanceLinkDecorator"
+				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
+					
 </configure>

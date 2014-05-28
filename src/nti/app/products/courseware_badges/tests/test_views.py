@@ -7,10 +7,11 @@ __docformat__ = "restructuredtext en"
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
 
+from hamcrest import has_item
 from hamcrest import has_entry
 from hamcrest import has_length
+from hamcrest import has_entries
 from hamcrest import assert_that
-from hamcrest import greater_than
 
 from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
 
@@ -18,31 +19,27 @@ from nti.app.testing.application_webtest import ApplicationLayerTest
 
 from nti.app.testing.decorators import WithSharedApplicationMockDS
 
-class TestCourses(ApplicationLayerTest):
+class TestViews(ApplicationLayerTest):
 
 	layer = CourseBadgesApplicationTestLayer
 
 	@WithSharedApplicationMockDS(users=True, testapp=True, default_authenticate=True)
-	def test_course_earnable_badges(self):
+	def test_course_badges(self):
 
 		extra_env = self.testapp.extra_environ or {}
 		extra_env.update({b'HTTP_ORIGIN': b'http://janux.ou.edu'})
 		self.testapp.extra_environ = extra_env
 
-		# enroll in the course using its purchasable id
-		courseId = 'tag:nextthought.com,2011-10:OU-course-CLC3403LawAndJustice'
+
 		environ = self._make_extra_environ()
 		environ[b'HTTP_ORIGIN'] = b'http://platform.ou.edu'
 
-		path = '/dataserver2/store/enroll_course'
-		data = {'courseId': courseId}
-		self.testapp.post_json(path, data, extra_environ=environ)
-
-		res = self.testapp.get('/dataserver2/users/sjohnson@nextthought.com/Courses/EnrolledCourses')
+		entry_href = '/dataserver2/users/CLC3403.ou.nextthought.com/LegacyCourses/CLC3403/Badges'
+		res = self.testapp.get(entry_href)
 		assert_that(res.json_body, has_entry('Items', has_length(1)))
 
-		earned_badges_path = '/dataserver2/users/sjohnson%40nextthought.com/Badges/EarnableBadges'
-		res = self.testapp.get(earned_badges_path,
-						  	   extra_environ=environ,
-						  	   status=200)
-		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than(0))))
+		res = self.testapp.get('/dataserver2/users/CLC3403.ou.nextthought.com/LegacyCourses/CLC3403/')
+		assert_that(res.json_body,
+					has_entries('Class', 'LegacyCommunityBasedCourseInstance',
+								'Links', has_item(has_entries('rel', 'Badges',
+															  'href', entry_href))))

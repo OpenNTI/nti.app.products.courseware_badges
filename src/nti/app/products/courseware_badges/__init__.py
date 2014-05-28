@@ -14,6 +14,8 @@ from nti.app.products.badges import get_badge
 
 from nti.ntiids import ntiids
 
+VIEW_BADGES = 'Badges'
+
 course_completion_badge = u'course_completion_badge'
 course_badge_types = (course_completion_badge,)
 
