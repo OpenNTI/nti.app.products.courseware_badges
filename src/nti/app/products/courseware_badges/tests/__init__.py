@@ -50,6 +50,13 @@ def _restore_ds_dir(cls):
     shutil.rmtree(cls.new_data_dir, True)
     os.environ['DATASERVER_DATA_DIR'] = cls.old_data_dir or '/tmp'
 
+def _register_sample(cls):
+    import transaction
+    with transaction.manager:
+        bm = manager.create_badge_manager(defaultSQLite=True)
+        badges.generate_db(bm.db)
+        component.provideUtility(bm, badge_interfaces.IBadgeManager, "sample")
+
 def _do_then_enumerate_library(do):
     database = ZODB.DB(ApplicationTestLayer._storage_base, database_name='Users')
 
@@ -88,11 +95,14 @@ class SharedConfiguringTestLayer(ZopeComponentLayer,
     @classmethod
     def setUp(cls):
         cls.setUpPackages()
+        _change_ds_dir(cls)
+        _register_sample(cls)
 
     @classmethod
     def tearDown(cls):
         cls.tearDownPackages()
         zope.testing.cleanup.cleanUp()
+        _restore_ds_dir(cls)
 
     @classmethod
     def testSetUp(cls, test=None):
@@ -112,14 +122,6 @@ class CourseBadgesApplicationTestLayer(ApplicationTestLayer):
     _library_path = 'Library'
 
     @classmethod
-    def _register_sample(cls):
-        import transaction
-        with transaction.manager:
-            bm = manager.create_badge_manager(defaultSQLite=True)
-            badges.generate_db(bm.db)
-            component.provideUtility(bm, badge_interfaces.IBadgeManager, "sample")
-
-    @classmethod
     def _setup_library(cls, *args, **kwargs):
         from nti.contentlibrary.filesystem import CachedNotifyingStaticFilesystemLibrary as Library
         lib = Library(
@@ -127,17 +129,13 @@ class CourseBadgesApplicationTestLayer(ApplicationTestLayer):
                 os.path.join(
                     os.path.dirname(__file__),
                     cls._library_path,
-                    'IntroWater'),
-                os.path.join(
-                    os.path.dirname(__file__),
-                    cls._library_path,
-                    'CLC3403_LawAndJustice')))
+                    'CLC3403_LawAndJustice'),))
         return lib
 
     @classmethod
     def setUp(cls):
         _change_ds_dir(cls)
-        cls._register_sample()
+        _register_sample(cls)
         # Must implement!
         cls.__old_library = component.getUtility(IContentPackageLibrary)
         component.provideUtility(cls._setup_library(), IContentPackageLibrary)

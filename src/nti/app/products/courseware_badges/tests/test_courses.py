@@ -7,17 +7,16 @@ __docformat__ = "restructuredtext en"
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
 
-# from hamcrest import has_entry
-# from hamcrest import has_length
-# from hamcrest import assert_that
-# from hamcrest import greater_than
+from hamcrest import has_entry
+from hamcrest import has_length
+from hamcrest import assert_that
+from hamcrest import greater_than
 
 from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
 from nti.app.testing.decorators import WithSharedApplicationMockDS
-
 
 class TestCourses(ApplicationLayerTest):
 
@@ -39,8 +38,11 @@ class TestCourses(ApplicationLayerTest):
 		data = {'courseId': courseId}
 		self.testapp.post_json(path, data, extra_environ=environ)
 
-# 		earned_badges_path = '/dataserver2/users/sjohnson%40nextthought.COM/Badges/EarnableBadges'
-# 		res = self.testapp.get(earned_badges_path,
-# 						  	   extra_environ=environ,
-# 						  	   status=200)
-# 		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than(0))))
+		res = self.testapp.get('/dataserver2/users/sjohnson@nextthought.com/Courses/EnrolledCourses')
+		assert_that(res.json_body, has_entry('Items', has_length(1)))
+
+		earned_badges_path = '/dataserver2/users/sjohnson%40nextthought.com/Badges/EarnableBadges'
+		res = self.testapp.get(earned_badges_path,
+						  	   extra_environ=environ,
+						  	   status=200)
+		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than(0))))

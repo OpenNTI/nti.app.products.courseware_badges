@@ -14,12 +14,12 @@ def generate_db(database):
 								    org=u'http://www.ou.edu',
 								    contact=u'janux@ou.edu')
 
-	database.add_badge(name=u'janux.course.chem4970.fall2013.completion',
-					   image=u'http://janux.ou.edu/bages/chem4970.fall2013.png',
+	database.add_badge(name=u'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.completion_badge',
+					   image=u'http://janux.ou.edu/bages/CLC3403_LawAndJustice_fall2013_completion_badge.png',
 					   desc=u'Chemistry of beer course completion',
 					   criteria=u'http://janux.ou.edu/bages/chem4970.fall2013.html',
 					   issuer_id=issuer_id,
-					   tags=('beer', 'chemistry'))
+					   tags='beer,chemistry')
 		
 	database.add_person(email=u'sjohnson@nextthought.com',
 						nickname='sjohnson@nextthought.com',
