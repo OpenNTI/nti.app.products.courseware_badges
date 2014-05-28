@@ -25,7 +25,7 @@ from nti.contentlibrary.interfaces import IContentPackageLibrary
 
 from nti.dataserver import users
 
-from nti.app.products.badges.tests import generator, sample_size
+from nti.app.products.courseware_badges.tests import badges
 
 from nti.dataserver.tests.mock_dataserver import WithMockDS
 from nti.dataserver.tests.mock_dataserver import mock_db_trans
@@ -116,7 +116,7 @@ class CourseBadgesApplicationTestLayer(ApplicationTestLayer):
         import transaction
         with transaction.manager:
             bm = manager.create_badge_manager(defaultSQLite=True)
-            generator.generate_db(bm.db, sample_size, sample_size, sample_size)
+            badges.generate_db(bm.db)
             component.provideUtility(bm, badge_interfaces.IBadgeManager, "sample")
 
     @classmethod
