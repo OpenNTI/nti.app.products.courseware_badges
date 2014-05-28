@@ -14,8 +14,8 @@ from nti.app.products.badges import get_badge
 
 from nti.ntiids import ntiids
 
-completion_badge = u'completion_badge'
-course_badge_types = (completion_badge,)
+course_completion_badge = u'course_completion_badge'
+course_badge_types = (course_completion_badge,)
 
 def get_course_badges(ntiid, badge_types=course_badge_types):
 	result = []
@@ -33,5 +33,5 @@ def get_course_badges(ntiid, badge_types=course_badge_types):
 	return result
 
 def get_course_completion_badge(ntiid):
-	result = get_course_badges(ntiid, (completion_badge,))
+	result = get_course_badges(ntiid, (course_completion_badge,))
 	return result[0] if result else None
