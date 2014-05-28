@@ -30,7 +30,6 @@ class TestViews(ApplicationLayerTest):
 		extra_env.update({b'HTTP_ORIGIN': b'http://janux.ou.edu'})
 		self.testapp.extra_environ = extra_env
 
-
 		environ = self._make_extra_environ()
 		environ[b'HTTP_ORIGIN'] = b'http://platform.ou.edu'
 

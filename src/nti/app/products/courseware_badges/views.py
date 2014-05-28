@@ -20,26 +20,28 @@ from nti.dataserver import authorization as nauth
 
 from nti.externalization.interfaces import LocatedExternalDict
 
+from . import interfaces
 from . import VIEW_BADGES
-from . import get_course_badges
 
 @view_config(route_name='objects.generic.traversal',
-              context=ICourseInstance,
-              request_method='GET',
-              permission=nauth.ACT_READ,
-              renderer='rest',
-              name=VIEW_BADGES)
+			  context=ICourseInstance,
+			  request_method='GET',
+			  permission=nauth.ACT_READ,
+			  renderer='rest',
+			  name=VIEW_BADGES)
 class CourseBadgesView(AbstractAuthenticatedView):
 
-    def __call__(self):
-        result = LocatedExternalDict()
-        result['Items'] = items = []
-        content_package_ntiid = getattr(self.request.context, 'ContentPackageNTIID', None)
-        if content_package_ntiid:
-            badges = get_course_badges(content_package_ntiid)
-            items.extend(badge_interfaces.INTIBadge(b) for b in badges)
-        result.__name__ = self.request.view_name
-        result.__parent__ = self.request.context
-        self.request.response.last_modified = self.request.context.lastModified
-        return result
+	def __call__(self):
+		result = LocatedExternalDict()
+		result['Items'] = items = []
 
+		context = self.request.context
+		content_package_ntiid = getattr(context, 'ContentPackageNTIID', None)
+		if content_package_ntiid:
+			badges = interfaces.ICourseBadgeCatalog(context).iter_badges()
+			items.extend(badge_interfaces.INTIBadge(b) for b in badges)
+
+		result.__parent__ = context
+		result.__name__ = self.request.view_name
+		self.request.response.last_modified = context.lastModified
+		return result
