@@ -45,8 +45,6 @@ def get_to_content_package_ntiid(badge_ntiid):
     raw_badge_nttid = base_root_ntiid(badge_ntiid)
     library = component.queryUtility(lib_interfaces.IContentPackageLibrary)
     for cp in getattr(library, 'contentPackages', ()):
-        print(dir(cp))
-        raise
         raw_content_package_nttid = base_root_ntiid(cp.ntiid)
         if raw_content_package_nttid == raw_badge_nttid:
             return cp.ntiid
