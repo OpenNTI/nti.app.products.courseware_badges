@@ -16,16 +16,14 @@ def generate_db(database):
 
 	database.add_badge(name=u'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.course_completion_badge',
 					   image=u'http://janux.ou.edu/bages/CLC3403_LawAndJustice_fall2013_completion_badge.png',
-					   desc=u'Law and Justice Course Completion',
-					   title=u'Law and Justice',
+					   desc=u'Law and Justice',
 					   criteria=u'http://janux.ou.edu/bages/CLC3403.fall2013.html',
 					   issuer_id=issuer_id,
 					   tags='law,justice')
 
 	database.add_badge(name=u'tag:nextthought.com,2011-10:OU-HTML-CHEM4970_Chemistry_of_Beer.course_completion_badge',
 					   image=u'http://pngimg.com/upload/beer_PNG2390.png',
-					   desc=u'Chemistry of Beer Course Completion',
-					   title=u'Chemistry of Beer',
+					   desc=u'Chemistry of Beer',
 					   criteria=u'http://janux.ou.edu/bages/CHEM4970.Spring2014.html',
 					   issuer_id=issuer_id,
 					   tags='beer,chemistry')
