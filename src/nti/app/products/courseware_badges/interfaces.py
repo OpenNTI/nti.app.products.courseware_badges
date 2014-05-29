@@ -6,6 +6,7 @@
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
+from zope import component
 from zope import interface
 from zope.interface.interface import taggedValue
 
@@ -29,3 +30,20 @@ class ICourseBadgeCatalog(interface.Interface):
         """
         Return an iterable of badges for a course
         """
+
+class ICoursePrincipalBadgeFilter(interface.Interface):
+    """
+    define subscriber course badge filter
+    """
+
+    def allow_badge(course, user, badge):
+        """
+        allow the specified badge
+        """
+
+def get_course_badge_predicate_for_user(course, user):
+    filters = component.subscribers((course, user,), ICoursePrincipalBadgeFilter)
+    filters = list(filters)
+    def uber_filter(badge):
+        return all((f.allow_badge(course, user, badge) for f in filters))
+    return uber_filter

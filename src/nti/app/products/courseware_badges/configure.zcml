@@ -32,6 +32,9 @@
 	<subscriber	factory=".courses._CourseErnableBadges"
 				provides="nti.app.products.badges.interfaces.IPrincipalErnableBadges"/>
 			
+	<subscriber	factory=".courses._DefaultCoursePrincipalBadgeFilter"
+				provides=".interfaces.ICoursePrincipalBadgeFilter"/>
+				
 	<!-- Decorators -->
 	
 	<subscriber factory=".decorators._CourseInstanceLinkDecorator"

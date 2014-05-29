@@ -11,6 +11,8 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from pyramid.threadlocal import get_current_request
+
 from nti.app.products.badges.interfaces import IPrincipalErnableBadges
 
 from nti.app.products.courseware.interfaces import IPrincipalEnrollmentCatalog
@@ -26,8 +28,6 @@ from . import get_course_badges
 @interface.implementer(interfaces.ICourseBadgeCatalog)
 class _CourseBadgeCatalog(object):
 
-    __slots__ = ('course',)
-
     def __init__(self, course):
         self.course = ICourseInstance(course)
 
@@ -36,8 +36,6 @@ class _CourseBadgeCatalog(object):
 
 @interface.implementer(interfaces.ICourseBadgeCatalog)
 class _LegacyCourseBadgeCatalog(object):
-
-    __slots__ = ('course',)
 
     def __init__(self, course):
         self.course = ILegacyCommunityBasedCourseInstance(course)
@@ -50,15 +48,30 @@ class _LegacyCourseBadgeCatalog(object):
 @interface.implementer(IPrincipalErnableBadges)
 class _CourseErnableBadges(object):
 
-    __slots__ = ('user')
-
     def __init__(self, user):
         self.user = user
 
     def iter_badges(self):
         result = []
-        for catalog in component.subscribers((self.user,), IPrincipalEnrollmentCatalog):
-            for course in catalog.iter_enrollments():
-                adapted = interfaces.ICourseBadgeCatalog(course)
-                result.extend(adapted.iter_badges())
+        request = get_current_request()
+        username = request.authenticated_userid if request else None
+        if self.user.username == username:
+            for catalog in component.subscribers((self.user,), IPrincipalEnrollmentCatalog):
+                for course in catalog.iter_enrollments():
+                    course = ICourseInstance(course)
+                    predicate = interfaces.get_course_badge_predicate_for_user(course, self.user)
+                    adapted = interfaces.ICourseBadgeCatalog(course)
+                    result.extend(b for b in adapted.iter_badges() if predicate(b))
         return result
+
+@component.adapter(ICourseInstance, nti_interfaces.IUser)
+@interface.implementer(interfaces.ICoursePrincipalBadgeFilter)
+class _DefaultCoursePrincipalBadgeFilter(object):
+
+    __slots__ = ()
+
+    def __init__(self, *args):
+        pass
+
+    def allow_badge(self, course, user, bage):
+        return True
