@@ -8,9 +8,16 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+import os
+
 from zope import component
 
+import repoze.lru
+
+from nti.badges.openbadges import interfaces as open_interfaces
+
 from nti.app.products.badges import get_badge
+from nti.app.products.badges import get_all_badges
 
 from nti.ntiids import ntiids
 
@@ -34,17 +41,19 @@ def base_root_ntiid(ntiid):
 							   base=parts.date)
 	return result
 
-def get_course_badges(ntiid, badge_types=course_badge_types):
+@repoze.lru.lru_cache(1000)
+def get_course_badge_names(course_ntiid, badge_types=course_badge_types):
 	"""
 	return all the course badges.
 
-	The name a course badge is 'root' course NTIID plus a period (.) plus course_{type}_badge
-	e.g tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.course_completion_badge
+	The image file name of a course badge is 'root' course NTIID plus a period (.) plus course_{type}_badge
+	e.g tag_nextthought.com_2011-10_OU-HTML-CLC3403_LawAndJustice.course_completion_badge.png
 	that is the completion badge of the tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice
  	course
  	"""
-	result = []
-	parts = ntiids.get_parts(ntiid)
+
+	badge_type_ntiids = set()
+	parts = ntiids.get_parts(course_ntiid)
 	pre_specfic = '.'.join(parts.specific.split('.')[0:-1]) or parts.specific
 	for subtype in badge_types:
 		specfic = '%s.%s' % (pre_specfic, subtype)
@@ -52,11 +61,23 @@ def get_course_badges(ntiid, badge_types=course_badge_types):
 								 nttype=parts.nttype,
 								 specific=specfic,
 								 base=parts.date)
+		badge_type_ntiids.add(name.replace(':', '_').replace(',', '_'))
+
+	result = []
+	for badge in get_all_badges():
+		image = open_interfaces.IBadgeClass(badge).image
+		filename = os.path.basename(image)
+		possible_ntiid = os.path.splitext(filename)[0] if filename else None
+		if possible_ntiid in badge_type_ntiids:
+			result.append(badge.name)
+	return result
+
+def get_course_badges(course_ntiid, badge_types=course_badge_types):
+	result = []
+	names = get_course_badge_names(course_ntiid, badge_types)
+	for name in names:
 		badge = get_badge(name)
 		if badge is not None:
 			result.append(badge)
 	return result
 
-def get_course_completion_badge(ntiid):
-	result = get_course_badges(ntiid, (course_completion_badge,))
-	return result[0] if result else None
