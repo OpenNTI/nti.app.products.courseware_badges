@@ -37,6 +37,9 @@ class TestViews(ApplicationLayerTest):
 		res = self.testapp.get(entry_href)
 		assert_that(res.json_body, has_entry('Items', has_length(1)))
 
+		badge = res.json_body['Items'][0]
+		assert_that(badge, has_entry('Title', 'Law and Justice'))
+
 		res = self.testapp.get('/dataserver2/users/CLC3403.ou.nextthought.com/LegacyCourses/CLC3403/')
 		assert_that(res.json_body,
 					has_entries('Class', 'LegacyCommunityBasedCourseInstance',

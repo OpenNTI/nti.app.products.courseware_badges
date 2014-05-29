@@ -40,7 +40,14 @@
 	<subscriber factory=".decorators._CourseInstanceLinkDecorator"
 				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
 			
-
+	<subscriber factory=".decorators._BadgeTitleAdder"
+				for="nti.badges.openbadges.interfaces.IBadgeClass"
+				provides="nti.externalization.interfaces.IExternalObjectDecorator"/>
+	
+	<subscriber factory=".decorators._BadgeTitleAdder"
+				for="nti.badges.interfaces.INTIBadge"
+				provides="nti.externalization.interfaces.IExternalObjectDecorator"/>
+	
 	<!-- Preferences -->
 		
 	<include package="zope.security" file="permissions.zcml"/>
