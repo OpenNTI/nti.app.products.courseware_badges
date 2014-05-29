@@ -90,6 +90,7 @@ class SharedConfiguringTestLayer(ZopeComponentLayer,
     _library_path = 'Library'
 
     set_up_packages = ('nti.dataserver',
+                       'nti.app.client_preferences',
                        'nti.app.products.courseware_badges')
 
     @classmethod
