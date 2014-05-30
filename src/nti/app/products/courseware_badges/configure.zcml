@@ -28,7 +28,11 @@
 	<adapter factory=".courses._LegacyCourseBadgeCatalog"
 			 for="nti.app.products.courseware.interfaces.ILegacyCourseInstanceEnrollment"
 			 provides=".interfaces.ICourseBadgeCatalog" />
-			 	 
+			
+	<adapter factory=".adapters.badge_to_course_content_package"
+			 for="nti.badges.interfaces.IBadgeClass"
+			 provides="nti.contentlibrary.interfaces.IContentPackage" />
+			  	 
 	<!-- Subscribers -->
 	
 	<subscriber	factory=".courses._CourseErnableBadges"
