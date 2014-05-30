@@ -42,3 +42,7 @@ class TestViews(ApplicationLayerTest):
 					has_entries('Class', 'LegacyCommunityBasedCourseInstance',
 								'Links', has_item(has_entries('rel', 'Badges',
 															  'href', entry_href))))
+
+		path = '/dataserver2/users/sjohnson%40nextthought.com/EarnedCourseBadges'
+		res = self.testapp.get(path)
+		assert_that(res.json_body, has_entry('Items', has_length(0)))

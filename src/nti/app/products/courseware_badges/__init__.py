@@ -12,16 +12,26 @@ import os
 
 from zope import component
 
+from zope.security.interfaces import IParticipation
+from zope.security.management import endInteraction
+from zope.security.management import newInteraction
+from zope.security.management import restoreInteraction
+
+from zope.preference.interfaces import IPreferenceGroup
+
 import repoze.lru
 
 from nti.badges.openbadges import interfaces as open_interfaces
 
+from nti.app.products.badges import BADGES
 from nti.app.products.badges import get_badge
 from nti.app.products.badges import get_all_badges
+from nti.app.products.badges import assertion_exists
 
 from nti.ntiids import ntiids
 
-VIEW_BADGES = 'Badges'
+VIEW_BADGES = BADGES
+VIEW_EARNED_COURSE_BADGES = u'EarnedCourseBadges'
 
 course_completion_badge = u'course_completion_badge'
 course_badge_types = (course_completion_badge,)
@@ -81,3 +91,11 @@ def get_course_badges(course_ntiid, badge_types=course_badge_types):
 			result.append(badge)
 	return result
 
+def show_course_badges(user):
+	prefs = component.getUtility(IPreferenceGroup, name='Badges.Course')
+	endInteraction()
+	try:
+		newInteraction(IParticipation(user))
+		return prefs.show_course_badges
+	finally:
+		restoreInteraction()
