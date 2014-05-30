@@ -14,8 +14,8 @@ from zope import interface
 from pyramid.threadlocal import get_current_request
 
 from nti.app.products.badges.interfaces import IPrincipalErnableBadges
+from nti.app.products.badges.interfaces import IPrincipalEarnedBadgeFilter
 
-from nti.app.products.courseware.interfaces import IPrincipalEnrollmentCatalog
 from nti.app.products.courseware.interfaces import ILegacyCommunityBasedCourseInstance
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -23,7 +23,10 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.dataserver import interfaces as nti_interfaces
 
 from . import interfaces
+from . import is_course_badge
 from . import get_course_badges
+from . import show_course_badges
+from . import get_course_badges_for_user
 
 @interface.implementer(interfaces.ICourseBadgeCatalog)
 class _CourseBadgeCatalog(object):
@@ -56,22 +59,22 @@ class _CourseErnableBadges(object):
         request = get_current_request()
         username = request.authenticated_userid if request else None
         if self.user.username == username:
-            for catalog in component.subscribers((self.user,), IPrincipalEnrollmentCatalog):
-                for course in catalog.iter_enrollments():
-                    course = ICourseInstance(course)
-                    predicate = interfaces.get_course_badge_predicate_for_user(course, self.user)
-                    adapted = interfaces.ICourseBadgeCatalog(course)
-                    result.extend(b for b in adapted.iter_badges() if predicate(b))
+            result.extend(get_course_badges_for_user(self.user))
         return result
 
-@component.adapter(ICourseInstance, nti_interfaces.IUser)
-@interface.implementer(interfaces.ICoursePrincipalBadgeFilter)
-class _DefaultCoursePrincipalBadgeFilter(object):
-
-    __slots__ = ()
+@component.adapter(nti_interfaces.IUser)
+@interface.implementer(IPrincipalEarnedBadgeFilter)
+class _CoursePrincipalEarnedBadgeFilter(object):
 
     def __init__(self, *args):
         pass
 
-    def allow_badge(self, course, user, bage):
-        return True
+    def allow_badge(self, user, badge):
+        result = False
+        req = get_current_request()
+        if req is not None:
+            if req.authenticated_userid == user.username:
+                result = True
+            elif is_course_badge(badge) and show_course_badges(user):
+                result = True
+        return result

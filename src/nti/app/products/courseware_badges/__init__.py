@@ -9,6 +9,7 @@ __docformat__ = "restructuredtext en"
 logger = __import__('logging').getLogger(__name__)
 
 import os
+import re
 
 from zope import component
 
@@ -23,12 +24,18 @@ import repoze.lru
 
 from nti.badges.openbadges import interfaces as open_interfaces
 
+from nti.contenttypes.courses.interfaces import ICourseInstance
+
 from nti.app.products.badges import BADGES
 from nti.app.products.badges import get_badge
 from nti.app.products.badges import get_all_badges
 from nti.app.products.badges import assertion_exists
 
+from nti.app.products.courseware.interfaces import IPrincipalEnrollmentCatalog
+
 from nti.ntiids import ntiids
+
+from . import interfaces
 
 VIEW_BADGES = BADGES
 VIEW_EARNED_COURSE_BADGES = u'EarnedCourseBadges'
@@ -50,6 +57,14 @@ def base_root_ntiid(ntiid):
 							   specific=specfic,
 							   base=parts.date)
 	return result
+
+badge_pattern = re.compile(".+\.course_.+_badge$", re.I | re.U)
+def is_course_badge(badge):
+	image = open_interfaces.IBadgeClass(badge).image
+	filename = os.path.basename(image)
+	filename = os.path.splitext(filename)[0] if filename else None
+	result = badge_pattern.match(filename) if filename else None
+	return True if result else False
 
 @repoze.lru.lru_cache(1000)
 def get_course_badge_names(course_ntiid, badge_types=course_badge_types):
@@ -99,3 +114,35 @@ def show_course_badges(user):
 		return prefs.show_course_badges
 	finally:
 		restoreInteraction()
+
+def get_universe_of_course_badges_for_user(user):
+	"""
+	return the badges for the courses a user in enrolled in
+	"""
+	result = []
+	for catalog in component.subscribers((user,), IPrincipalEnrollmentCatalog):
+		for course in catalog.iter_enrollments():
+			course = ICourseInstance(course)
+			adapted = interfaces.ICourseBadgeCatalog(course)
+			result.append((course, list(adapted.iter_badges())))
+	return result
+
+def get_course_badges_for_user(user):
+	"""
+	return the badges for the courses a user in enrolled in
+	"""
+	result = []
+	for _, badges in get_universe_of_course_badges_for_user(user):
+		result.extend(badges)
+	return result
+
+def get_earned_course_badges(user):
+	"""
+	return the earned course badges for a user
+	"""
+	result = []
+	for badge in get_course_badges_for_user(user):
+		if assertion_exists(user, badge):
+			result.append(badge)
+	return result
+
