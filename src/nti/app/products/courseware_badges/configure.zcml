@@ -41,9 +41,6 @@
 	
 	<subscriber factory=".decorators._CourseInstanceLinkDecorator"
 				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
-	
-	<subscriber factory=".decorators._UserCourseEarnedBadgesLinkDecorator"
-				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
 				
 	<!-- Preferences -->
 		
