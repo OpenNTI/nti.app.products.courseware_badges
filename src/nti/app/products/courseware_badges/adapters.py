@@ -8,33 +8,32 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-import os
-
 from zope import component
 from zope import interface
 
 from nti.badges import interfaces as badge_interfaces
-from nti.badges.openbadges import interfaces as open_interfaces
 
 from nti.contentlibrary import interfaces as lib_interfaces
 
 from . import is_course_badge
 from . import base_root_ntiid
+from . import get_image_filename
 
 @component.adapter(badge_interfaces.IBadgeClass)
 @interface.implementer(lib_interfaces.IContentPackage)
 def badge_to_course_content_package(badge):
+	library = component.queryUtility(lib_interfaces.IContentPackageLibrary)
 	if is_course_badge(badge):
-		image = open_interfaces.IBadgeClass(badge).image
-		filename = os.path.basename(image)
-		filename = os.path.splitext(filename)[0]  # file name no extention
-		badge_ntiid = '.'.join(filename.split('.'))[0:-1]  # not a valid nttid
-		badge_ntiid = badge_ntiid.replace(':', '_').replace(',', '_') # should be a root ntiid
+		filename = get_image_filename(badge)
+		# remvoe subtype from NTIID, filename is not a valid NTIID
+		proxied_ntiid = '.'.join(filename.split('.'))[0:-1]
+		# replace ':','-' to before comparing
+		proxied_ntiid = proxied_ntiid.replace(':', '_').replace(',', '_')
 
-		library = component.queryUtility(lib_interfaces.IContentPackageLibrary)
+		# search packages
 		for package in getattr(library, 'contentPackages', ()):
 			root_package_nttid = base_root_ntiid(package.ntiid)
 			root_package_nttid = root_package_nttid.replace(':', '_').replace(',', '_')
-			if badge_ntiid == root_package_nttid:
+			if proxied_ntiid == root_package_nttid:
 				return package
 	return None

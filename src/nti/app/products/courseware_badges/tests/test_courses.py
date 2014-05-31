@@ -7,11 +7,16 @@ __docformat__ = "restructuredtext en"
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
 
+from hamcrest import none
+from hamcrest import is_not
 from hamcrest import has_entry
 from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import greater_than
 
+from nti.badges import interfaces as badge_interfaces
+
+from nti.app.products.courseware_badges import get_course_badges
 from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
@@ -46,3 +51,10 @@ class TestCourses(ApplicationLayerTest):
 						  	   extra_environ=environ,
 						  	   status=200)
 		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than(0))))
+		
+		nttid = 'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice'
+		badges = get_course_badges(nttid)
+		assert_that(badges, has_length(1))
+
+		cp = badge_interfaces.IBadgeClass(badges[0], None)
+		assert_that(cp, is_not(none()))
