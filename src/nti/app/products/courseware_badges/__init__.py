@@ -64,7 +64,7 @@ def get_image_filename(badge):
 	filename = os.path.splitext(filename)[0] if filename else None
 	return filename
 
-badge_pattern = re.compile(".+\.course_.+_badge$", re.I | re.U)
+badge_pattern = re.compile("(.+\.course_.+_badge$)|(.+\.course_badge$)", re.I | re.U)
 def is_course_badge(badge):
 	filename = get_image_filename(badge)
 	result = badge_pattern.match(filename) if filename else None
