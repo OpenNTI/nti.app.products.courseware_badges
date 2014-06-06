@@ -40,7 +40,7 @@ from . import interfaces
 VIEW_BADGES = BADGES
 VIEW_EARNED_COURSE_BADGES = u'EarnedCourseBadges'
 
-course_completion_badge = u'course_completion_badge'
+course_completion_badge = u'course_badge'
 course_badge_types = (course_completion_badge,)
 
 def base_root_ntiid(ntiid):
@@ -80,7 +80,6 @@ def get_course_badge_names(course_ntiid, badge_types=course_badge_types):
 	that is the completion badge of the tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice
  	course
  	"""
-
 	badge_type_ntiids = set()
 	parts = ntiids.get_parts(course_ntiid)
 	pre_specfic = '.'.join(parts.specific.split('.')[0:-1]) or parts.specific
