@@ -97,7 +97,10 @@ def get_course_badge_names(course_ntiid, badge_types=course_badge_types):
 	for badge in get_all_badges():
 		image = open_interfaces.IBadgeClass(badge).image
 		filename = os.path.basename(image)
-		possible_ntiid = os.path.splitext(filename)[0] if filename else None
+		if filename and filename.lower().endswith('.png'):
+			possible_ntiid = os.path.splitext(filename)[0]
+		else:
+			possible_ntiid = filename
 		if possible_ntiid in badge_type_ntiids:
 			result.append(badge.name)
 	return result
