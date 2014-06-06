@@ -43,6 +43,10 @@
 				
 	<!-- Decorators -->
 	
+	<subscriber factory=".decorators._BadgeTypeAdder"
+				for="nti.badges.interfaces.IBadgeClass"
+				provides="nti.externalization.interfaces.IExternalObjectDecorator"/>
+				
 	<subscriber factory=".decorators._CourseInstanceLinkDecorator"
 				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
 				

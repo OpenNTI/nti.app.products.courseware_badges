@@ -25,11 +25,10 @@ def badge_to_course_content_package(badge):
 	library = component.queryUtility(lib_interfaces.IContentPackageLibrary)
 	if is_course_badge(badge):
 		filename = get_image_filename(badge)
-		# remvoe subtype from NTIID, filename is not a valid NTIID
-		proxied_ntiid = '.'.join(filename.split('.'))[0:-1]
-		# replace ':','-' to before comparing
+		# remove subtype from NTIID, filename is not a valid NTIID
+		proxied_ntiid = '.'.join(filename.split('.')[0:-1])
+		# replace ':',',' to before comparing
 		proxied_ntiid = proxied_ntiid.replace(':', '_').replace(',', '_')
-
 		# search packages
 		for package in getattr(library, 'contentPackages', ()):
 			root_package_nttid = base_root_ntiid(package.ntiid)
