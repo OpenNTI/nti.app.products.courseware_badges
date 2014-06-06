@@ -40,6 +40,10 @@ from . import interfaces
 VIEW_BADGES = BADGES
 VIEW_EARNED_COURSE_BADGES = u'EarnedCourseBadges'
 
+# Base transformed root NTTID
+ROOT = 'tag:nextthought.com,'.replace(':', '_').replace(',', '_')
+ROOT_LOWER = ROOT.lower()
+
 course_completion_badge = u'course_badge'
 course_badge_types = (course_completion_badge,)
 
