@@ -60,6 +60,8 @@ def base_root_ntiid(ntiid):
 
 def get_image_filename(badge):
 	image = open_interfaces.IBadgeClass(badge).image
+	if not image.lower().endswith('.png'):
+		return image
 	filename = os.path.basename(image)
 	filename = os.path.splitext(filename)[0] if filename else None
 	return filename
