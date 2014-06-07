@@ -11,9 +11,13 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from nti.app.products.courseware.interfaces import ICourseCatalogEntry
+
 from nti.badges import interfaces as badge_interfaces
 
 from nti.contentlibrary import interfaces as lib_interfaces
+
+from nti.contenttypes.courses.interfaces import ICourseInstance
 
 from . import is_course_badge
 from . import base_root_ntiid
@@ -36,3 +40,11 @@ def badge_to_course_content_package(badge):
 			if proxied_ntiid == root_package_nttid:
 				return package
 	return None
+
+@component.adapter(badge_interfaces.IBadgeClass)
+@interface.implementer(ICourseCatalogEntry)
+def badge_to_course_catalog_entry(badge):
+	unit = lib_interfaces.IContentPackage(badge, None)
+	course = ICourseInstance(unit, None)
+	entry = ICourseCatalogEntry(course, None)
+	return entry

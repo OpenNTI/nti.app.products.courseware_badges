@@ -11,13 +11,7 @@ logger = __import__('logging').getLogger(__name__)
 from zope import interface
 from zope import component
 
-import repoze.lru
-
-from nti.app.products.courseware import interfaces as course_interfaces
-
 from nti.badges import interfaces as badge_interfaces
-
-from nti.contentlibrary import interfaces as lib_interfaces
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
@@ -29,6 +23,7 @@ from nti.externalization.interfaces import IExternalObjectDecorator
 from nti.externalization.interfaces import IExternalMappingDecorator
 
 from . import VIEW_BADGES
+from . import get_course_nttid_for_badge
 
 LINKS = StandardExternalFields.LINKS
 
@@ -41,14 +36,6 @@ class _CourseInstanceLinkDecorator(object):
 	def decorateExternalMapping(self, context, result):
 		_links = result.setdefault(LINKS, [])
 		_links.append(Link(context, elements=(VIEW_BADGES,), rel=VIEW_BADGES))
-
-@repoze.lru.lru_cache(1000)
-def get_course_nttid_for_badge(badge):
-	unit = lib_interfaces.IContentPackage(badge, None)
-	course = ICourseInstance(unit, None)
-	entry = course_interfaces.ICourseCatalogEntry(course, None)
-	result = getattr(entry, 'ContentPackageNTIID', None)
-	return result
 
 @component.adapter(badge_interfaces.IBadgeClass)
 @interface.implementer(IExternalObjectDecorator)

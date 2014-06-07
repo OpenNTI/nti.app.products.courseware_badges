@@ -22,6 +22,8 @@ from zope.preference.interfaces import IPreferenceGroup
 
 import repoze.lru
 
+from nti.app.products.courseware.interfaces import ICourseCatalogEntry
+
 from nti.badges.openbadges import interfaces as open_interfaces
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -156,5 +158,11 @@ def get_earned_course_badges(user):
 	for badge in get_course_badges_for_user(user):
 		if assertion_exists(user, badge):
 			result.append(badge)
+	return result
+
+@repoze.lru.lru_cache(1000)
+def get_course_nttid_for_badge(badge):
+	entry = ICourseCatalogEntry(badge, None)
+	result = getattr(entry, 'ContentPackageNTIID', None)
 	return result
 
