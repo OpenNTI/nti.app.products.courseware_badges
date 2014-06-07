@@ -64,19 +64,25 @@ def base_root_ntiid(ntiid):
 							   base=parts.date)
 	return result
 
-def get_image_filename(badge):
+def get_base_image_filename(badge):
+	"""
+	return the image file name w/ no ext
+	"""
 	image = open_interfaces.IBadgeClass(badge).image
-	if not image.lower().endswith('.png'):
-		return image
-	filename = os.path.basename(image)
-	filename = os.path.splitext(filename)[0] if filename else None
+	filename = os.path.basename(image) if image else None
+	if filename and filename.lower().endswith('.png'):
+		filename = os.path.splitext(filename)[0]
 	return filename
 
 badge_pattern = re.compile("(.+\.course_.+_badge$)|(.+\.course_badge$)", re.I | re.U)
-def is_course_badge(badge):
-	filename = get_image_filename(badge)
+def is_course_badge_filename(filename):
 	result = badge_pattern.match(filename) if filename else None
 	return True if result else False
+
+def is_course_badge(badge):
+	filename = get_base_image_filename(badge)
+	result = is_course_badge_filename(filename)
+	return result
 
 @repoze.lru.lru_cache(1000)
 def get_course_badge_names(course_ntiid, badge_types=course_badge_types):
@@ -101,12 +107,7 @@ def get_course_badge_names(course_ntiid, badge_types=course_badge_types):
 
 	result = []
 	for badge in get_all_badges():
-		image = open_interfaces.IBadgeClass(badge).image
-		filename = os.path.basename(image)
-		if filename and filename.lower().endswith('.png'):
-			possible_ntiid = os.path.splitext(filename)[0]
-		else:
-			possible_ntiid = filename
+		possible_ntiid = get_base_image_filename(badge)
 		if possible_ntiid in badge_type_ntiids:
 			result.append(badge.name)
 	return result
@@ -160,7 +161,13 @@ def get_earned_course_badges(user):
 			result.append(badge)
 	return result
 
-@repoze.lru.lru_cache(1000)
+@repoze.lru.lru_cache(500)
+def get_catalog_entry_name_for_badge(badge):
+	entry = ICourseCatalogEntry(badge, None)
+	result = getattr(entry, '__name__', None)
+	return result
+
+@repoze.lru.lru_cache(500)
 def get_course_nttid_for_badge(badge):
 	entry = ICourseCatalogEntry(badge, None)
 	result = getattr(entry, 'ContentPackageNTIID', None)

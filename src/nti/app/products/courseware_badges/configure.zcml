@@ -44,6 +44,9 @@
 			
 	<subscriber	factory=".courses._CoursePrincipalEarnedBadgeFilter"
 				provides="nti.app.products.badges.interfaces.IPrincipalEarnedBadgeFilter"/>
+		
+	<subscriber	factory=".courses._CoursePrincipalEarnableBadgeFilter"
+				provides="nti.app.products.badges.interfaces.IPrincipalEarnableBadgeFilter"/>
 				
 	<!-- Decorators -->
 	

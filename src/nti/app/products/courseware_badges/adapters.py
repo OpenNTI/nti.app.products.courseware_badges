@@ -19,21 +19,21 @@ from nti.contentlibrary import interfaces as lib_interfaces
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
-from . import is_course_badge
 from . import base_root_ntiid
-from . import get_image_filename
+from . import get_base_image_filename
+from . import is_course_badge_filename
 
 @component.adapter(badge_interfaces.IBadgeClass)
 @interface.implementer(lib_interfaces.IContentPackage)
 def badge_to_course_content_package(badge):
-	library = component.queryUtility(lib_interfaces.IContentPackageLibrary)
-	if is_course_badge(badge):
-		filename = get_image_filename(badge)
+	filename = get_base_image_filename(badge)
+	if is_course_badge_filename(filename):
 		# remove subtype from NTIID, filename is not a valid NTIID
 		proxied_ntiid = '.'.join(filename.split('.')[0:-1])
 		# replace ':',',' to before comparing
 		proxied_ntiid = proxied_ntiid.replace(':', '_').replace(',', '_')
 		# search packages
+		library = component.queryUtility(lib_interfaces.IContentPackageLibrary)
 		for package in getattr(library, 'contentPackages', ()):
 			root_package_nttid = base_root_ntiid(package.ntiid)
 			root_package_nttid = root_package_nttid.replace(':', '_').replace(',', '_')
