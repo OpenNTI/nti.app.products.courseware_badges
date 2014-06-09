@@ -10,7 +10,7 @@ __docformat__ = "restructuredtext en"
 def generate_db(database):
 
 	issuer_id = database.add_issuer(name=u'Janux',
-									origin=u'http://janux.ou.edu',
+									origin=u'https://janux.ou.edu',
 								    org=u'http://www.ou.edu',
 								    contact=u'janux@ou.edu')
 

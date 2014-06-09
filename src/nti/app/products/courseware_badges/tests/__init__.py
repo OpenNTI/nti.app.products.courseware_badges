@@ -53,9 +53,10 @@ def _restore_ds_dir(cls):
 def _register_sample(cls):
     import transaction
     with transaction.manager:
+        cls.old = component.getUtility(badge_interfaces.IBadgeManager)
         bm = manager.create_badge_manager(defaultSQLite=True)
         generate_db(bm.db)
-        component.provideUtility(bm, badge_interfaces.IBadgeManager, "sample")
+        component.provideUtility(bm, badge_interfaces.IBadgeManager)
 
 def _do_then_enumerate_library(do):
     database = ZODB.DB(ApplicationTestLayer._storage_base, database_name='Users')

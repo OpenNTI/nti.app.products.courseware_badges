@@ -172,4 +172,3 @@ def get_course_nttid_for_badge(badge):
 	entry = ICourseCatalogEntry(badge, None)
 	result = getattr(entry, 'ContentPackageNTIID', None)
 	return result
-
