@@ -26,6 +26,13 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 
 from nti.dataserver import interfaces as nti_interfaces
 
+from nti.externalization.externalization import WithRepr
+from nti.externalization.externalization import NoPickle
+
+from nti.utils.schema import EqHash
+from nti.utils.schema import SchemaConfigured
+from nti.utils.schema import createFieldProperties
+
 from . import interfaces
 from . import get_course_badges
 from . import show_course_badges
@@ -100,4 +107,34 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 			now = datetime.datetime.utcnow()
 			result = (entry.StartDate and now >= entry.StartDate) and \
 				     (not entry.EndDate or now <= entry.EndDate)
+		return result
+
+@interface.implementer(interfaces.ICourseBadge)
+@WithRepr
+@NoPickle
+@EqHash('name',)
+class CourseBadge(SchemaConfigured):
+	createFieldProperties(interfaces.ICourseBadge)
+
+@interface.implementer(interfaces.ICourseBadgeMap)
+class CourseBadgeMap(dict):
+
+	def __init__(self):
+		super(CourseBadgeMap, self).__init__()
+		self.by_name = {}
+
+	def mark(self, course):
+		self.setdefault(course, set())
+
+	def add(self, course, badge, kind=interfaces.COURSE_COMPLETION):
+		self.mark(course)
+		self.by_name[badge] = course
+		self[course].add(CourseBadge(Badge=badge, Type=kind))
+
+	def get_badge_names(self, course):
+		result = [x.name for x in self.get(course, ())]
+		return result
+
+	def get_course_ntiid(self, badge):
+		result = self.by_name.get(badge)
 		return result

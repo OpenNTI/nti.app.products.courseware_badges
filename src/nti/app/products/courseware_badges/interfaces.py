@@ -7,12 +7,46 @@ from __future__ import print_function, unicode_literals, absolute_import, divisi
 __docformat__ = "restructuredtext en"
 
 from zope import interface
+from zope.schema import vocabulary
+from zope.interface.common import mapping
 from zope.interface.interface import taggedValue
 
 from nti.app.client_preferences.interfaces import TAG_EXTERNAL_PREFERENCE_GROUP
 
 from nti.utils import schema
 
+COURSE_COMPLETION = u'completion'
+COURSE_BADGE_TYPES = (COURSE_COMPLETION,)
+COURSE_BADGE_TYPES_VOCABULARY = \
+    vocabulary.SimpleVocabulary([vocabulary.SimpleTerm(_x) for _x in COURSE_BADGE_TYPES])
+
+class ICourseBadge(interface.Interface):
+    name = schema.ValidTextLine(title="Badge name")
+    type = schema.Choice(vocabulary=COURSE_BADGE_TYPES_VOCABULARY,
+                         title='Badge type', required=True, default=COURSE_COMPLETION)
+
+class ICourseBadgeMap(mapping.IReadMapping):
+    
+    def mark(course):
+        """
+        mark a course this map
+        """
+
+    def add(course, badge, kind=COURSE_COMPLETION):
+        """
+        register a badge name for specified course ntiid and badge kind
+        """
+
+    def get_badge_names(course):
+        """
+        return the badge names associated w/ the specified course ntiid
+        """
+
+    def get_course_ntiid(badge):
+        """
+        return the course nttid associated w/ the specfied badge name
+        """
+        
 class ICourseBadgeSettings(interface.Interface):
     """
     The root of the settings tree for badges

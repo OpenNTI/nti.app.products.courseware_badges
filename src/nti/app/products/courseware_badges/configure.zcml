@@ -36,7 +36,12 @@
 	<adapter factory=".adapters.badge_to_course_catalog_entry"
 			 for="nti.badges.interfaces.IBadgeClass"
 			 provides="nti.app.products.courseware.interfaces.ICourseCatalogEntry" />
-			  	 		  	 
+			  	 		  
+	<!-- Utilities -->
+	 
+	<utility factory=".courses.CourseBadgeMap"
+			 provides=".interfaces.ICourseBadgeMap"/>
+			 
 	<!-- Subscribers -->
 	
 	<subscriber	factory=".courses._CourseErnableBadges"
