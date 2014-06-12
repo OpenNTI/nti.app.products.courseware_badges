@@ -67,5 +67,5 @@ class TestCourses(ApplicationLayerTest):
 		names = badge_map.get_badge_names(ntiid)
 		assert_that(names, has_length(1))
 		
-		course_ntiid = badge_map.get_course_ntiid(names[0])
-		assert_that(course_ntiid, is_(ntiid))
+		course_iden = badge_map.get_course_iden(names[0])
+		assert_that(course_iden, is_(ntiid))

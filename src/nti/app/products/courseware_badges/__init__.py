@@ -96,15 +96,6 @@ def get_earned_course_badges(user):
 			result.append(badge)
 	return result
 
-@repoze.lru.lru_cache(500)
-def get_catalog_entry_name_for_badge(badge):
+def get_catalog_entry_for_badge(badge):
 	entry = ICourseCatalogEntry(badge, None)
-	result = getattr(entry, '__name__', None)
-	return result
-
-@repoze.lru.lru_cache(500)
-def get_course_nttid_for_badge(badge):
-	entry = ICourseCatalogEntry(badge, None)
-	result = getattr(entry, 'ContentPackageNTIID', None)
-	return result
-
+	return entry

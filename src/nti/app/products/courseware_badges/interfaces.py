@@ -27,12 +27,12 @@ class ICourseBadge(interface.Interface):
 
 class ICourseBadgeMap(mapping.IReadMapping):
     
-    def is_no_course(course_ntiid):
+    def is_no_course(course):
         """
-        check if the course_ntiid is for no course
+        check if the course is for no course
         """
 
-    def mark_no_course(badge_name):
+    def mark_no_course(badge):
         """
         mark this badge name for a no course
         """
@@ -52,9 +52,9 @@ class ICourseBadgeMap(mapping.IReadMapping):
         return the badge names associated w/ the specified course ntiid
         """
 
-    def get_course_ntiid(badge):
+    def get_course_iden(badge):
         """
-        return the course nttid associated w/ the specfied badge name
+        return the course iden associated w/ the specfied badge name
         """
         
 class ICourseBadgeSettings(interface.Interface):

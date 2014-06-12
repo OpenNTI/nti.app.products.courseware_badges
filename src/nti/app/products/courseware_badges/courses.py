@@ -19,7 +19,6 @@ from nti.app.products.badges.interfaces import IPrincipalErnableBadges
 from nti.app.products.badges.interfaces import IPrincipalEarnedBadgeFilter
 from nti.app.products.badges.interfaces import IPrincipalEarnableBadgeFilter
 
-from nti.app.products.courseware.interfaces import ICourseCatalog
 from nti.app.products.courseware.interfaces import ILegacyCommunityBasedCourseInstance
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -37,8 +36,7 @@ from . import interfaces
 from . import get_course_badges
 from . import show_course_badges
 from . import get_course_badges_for_user
-from . import get_course_nttid_for_badge
-from . import get_catalog_entry_name_for_badge
+from . import get_catalog_entry_for_badge
 
 @interface.implementer(interfaces.ICourseBadgeCatalog)
 class _CourseBadgeCatalog(object):
@@ -87,7 +85,8 @@ class _CoursePrincipalEarnedBadgeFilter(object):
 		if req is not None:
 			if req.authenticated_userid == user.username:
 				result = True
-			elif get_course_nttid_for_badge(badge) and show_course_badges(user):
+			elif get_catalog_entry_for_badge(badge) is not None and \
+				 show_course_badges(user):
 				result = True
 		return result
 
@@ -100,10 +99,8 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 
 	def allow_badge(self, user, badge):
 		result = True
-		name = get_catalog_entry_name_for_badge(badge)
-		if name:
-			catalog = component.getUtility(ICourseCatalog)
-			entry = catalog[name]
+		entry = get_catalog_entry_for_badge(badge)
+		if entry is not None:
 			now = datetime.datetime.utcnow()
 			result = (entry.StartDate and now >= entry.StartDate) and \
 				     (not entry.EndDate or now <= entry.EndDate)
@@ -125,26 +122,26 @@ class CourseBadgeMap(dict):
 		super(CourseBadgeMap, self).__init__()
 		self.by_name = {}
 
-	def mark(self, course_ntiid):
-		self.setdefault(course_ntiid, set())
+	def mark(self, course):
+		self.setdefault(course, set())
 
-	def is_no_course(self, course_ntiid):
-		return course_ntiid == self.no_course
+	def is_no_course(self, course):
+		return course == self.no_course
 
-	def mark_no_course(self, badge_name):
-		self.by_name[badge_name] = self.no_course
+	def mark_no_course(self, badge):
+		self.by_name[badge] = self.no_course
 		
-	def add(self, course_ntiid, badge_name, kind=interfaces.COURSE_COMPLETION):
-		self.mark(course_ntiid)
-		self.by_name[badge_name] = course_ntiid
-		self[course_ntiid].add(CourseBadge(name=badge_name, type=kind))
+	def add(self, course, badge, kind=interfaces.COURSE_COMPLETION):
+		self.mark(course)
+		self.by_name[badge] = course
+		self[course].add(CourseBadge(name=badge, type=kind))
 
-	def get_badge_names(self, course_ntiid):
-		result = self.get(course_ntiid)
+	def get_badge_names(self, course):
+		result = self.get(course)
 		if result is not None:
 			result = [x.name for x in result]
 		return result
 
-	def get_course_ntiid(self, badge_name):
-		result = self.by_name.get(badge_name)
+	def get_course_iden(self, badge):
+		result = self.by_name.get(badge)
 		return result
