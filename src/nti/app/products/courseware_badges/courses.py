@@ -36,8 +36,8 @@ from nti.utils.schema import createFieldProperties
 from . import interfaces
 from . import get_course_badges
 from . import show_course_badges
-from . import get_course_nttid_for_badge
 from . import get_course_badges_for_user
+from . import get_course_nttid_for_badge
 from . import get_catalog_entry_name_for_badge
 
 @interface.implementer(interfaces.ICourseBadgeCatalog)
@@ -119,22 +119,32 @@ class CourseBadge(SchemaConfigured):
 @interface.implementer(interfaces.ICourseBadgeMap)
 class CourseBadgeMap(dict):
 
+	no_course = object()
+
 	def __init__(self):
 		super(CourseBadgeMap, self).__init__()
 		self.by_name = {}
 
-	def mark(self, course):
-		self.setdefault(course, set())
+	def mark(self, course_ntiid):
+		self.setdefault(course_ntiid, set())
 
-	def add(self, course, badge, kind=interfaces.COURSE_COMPLETION):
-		self.mark(course)
-		self.by_name[badge] = course
-		self[course].add(CourseBadge(Badge=badge, Type=kind))
+	def is_no_course(self, course_ntiid):
+		return course_ntiid == self.no_course
 
-	def get_badge_names(self, course):
-		result = [x.name for x in self.get(course, ())]
+	def mark_no_course(self, badge_name):
+		self.by_name[badge_name] = self.no_course
+		
+	def add(self, course_ntiid, badge_name, kind=interfaces.COURSE_COMPLETION):
+		self.mark(course_ntiid)
+		self.by_name[badge_name] = course_ntiid
+		self[course_ntiid].add(CourseBadge(name=badge_name, type=kind))
+
+	def get_badge_names(self, course_ntiid):
+		result = self.get(course_ntiid)
+		if result is not None:
+			result = [x.name for x in result]
 		return result
 
-	def get_course_ntiid(self, badge):
-		result = self.by_name.get(badge)
+	def get_course_ntiid(self, badge_name):
+		result = self.by_name.get(badge_name)
 		return result

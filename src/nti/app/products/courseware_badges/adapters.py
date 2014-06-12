@@ -19,13 +19,14 @@ from nti.contentlibrary import interfaces as lib_interfaces
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
-from . import base_root_ntiid
-from . import get_base_image_filename
-from . import is_course_badge_filename
+from . import interfaces
 
-@component.adapter(badge_interfaces.IBadgeClass)
-@interface.implementer(lib_interfaces.IContentPackage)
-def badge_to_course_content_package(badge):
+from .utils import get_badge_type
+from .utils import base_root_ntiid
+from .utils import get_base_image_filename
+from .utils import is_course_badge_filename
+
+def find_content_package_from_badge(badge):
 	filename = get_base_image_filename(badge)
 	if is_course_badge_filename(filename):
 		# remove subtype from NTIID, filename is not a valid NTIID
@@ -40,6 +41,28 @@ def badge_to_course_content_package(badge):
 			if proxied_ntiid == root_package_nttid:
 				return package
 	return None
+
+@component.adapter(badge_interfaces.IBadgeClass)
+@interface.implementer(lib_interfaces.IContentPackage)
+def badge_to_course_content_package(badge):
+	badge_name = badge.name
+	badge_map = component.getUtility(interfaces.ICourseBadgeMap)
+	course_ntiid = badge_map.get_course_ntiid(badge_name)
+	if badge_map.is_no_course(course_ntiid):
+		package = None
+	elif course_ntiid is None:
+		package = find_content_package_from_badge(badge)
+		if package is not None:
+			# populate badge map
+			kind = get_badge_type(badge)
+			course_ntiid = package.ntiid
+			badge_map.add(course_ntiid, badge_name, kind)
+		else:
+			badge_map.mark_no_course(badge_name)
+	else:
+		library = component.queryUtility(lib_interfaces.IContentPackageLibrary) or {}
+		package = library.get(course_ntiid)
+	return package
 
 @component.adapter(badge_interfaces.IBadgeClass)
 @interface.implementer(ICourseCatalogEntry)

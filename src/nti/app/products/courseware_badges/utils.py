@@ -66,7 +66,7 @@ def is_course_badge(badge):
 	result = is_course_badge_filename(filename)
 	return result
 
-def find_course_badge_from_badges(course_ntiid, source_badges=()):
+def find_course_badges_from_badges(course_ntiid, source_badges=()):
 	"""
 	return all the badges for the specified course using the badge image names
 
