@@ -24,7 +24,7 @@ def base_root_ntiid(ntiid):
 	tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.clc_3403_law_and_justice
 	we get tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice
 	"""
-	if ntiid:
+	if ntiid and ntiids.is_valid_ntiid_string(ntiid):
 		parts = ntiids.get_parts(ntiid)
 		specfic = parts.specific.split('.')[0]
 		result = ntiids.make_ntiid(provider=parts.provider,
