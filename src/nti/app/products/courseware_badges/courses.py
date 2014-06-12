@@ -46,7 +46,8 @@ class _CourseBadgeCatalog(object):
 
 	def iter_badges(self):
 		entry = ICourseCatalogLegacyEntry(self.course)
-		result = get_course_badges(entry.ProviderUniqueID)
+		# TODO: ContentPackageNTIID will be deprecated
+		result = get_course_badges(entry.ContentPackageNTIID)
 		return result
 
 @component.adapter(nti_interfaces.IUser)

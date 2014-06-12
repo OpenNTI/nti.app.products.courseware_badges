@@ -53,20 +53,23 @@ def badge_to_course_catalog_entry(badge):
 	badge_map = component.getUtility(interfaces.ICourseBadgeMap)
 	course_iden = badge_map.get_course_iden(badge_name)
 	if badge_map.is_no_course(course_iden):
-		entry = None
+		result = None
 	elif course_iden is None:
-		entry = find_catalog_entry_from_badge(badge)
-		if entry is not None:
+		result = find_catalog_entry_from_badge(badge)
+		if result is not None:
 			# populate badge map
 			kind = get_badge_type(badge)
-			course_iden = entry.ProviderUniqueID
+			# TODO: ContentPackageNTIID will be deprecated
+			course_iden = result.ContentPackageNTIID
 			badge_map.add(course_iden, badge_name, kind)
 		else:
 			badge_map.mark_no_course(badge_name)
 	else:
+		result = None
 		catalog = component.getUtility(ICourseCatalog)
-		try:
-			entry = catalog[course_iden]
-		except KeyError:
-			entry = None
-	return entry
+		for catalog_entry in catalog:
+			# TODO: ContentPackageNTIID will be deprecated
+			if catalog_entry.ContentPackageNTIID == course_iden:
+				result = catalog_entry
+				break
+	return result

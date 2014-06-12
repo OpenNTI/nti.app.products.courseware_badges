@@ -77,6 +77,10 @@ def find_course_badges_from_badges(course_ntiid, source_badges=()):
 	that is the completion badge of the tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice
  	course
  	"""
+
+	if not ntiids.is_valid_ntiid_string(course_ntiid):
+		raise ValueError("Invalid course ntiid")
+
 	badge_types = interfaces.COURSE_BADGE_TYPES
 	badge_types = ['course_%s_badge' % x for x in badge_types] + ['course_badge']
 
