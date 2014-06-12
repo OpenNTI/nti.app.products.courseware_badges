@@ -19,7 +19,7 @@ from nti.app.products.badges.interfaces import IPrincipalErnableBadges
 from nti.app.products.badges.interfaces import IPrincipalEarnedBadgeFilter
 from nti.app.products.badges.interfaces import IPrincipalEarnableBadgeFilter
 
-from nti.app.products.courseware.interfaces import ILegacyCommunityBasedCourseInstance
+from nti.app.products.courseware.interfaces import ICourseCatalogLegacyEntry
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
@@ -45,16 +45,8 @@ class _CourseBadgeCatalog(object):
 		self.course = ICourseInstance(course)
 
 	def iter_badges(self):
-		return ()
-
-@interface.implementer(interfaces.ICourseBadgeCatalog)
-class _LegacyCourseBadgeCatalog(object):
-
-	def __init__(self, course):
-		self.course = ILegacyCommunityBasedCourseInstance(course)
-
-	def iter_badges(self):
-		result = get_course_badges(self.course.ContentPackageNTIID)
+		entry = ICourseCatalogLegacyEntry(self.course)
+		result = get_course_badges(entry.ProviderUniqueID)
 		return result
 
 @component.adapter(nti_interfaces.IUser)

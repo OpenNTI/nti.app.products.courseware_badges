@@ -45,19 +45,19 @@ def show_course_badges(user):
 	finally:
 		restoreInteraction()
 
-def get_course_badges(course_ntiid):
+def get_course_badges(course_iden):
 	result = []
 	badge_map = component.getUtility(interfaces.ICourseBadgeMap)
-	names = badge_map.get_badge_names(course_ntiid)
+	names = badge_map.get_badge_names(course_iden)
 	if names is None:
-		badges = utils.find_course_badges_from_badges(course_ntiid, get_all_badges())
+		badges = utils.find_course_badges_from_badges(course_iden, get_all_badges())
 		# populate course badge map
 		for badge in badges:
 			result.append(badge)
 			kind = utils.get_badge_type(badge)
-			badge_map.add(course_ntiid, badge.name, kind)
+			badge_map.add(course_iden, badge.name, kind)
 		# mark in case no badge is found
-		badge_map.mark(course_ntiid)
+		badge_map.mark(course_iden)
 	else:
 		for name in names:
 			badge = get_badge(name)

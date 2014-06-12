@@ -20,14 +20,6 @@
 	<adapter factory=".courses._CourseBadgeCatalog"
 			 for="nti.app.products.courseware.interfaces.ICourseInstanceEnrollment"
 			 provides=".interfaces.ICourseBadgeCatalog" />
-		
-	<adapter factory=".courses._LegacyCourseBadgeCatalog"
-			 for="nti.app.products.courseware.interfaces.ILegacyCommunityBasedCourseInstance"
-			 provides=".interfaces.ICourseBadgeCatalog" />
-
-	<adapter factory=".courses._LegacyCourseBadgeCatalog"
-			 for="nti.app.products.courseware.interfaces.ILegacyCourseInstanceEnrollment"
-			 provides=".interfaces.ICourseBadgeCatalog" />
 	
 	<adapter factory=".adapters.badge_to_course_catalog_entry"
 			 for="nti.badges.interfaces.IBadgeClass"
