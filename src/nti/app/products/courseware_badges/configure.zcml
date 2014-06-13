@@ -42,7 +42,10 @@
 		<subscriber	factory=".courses._CoursePrincipalEarnableBadgeFilter"
 					provides="nti.app.products.badges.interfaces.IPrincipalEarnableBadgeFilter" />
 	</configure>
-				
+		
+	<subscriber	factory=".filters._CourseBadgePrincipalUGDFilter"
+				provides="nti.appserver.interfaces.IPrincipalUGDFilter" />
+					
 	<!-- Decorators -->
 	
 	<subscriber factory=".decorators._BadgeTypeAdder"
