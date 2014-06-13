@@ -56,7 +56,7 @@ class TestCourses(ApplicationLayerTest):
 						  	   status=200)
 		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than(0))))
 		
-		ntiid = 'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice'
+		ntiid = 'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.clc_3403_law_and_justice'
 		badges = get_course_badges(ntiid)
 		assert_that(badges, has_length(1))
 

@@ -20,11 +20,7 @@ class TestCoursewareBadges(CourseBadgesTestCase):
 
 	@WithMockDSTrans
 	def test_get_course_badges(self):
-		courseId = 'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice'
-		badges = get_course_badges(courseId)
-		assert_that(badges, has_length(1))
-
-		courseId = 'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.course_info'
+		courseId = 'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.clc_3403_law_and_justice'
 		badges = get_course_badges(courseId)
 		assert_that(badges, has_length(1))
 
