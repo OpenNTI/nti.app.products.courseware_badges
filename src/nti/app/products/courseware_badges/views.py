@@ -41,10 +41,9 @@ class CourseBadgesView(AbstractAuthenticatedView):
 		result['Items'] = items = []
 
 		context = self.request.context
-		content_package_ntiid = getattr(context, 'ContentPackageNTIID', None)
-		if content_package_ntiid:
-			badges = interfaces.ICourseBadgeCatalog(context).iter_badges()
-			items.extend(open_interfaces.IBadgeClass(b) for b in badges)
+		badge_catalog = interfaces.ICourseBadgeCatalog(context, None)
+		badges = badge_catalog.iter_badges() if badge_catalog is not None else ()
+		items.extend(open_interfaces.IBadgeClass(b) for b in badges)
 
 		result.__parent__ = context
 		result.__name__ = self.request.view_name
