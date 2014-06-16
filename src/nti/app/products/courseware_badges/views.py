@@ -65,8 +65,10 @@ class EarnedCourseBadgesView(AbstractAuthenticatedView):
 
 		request = self.request
 		context = self.request.context
-		if request.authenticated_userid == context.username or show_course_badges(context):
-			items.extend(get_earned_course_badges(context))
+		if 	request.authenticated_userid == context.username or \
+			show_course_badges(context):
+			badges = get_earned_course_badges(context)
+			items.extend(open_interfaces.IBadgeClass(b) for b in badges)
 
 		result.__parent__ = context
 		result.__name__ = self.request.view_name
