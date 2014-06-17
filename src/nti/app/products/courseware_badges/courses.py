@@ -28,9 +28,9 @@ from nti.dataserver import interfaces as nti_interfaces
 from nti.externalization.externalization import WithRepr
 from nti.externalization.externalization import NoPickle
 
-from nti.utils.schema import EqHash
-from nti.utils.schema import SchemaConfigured
-from nti.utils.schema import createFieldProperties
+from nti.schema.schema import EqHash
+from nti.schema.field import SchemaConfigured
+from nti.schema.fieldproperty import createFieldProperties
 
 from . import interfaces
 from . import get_course_badges
