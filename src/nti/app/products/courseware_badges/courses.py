@@ -25,8 +25,8 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 
 from nti.dataserver import interfaces as nti_interfaces
 
+from nti.externalization.persistence import NoPickle
 from nti.externalization.externalization import WithRepr
-from nti.externalization.externalization import NoPickle
 
 from nti.schema.schema import EqHash
 from nti.schema.field import SchemaConfigured
