@@ -39,10 +39,8 @@ def find_catalog_entry_from_badge(badge):
 		catalog = component.getUtility(ICourseCatalog)
 		for entry in catalog:
 			# TODO: ContentPackageNTIID will be deprecated
-			unique_id = getattr(entry, 'ProviderUniqueID', None)
 			pack_ntiid = getattr(entry, 'ContentPackageNTIID', None)
-			if 	_compare_pseudo_ntiids(ntiid_root, base_root_ntiid(unique_id)) or \
-				_compare_pseudo_ntiids(ntiid_root, base_root_ntiid(pack_ntiid)):
+			if _compare_pseudo_ntiids(ntiid_root, base_root_ntiid(pack_ntiid)):
 				return entry
 	return None
 
