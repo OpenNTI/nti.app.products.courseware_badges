@@ -11,7 +11,7 @@ logger = __import__('logging').getLogger(__name__)
 import os
 import re
 
-from nti.badges.openbadges import interfaces as open_interfaces
+from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.ntiids import ntiids
 
@@ -38,7 +38,7 @@ def get_base_image_filename(badge):
 	"""
 	return the image file name w/ no ext
 	"""
-	image = open_interfaces.IBadgeClass(badge).image
+	image = IBadgeClass(badge).image
 	filename = os.path.basename(image) if image else None
 	if filename and filename.lower().endswith('.png'):
 		filename = os.path.splitext(filename)[0]

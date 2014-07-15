@@ -11,7 +11,7 @@ logger = __import__('logging').getLogger(__name__)
 from zope import interface
 from zope import component
 
-from nti.badges import interfaces as badge_interfaces
+from nti.badges.interfaces import IBadgeClass
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
@@ -37,7 +37,7 @@ class _CourseInstanceLinkDecorator(object):
 		_links = result.setdefault(LINKS, [])
 		_links.append(Link(context, elements=(VIEW_BADGES,), rel=VIEW_BADGES))
 
-@component.adapter(badge_interfaces.IBadgeClass)
+@component.adapter(IBadgeClass)
 @interface.implementer(IExternalObjectDecorator)
 class _BadgeTypeAdder(object):
 

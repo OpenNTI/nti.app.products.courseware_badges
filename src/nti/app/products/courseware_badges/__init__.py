@@ -19,7 +19,7 @@ from zope.preference.interfaces import IPreferenceGroup
 
 import repoze.lru
 
-from nti.app.products.courseware.interfaces import ICourseCatalogEntry
+from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 

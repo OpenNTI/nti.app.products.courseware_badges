@@ -12,7 +12,7 @@ from pyramid.view import view_config
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
-from nti.badges.openbadges import interfaces as open_interfaces
+from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
@@ -43,7 +43,7 @@ class CourseBadgesView(AbstractAuthenticatedView):
 		context = self.request.context
 		badge_catalog = interfaces.ICourseBadgeCatalog(context, None)
 		badges = badge_catalog.iter_badges() if badge_catalog is not None else ()
-		items.extend(open_interfaces.IBadgeClass(b) for b in badges)
+		items.extend(IBadgeClass(b) for b in badges)
 
 		result.__parent__ = context
 		result.__name__ = self.request.view_name
@@ -67,7 +67,7 @@ class EarnedCourseBadgesView(AbstractAuthenticatedView):
 		if 	request.authenticated_userid == context.username or \
 			show_course_badges(context):
 			badges = get_earned_course_badges(context)
-			items.extend(open_interfaces.IBadgeClass(b) for b in badges)
+			items.extend(IBadgeClass(b) for b in badges)
 
 		result.__parent__ = context
 		result.__name__ = self.request.view_name

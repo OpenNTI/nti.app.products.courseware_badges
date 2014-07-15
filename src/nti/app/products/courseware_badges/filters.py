@@ -15,9 +15,9 @@ from ZODB.POSException import POSKeyError
 
 from pyramid.threadlocal import get_current_request
 
-from nti.badges import interfaces as badge_interfaces
+from nti.badges.interfaces import IBadgeClass
 
-from nti.dataserver import interfaces as nti_interfaces
+from nti.dataserver.interfaces import IUser
 
 from nti.appserver.interfaces import IPrincipalUGDFilter
 
@@ -26,7 +26,7 @@ from nti.app.products.badges.interfaces import IAssertionChange
 from . import show_course_badges
 from . import get_catalog_entry_for_badge
 
-@component.adapter(nti_interfaces.IUser)
+@component.adapter(IUser)
 @interface.implementer(IPrincipalUGDFilter)
 class _CourseBadgePrincipalUGDFilter(object):
 
@@ -39,8 +39,8 @@ class _CourseBadgePrincipalUGDFilter(object):
 		if req is not None and IAssertionChange.providedBy(obj):
 			try:
 				assertion = obj.object
-				user = nti_interfaces.IUser(assertion)
-				badge = badge_interfaces.IBadgeClass(assertion)
+				user = IUser(assertion)
+				badge = IBadgeClass(assertion)
 				if req.authenticated_userid != user.username:
 					result = get_catalog_entry_for_badge(badge) is None or \
 							 show_course_badges(user)

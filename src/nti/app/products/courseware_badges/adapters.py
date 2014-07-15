@@ -11,10 +11,10 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
-from nti.app.products.courseware.interfaces import ICourseCatalog
-from nti.app.products.courseware.interfaces import ICourseCatalogEntry
+from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
-from nti.badges import interfaces as badge_interfaces
+from nti.badges.interfaces import IBadgeClass
 
 from . import interfaces
 
@@ -44,7 +44,7 @@ def find_catalog_entry_from_badge(badge):
 				return entry
 	return None
 
-@component.adapter(badge_interfaces.IBadgeClass)
+@component.adapter(IBadgeClass)
 @interface.implementer(ICourseCatalogEntry)
 def badge_to_course_catalog_entry(badge):
 	badge_name = badge.name

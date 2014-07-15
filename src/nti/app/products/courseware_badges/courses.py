@@ -23,7 +23,7 @@ from nti.app.products.courseware.interfaces import ICourseCatalogLegacyEntry
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
-from nti.dataserver import interfaces as nti_interfaces
+from nti.dataserver.interfaces import IUser
 
 from nti.externalization.persistence import NoPickle
 from nti.externalization.externalization import WithRepr
@@ -32,13 +32,17 @@ from nti.schema.schema import EqHash
 from nti.schema.field import SchemaConfigured
 from nti.schema.fieldproperty import createFieldProperties
 
-from . import interfaces
+from .interfaces import ICourseBadge
+from .interfaces import ICourseBadgeMap
+from .interfaces import COURSE_COMPLETION
+from .interfaces import ICourseBadgeCatalog
+
 from . import get_course_badges
 from . import show_course_badges
 from . import get_course_badges_for_user
 from . import get_catalog_entry_for_badge
 
-@interface.implementer(interfaces.ICourseBadgeCatalog)
+@interface.implementer(ICourseBadgeCatalog)
 class _CourseBadgeCatalog(object):
 
 	def __init__(self, course):
@@ -50,7 +54,7 @@ class _CourseBadgeCatalog(object):
 		result = get_course_badges(entry.ContentPackageNTIID)
 		return result
 
-@component.adapter(nti_interfaces.IUser)
+@component.adapter(IUser)
 @interface.implementer(IPrincipalErnableBadges)
 class _CourseErnableBadges(object):
 
@@ -65,7 +69,7 @@ class _CourseErnableBadges(object):
 			result.extend(get_course_badges_for_user(self.user))
 		return result
 
-@component.adapter(nti_interfaces.IUser)
+@component.adapter(IUser)
 @interface.implementer(IPrincipalEarnedBadgeFilter)
 class _CoursePrincipalEarnedBadgeFilter(object):
 
@@ -83,7 +87,7 @@ class _CoursePrincipalEarnedBadgeFilter(object):
 				result = True
 		return result
 
-@component.adapter(nti_interfaces.IUser)
+@component.adapter(IUser)
 @interface.implementer(IPrincipalEarnableBadgeFilter)
 class _CoursePrincipalEarnableBadgeFilter(object):
 
@@ -99,14 +103,14 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 				     (not entry.EndDate or now <= entry.EndDate)
 		return result
 
-@interface.implementer(interfaces.ICourseBadge)
+@interface.implementer(ICourseBadge)
 @WithRepr
 @NoPickle
 @EqHash('name',)
 class CourseBadge(SchemaConfigured):
-	createFieldProperties(interfaces.ICourseBadge)
+	createFieldProperties(ICourseBadge)
 
-@interface.implementer(interfaces.ICourseBadgeMap)
+@interface.implementer(ICourseBadgeMap)
 class CourseBadgeMap(dict):
 
 	no_course = object()
@@ -124,7 +128,7 @@ class CourseBadgeMap(dict):
 	def mark_no_course(self, badge):
 		self.by_name[badge] = self.no_course
 		
-	def add(self, course, badge, kind=interfaces.COURSE_COMPLETION):
+	def add(self, course, badge, kind=COURSE_COMPLETION):
 		self.mark(course)
 		self.by_name[badge] = course
 		self[course].add(CourseBadge(name=badge, type=kind))
