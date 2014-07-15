@@ -10,7 +10,7 @@
 	<include package="zope.component" />
 	<include package="zope.security" />
 	
-	<include package="nti.badges" />
+	<include package="nti.app.products.badges" />
 	
 	<!-- Adapters -->
 	
