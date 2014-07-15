@@ -16,7 +16,7 @@ from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.badges.interfaces import IBadgeClass
 
-from . import interfaces
+from .interfaces import ICourseBadgeMap
 
 from .utils import get_badge_type
 from .utils import base_root_ntiid
@@ -48,7 +48,7 @@ def find_catalog_entry_from_badge(badge):
 @interface.implementer(ICourseCatalogEntry)
 def badge_to_course_catalog_entry(badge):
 	badge_name = badge.name
-	badge_map = component.getUtility(interfaces.ICourseBadgeMap)
+	badge_map = component.getUtility(ICourseBadgeMap)
 	course_iden = badge_map.get_course_iden(badge_name)
 	if badge_map.is_no_course(course_iden):
 		result = None
