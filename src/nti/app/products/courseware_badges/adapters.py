@@ -65,7 +65,7 @@ def badge_to_course_catalog_entry(badge):
 	else:
 		result = None
 		catalog = component.getUtility(ICourseCatalog)
-		for catalog_entry in catalog.values():
+		for catalog_entry in catalog.iterCatalogEntries():
 			# TODO: ContentPackageNTIID will be deprecated
 			if catalog_entry.ContentPackageNTIID == course_iden:
 				result = catalog_entry
