@@ -16,7 +16,7 @@ from zope.component.interfaces import IComponents
 
 import ZODB
 
-from nti.app.products.courseware.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseCatalog
 
 from nti.badges.tahrir import manager
 from nti.badges import interfaces as badge_interfaces
@@ -73,13 +73,6 @@ def _do_then_enumerate_library(do):
                 pass
 
             getattr(lib, 'contentPackages')
-
-            components = component.getUtility(IComponents, name='platform.ou.edu')
-            catalog = components.getUtility(ICourseCatalog)
-
-            # re-register globally
-            global_catalog = component.getUtility(ICourseCatalog)
-            global_catalog._entries[:] = catalog._entries
 
     _create()
 
