@@ -19,9 +19,8 @@ from nti.app.products.badges.interfaces import IPrincipalErnableBadges
 from nti.app.products.badges.interfaces import IPrincipalEarnedBadgeFilter
 from nti.app.products.badges.interfaces import IPrincipalEarnableBadgeFilter
 
-from nti.app.products.courseware.interfaces import ICourseCatalogLegacyEntry
-
 from nti.contenttypes.courses.interfaces import ICourseInstance
+from nti.contenttypes.courses.legacy_catalog import ICourseCatalogLegacyEntry
 
 from nti.dataserver.interfaces import IUser
 

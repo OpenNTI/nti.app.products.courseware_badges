@@ -15,7 +15,8 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.ntiids import ntiids
 
-from . import interfaces
+from .interfaces import COURSE_COMPLETION
+from .interfaces import COURSE_BADGE_TYPES
 
 def base_root_ntiid(ntiid):
 	"""
@@ -50,7 +51,7 @@ def get_badge_type_from_filename(filename):
 	if m is not None:
 		result = m.groups()[0].lower()
 	else:
-		result = interfaces.COURSE_COMPLETION
+		result = COURSE_COMPLETION
 	return result
 
 def get_badge_type(badge):
@@ -81,7 +82,7 @@ def find_course_badges_from_badges(course_ntiid, source_badges=()):
 	if not ntiids.is_valid_ntiid_string(course_ntiid):
 		raise ValueError("Invalid course ntiid")
 
-	badge_types = interfaces.COURSE_BADGE_TYPES
+	badge_types = COURSE_BADGE_TYPES
 	badge_types = ['course_%s_badge' % x for x in badge_types] + ['course_badge']
 
 	badge_type_ntiids = set()
