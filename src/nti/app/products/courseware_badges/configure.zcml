@@ -24,7 +24,7 @@
 	
 	<adapter factory=".adapters.badge_to_course_catalog_entry"
 			 for="nti.badges.interfaces.IBadgeClass"
-			 provides="nti.app.products.courseware.interfaces.ICourseCatalogEntry" />
+			 provides="nti.contenttypes.courses.interfaces.ICourseCatalogEntry" />
 			  	 		  
 	<!-- Utilities -->
 	 
