@@ -37,7 +37,7 @@ def find_catalog_entry_from_badge(badge):
 		ntiid_root = '.'.join(filename.split('.')[0:-1])
 		# search catalog entries
 		catalog = component.getUtility(ICourseCatalog)
-		for entry in catalog:
+		for entry in catalog.iterCatalogEntries():
 			# TODO: ContentPackageNTIID will be deprecated
 			pack_ntiid = getattr(entry, 'ContentPackageNTIID', None)
 			if _compare_pseudo_ntiids(ntiid_root, base_root_ntiid(pack_ntiid)):
