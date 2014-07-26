@@ -12,6 +12,7 @@ from zope import component
 from zope import interface
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.badges.interfaces import IBadgeClass
@@ -38,11 +39,17 @@ def find_catalog_entry_from_badge(badge):
 		# search catalog entries
 		catalog = component.getUtility(ICourseCatalog)
 		for entry in catalog.iterCatalogEntries():
-			# TODO: ContentPackageNTIID will be deprecated
-			pack_ntiid = getattr(entry, 'ContentPackageNTIID', None)
-			if _compare_pseudo_ntiids(ntiid_root, base_root_ntiid(pack_ntiid)):
-				return entry
-	return None
+			course = ICourseInstance(entry, None)
+			if course is None:
+				continue
+			try:
+				for pack in course.ContentPackageBundle.ContentPackages:
+					pack_ntiid = pack.ntiid
+					if _compare_pseudo_ntiids(ntiid_root, base_root_ntiid(pack_ntiid)):
+						return entry
+			except AttributeError:
+				pass
+
 
 @component.adapter(IBadgeClass)
 @interface.implementer(ICourseCatalogEntry)
@@ -66,8 +73,14 @@ def badge_to_course_catalog_entry(badge):
 		result = None
 		catalog = component.getUtility(ICourseCatalog)
 		for catalog_entry in catalog.iterCatalogEntries():
-			# TODO: ContentPackageNTIID will be deprecated
-			if catalog_entry.ContentPackageNTIID == course_iden:
-				result = catalog_entry
-				break
+			course = ICourseInstance(catalog_entry, None)
+			if course is None:
+				continue
+			try:
+				for pack in course.ContentPackageBundle.ContentPackages:
+					if pack.ntiid == course_iden:
+						result = catalog_entry
+						break
+			except AttributeError:
+				pass
 	return result
