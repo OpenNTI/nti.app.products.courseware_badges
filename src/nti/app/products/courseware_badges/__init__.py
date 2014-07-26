@@ -17,7 +17,6 @@ from zope.security.management import restoreInteraction
 
 from zope.preference.interfaces import IPreferenceGroup
 
-import repoze.lru
 
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 

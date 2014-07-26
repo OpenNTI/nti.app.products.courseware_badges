@@ -50,7 +50,10 @@ class _CourseBadgeCatalog(object):
 	def iter_badges(self):
 		entry = ICourseCatalogLegacyEntry(self.course)
 		# TODO: ContentPackageNTIID will be deprecated
-		result = get_course_badges(entry.ContentPackageNTIID)
+		result = []
+		for pack in self.course.ContentPackageBundle.ContentPackages:
+			result.extend( get_course_badges(pack.ntiid) )
+
 		return result
 
 @component.adapter(IUser)
@@ -126,7 +129,7 @@ class CourseBadgeMap(dict):
 
 	def mark_no_course(self, badge):
 		self.by_name[badge] = self.no_course
-		
+
 	def add(self, course, badge, kind=COURSE_COMPLETION):
 		self.mark(course)
 		self.by_name[badge] = course

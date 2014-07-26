@@ -5,7 +5,7 @@ from __future__ import print_function, unicode_literals, absolute_import, divisi
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
-# pylint: disable=W0212,R0904
+# pylint: disable=I0011,W0212,R0904
 
 from hamcrest import is_
 from hamcrest import none
@@ -36,12 +36,11 @@ class TestCourses(ApplicationLayerTest):
 	@WithSharedApplicationMockDS(users=True, testapp=True, default_authenticate=True)
 	def test_course_earnable_badges(self):
 		self.testapp.post_json('/dataserver2/users/sjohnson@nextthought.com/Courses/EnrolledCourses',
-							   {'ntiid': 'tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice'})
+							   {'ntiid': 'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.course_info'} )
 
 
 		earned_badges_path = '/dataserver2/users/sjohnson%40nextthought.com/Badges/EarnableBadges'
 		res = self.testapp.get(earned_badges_path,
-						  	   extra_environ=environ,
 						  	   status=200)
 		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than(0))))
 
