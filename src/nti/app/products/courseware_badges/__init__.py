@@ -17,7 +17,6 @@ from zope.security.management import restoreInteraction
 
 from zope.preference.interfaces import IPreferenceGroup
 
-
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -29,8 +28,11 @@ from nti.app.products.badges import assertion_exists
 
 from nti.app.products.courseware.interfaces import IPrincipalEnrollmentCatalog
 
-from . import utils
-from . import interfaces
+from .utils import get_badge_type 
+from .utils import find_course_badges_from_badges
+
+from .interfaces import ICourseBadgeMap
+from .interfaces import ICourseBadgeCatalog
 
 VIEW_BADGES = BADGES
 VIEW_EARNED_COURSE_BADGES = u'EarnedCourseBadges'
@@ -46,14 +48,14 @@ def show_course_badges(user):
 
 def get_course_badges(course_iden):
 	result = []
-	badge_map = component.getUtility(interfaces.ICourseBadgeMap)
+	badge_map = component.getUtility(ICourseBadgeMap)
 	names = badge_map.get_badge_names(course_iden)
 	if names is None:
-		badges = utils.find_course_badges_from_badges(course_iden, get_all_badges())
+		badges = find_course_badges_from_badges(course_iden, get_all_badges())
 		# populate course badge map
 		for badge in badges:
 			result.append(badge)
-			kind = utils.get_badge_type(badge)
+			kind = get_badge_type(badge)
 			badge_map.add(course_iden, badge.name, kind)
 		# mark in case no badge is found
 		badge_map.mark(course_iden)
@@ -72,7 +74,7 @@ def get_universe_of_course_badges_for_user(user):
 	for catalog in component.subscribers((user,), IPrincipalEnrollmentCatalog):
 		for course in catalog.iter_enrollments():
 			course = ICourseInstance(course)
-			adapted = interfaces.ICourseBadgeCatalog(course)
+			adapted = ICourseBadgeCatalog(course)
 			result.append((course, adapted.iter_badges()))
 	return result
 

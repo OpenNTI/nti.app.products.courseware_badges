@@ -50,7 +50,6 @@ def find_catalog_entry_from_badge(badge):
 			except AttributeError:
 				pass
 
-
 @component.adapter(IBadgeClass)
 @interface.implementer(ICourseCatalogEntry)
 def badge_to_course_catalog_entry(badge):

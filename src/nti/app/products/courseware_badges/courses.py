@@ -20,7 +20,6 @@ from nti.app.products.badges.interfaces import IPrincipalEarnedBadgeFilter
 from nti.app.products.badges.interfaces import IPrincipalEarnableBadgeFilter
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
-from nti.contenttypes.courses.legacy_catalog import ICourseCatalogLegacyEntry
 
 from nti.dataserver.interfaces import IUser
 
@@ -48,12 +47,9 @@ class _CourseBadgeCatalog(object):
 		self.course = ICourseInstance(course)
 
 	def iter_badges(self):
-		entry = ICourseCatalogLegacyEntry(self.course)
-		# TODO: ContentPackageNTIID will be deprecated
 		result = []
 		for pack in self.course.ContentPackageBundle.ContentPackages:
-			result.extend( get_course_badges(pack.ntiid) )
-
+			result.extend(get_course_badges(pack.ntiid))
 		return result
 
 @component.adapter(IUser)
