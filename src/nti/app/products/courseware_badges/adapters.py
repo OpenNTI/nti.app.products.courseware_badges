@@ -17,9 +17,6 @@ from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.badges.interfaces import IBadgeClass
 
-from .interfaces import ICourseBadgeMap
-
-from .utils import get_badge_type
 from .utils import base_root_ntiid
 from .utils import get_base_image_filename
 from .utils import is_course_badge_filename
@@ -39,47 +36,28 @@ def find_catalog_entry_from_badge(badge):
 		# search catalog entries
 		catalog = component.getUtility(ICourseCatalog)
 		for entry in catalog.iterCatalogEntries():
+			# collecct all possible matching ntiids
+			ntiids = { getattr(entry,'ntiid', None) }
 			course = ICourseInstance(entry, None)
-			if course is None:
-				continue
-			try:
-				for pack in course.ContentPackageBundle.ContentPackages:
-					pack_ntiid = pack.ntiid
-					if _compare_pseudo_ntiids(ntiid_root, base_root_ntiid(pack_ntiid)):
-						return entry
-			except AttributeError:
-				pass
+			if course is not None:
+				# for legacy badges get the ntiids of the content packages
+				try:
+					bundle = course.ContentPackageBundle
+					ntiids.add(getattr(bundle, 'ntiid', None))
+					ntiids.add(getattr(bundle, 'ContentPackageNTIID', None))
+					for pack in bundle.ContentPackages:
+						ntiids.add(pack.ntiid)
+				except AttributeError: # in case no ContentPackageBundle
+					pass
+	
+			ntiids.discard(None)	
+			for ntiid in ntiids:
+				if ntiid and _compare_pseudo_ntiids(ntiid_root, base_root_ntiid(ntiid)):
+					return entry
+	return None
 
 @component.adapter(IBadgeClass)
 @interface.implementer(ICourseCatalogEntry)
 def badge_to_course_catalog_entry(badge):
-	badge_name = badge.name
-	badge_map = component.getUtility(ICourseBadgeMap)
-	course_iden = badge_map.get_course_iden(badge_name)
-	if badge_map.is_no_course(course_iden):
-		result = None
-	elif course_iden is None:
-		result = find_catalog_entry_from_badge(badge)
-		if result is not None:
-			# populate badge map
-			kind = get_badge_type(badge)
-			# XXX: WARNING: Broken for multiple packages
-			course_iden = list(ICourseInstance(result).ContentPackageBundle.ContentPackages)[0].ntiid
-			badge_map.add(course_iden, badge_name, kind)
-		else:
-			badge_map.mark_no_course(badge_name)
-	else:
-		result = None
-		catalog = component.getUtility(ICourseCatalog)
-		for catalog_entry in catalog.iterCatalogEntries():
-			course = ICourseInstance(catalog_entry, None)
-			if course is None:
-				continue
-			try:
-				for pack in course.ContentPackageBundle.ContentPackages:
-					if pack.ntiid == course_iden:
-						result = catalog_entry
-						break
-			except AttributeError:
-				pass
+	result = find_catalog_entry_from_badge(badge)
 	return result

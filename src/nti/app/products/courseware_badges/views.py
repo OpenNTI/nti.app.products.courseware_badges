@@ -40,7 +40,7 @@ class CourseBadgesView(AbstractAuthenticatedView):
 	def __call__(self):
 		result = LocatedExternalDict()
 		result['Items'] = items = []
-
+		
 		context = self.request.context
 		badge_catalog = ICourseBadgeCatalog(context, None)
 		badges = badge_catalog.iter_badges() if badge_catalog is not None else ()

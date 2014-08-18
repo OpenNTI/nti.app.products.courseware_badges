@@ -18,6 +18,9 @@ from nti.ntiids import ntiids
 from .interfaces import COURSE_COMPLETION
 from .interfaces import COURSE_BADGE_TYPES
 
+ROOT = "tag:nextthought.com,2011-10:"
+SAFE_ROOT = ROOT.replace(':', '_').replace(',', '_')
+
 def base_root_ntiid(ntiid):
 	"""
 	return the 'root' ntiid of a source ntiid. That is, we remove from the NTIID-source
@@ -43,6 +46,8 @@ def get_base_image_filename(badge):
 	filename = os.path.basename(image) if image else None
 	if filename and filename.lower().endswith('.png'):
 		filename = os.path.splitext(filename)[0]
+		if not filename.startswith(SAFE_ROOT):
+			filename = SAFE_ROOT + filename
 	return filename
 
 type_pattern = re.compile("course_(.+)_badge", re.I | re.U)
@@ -69,6 +74,8 @@ def is_course_badge(badge):
 	result = is_course_badge_filename(filename)
 	return result
 
+_all_badge_types = tuple(['course_%s_badge' % x for x in COURSE_BADGE_TYPES] + ['course_badge'])
+
 def find_course_badges_from_badges(course_ntiid, source_badges=()):
 	"""
 	return all the badges for the specified course using the badge image names
@@ -82,13 +89,10 @@ def find_course_badges_from_badges(course_ntiid, source_badges=()):
 	if not ntiids.is_valid_ntiid_string(course_ntiid):
 		raise ValueError("Invalid course ntiid")
 
-	badge_types = COURSE_BADGE_TYPES
-	badge_types = ['course_%s_badge' % x for x in badge_types] + ['course_badge']
-
 	badge_type_ntiids = set()
 	parts = ntiids.get_parts(course_ntiid)
 	pre_specfic = '.'.join(parts.specific.split('.')[0:-1]) or parts.specific
-	for subtype in badge_types:
+	for subtype in _all_badge_types:
 		specfic = '%s.%s' % (pre_specfic, subtype)
 		name = ntiids.make_ntiid(provider=parts.provider,
 								 nttype=parts.nttype,

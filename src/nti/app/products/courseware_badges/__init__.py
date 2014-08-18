@@ -31,7 +31,6 @@ from nti.app.products.courseware.interfaces import IPrincipalEnrollmentCatalog
 from .utils import get_badge_type 
 from .utils import find_course_badges_from_badges
 
-from .interfaces import ICourseBadgeMap
 from .interfaces import ICourseBadgeCatalog
 
 VIEW_BADGES = BADGES
@@ -47,23 +46,7 @@ def show_course_badges(user):
 		restoreInteraction()
 
 def get_course_badges(course_iden):
-	result = []
-	badge_map = component.getUtility(ICourseBadgeMap)
-	names = badge_map.get_badge_names(course_iden)
-	if names is None:
-		badges = find_course_badges_from_badges(course_iden, get_all_badges())
-		# populate course badge map
-		for badge in badges:
-			result.append(badge)
-			kind = get_badge_type(badge)
-			badge_map.add(course_iden, badge.name, kind)
-		# mark in case no badge is found
-		badge_map.mark(course_iden)
-	else:
-		for name in names:
-			badge = get_badge(name)
-			if badge is not None:
-				result.append(badge)
+	result = find_course_badges_from_badges(course_iden, get_all_badges())
 	return result
 
 def get_universe_of_course_badges_for_user(user):
