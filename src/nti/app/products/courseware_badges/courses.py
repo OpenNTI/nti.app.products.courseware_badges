@@ -20,6 +20,7 @@ from nti.app.products.badges.interfaces import IPrincipalEarnedBadgeFilter
 from nti.app.products.badges.interfaces import IPrincipalEarnableBadgeFilter
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
+from nti.contenttypes.courses.interfaces import ICourseSubInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.dataserver.interfaces import IUser
@@ -39,10 +40,12 @@ class _CourseBadgeCatalog(object):
 
 	def iter_badges(self):
 		result = []
-		entry = ICourseCatalogEntry(self.course, None)
-		ntiid = getattr(entry, 'ntiid', None)
-		if ntiid: # get course badges using entry ntiid
-			result.extend(get_course_badges(ntiid))
+		entry = ICourseCatalogEntry(self.course)
+		result.extend(get_course_badges(entry.ntiid))
+		if not result and ICourseSubInstance.providedBy(self.course):
+			# if no badges for subinstance then check main course
+			entry = ICourseCatalogEntry(self.course.__parent__.__parent__)
+			result.extend(get_course_badges(entry.ntiid))
 		# for legacy badges scan the content packages
 		if not result:
 			for pack in self.course.ContentPackageBundle.ContentPackages:
