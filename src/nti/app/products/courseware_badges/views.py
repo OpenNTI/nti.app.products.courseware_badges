@@ -16,15 +16,14 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
+from nti.dataserver.interfaces import IUser
 from nti.dataserver import authorization as nauth
-from nti.dataserver import interfaces as nti_interfaces
 
 from nti.externalization.interfaces import LocatedExternalDict
 
+from . import VIEW_BADGES
 from . import show_course_badges
 from . import get_earned_course_badges
-
-from . import VIEW_BADGES
 from . import VIEW_EARNED_COURSE_BADGES
 
 from .interfaces import ICourseBadgeCatalog
@@ -52,7 +51,7 @@ class CourseBadgesView(AbstractAuthenticatedView):
 		return result
 
 @view_config(route_name='objects.generic.traversal',
-			  context=nti_interfaces.IUser,
+			  context=IUser,
 			  request_method='GET',
 			  permission=nauth.ACT_READ,
 			  renderer='rest',
