@@ -10,8 +10,19 @@ logger = __import__('logging').getLogger(__name__)
 
 import os
 import re
+import six
+from collections import Mapping
+
+from zope import component
+from zope.traversing.api import traverse
+
+from pyramid.compat import is_nonstr_iter
 
 from nti.badges.openbadges.interfaces import IBadgeClass
+
+from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseInstance
+from nti.contenttypes.courses.interfaces import ICourseInstanceVendorInfo
 
 from nti.ntiids import ntiids
 
@@ -76,6 +87,12 @@ def is_course_badge(badge):
 
 _all_badge_types = tuple(['course_%s_badge' % x for x in COURSE_BADGE_TYPES] + ['course_badge'])
 
+def find_course_badges_from_entry(entry):
+	course = ICourseInstance(entry, None)
+	vendor_info = ICourseInstanceVendorInfo(course, {})
+	result = traverse(vendor_info, 'NTI/Badges', default=None)
+	return result
+
 def find_course_badges_from_badges(course_ntiid, source_badges=()):
 	"""
 	return all the badges for the specified course using the badge image names
@@ -89,20 +106,44 @@ def find_course_badges_from_badges(course_ntiid, source_badges=()):
 	if not ntiids.is_valid_ntiid_string(course_ntiid):
 		raise ValueError("Invalid course ntiid")
 
-	badge_type_ntiids = set()
-	parts = ntiids.get_parts(course_ntiid)
-	pre_specfic = '.'.join(parts.specific.split('.')[0:-1]) or parts.specific
-	for subtype in _all_badge_types:
-		specfic = '%s.%s' % (pre_specfic, subtype)
-		name = ntiids.make_ntiid(provider=parts.provider,
-								 nttype=parts.nttype,
-								 specific=specfic,
-								 base=parts.date)
-		badge_type_ntiids.add(name.replace(':', '_').replace(',', '_'))
-
 	result = []
-	for badge in source_badges:
-		possible_ntiid = get_base_image_filename(badge)
-		if possible_ntiid in badge_type_ntiids:
-			result.append(badge)
+	badge_type_ntiids = set()
+	catalog = component.queryUtility(ICourseCatalog)
+	if catalog:
+		try:
+			entry = catalog.getCatalogEntry(course_ntiid)
+			badges = find_course_badges_from_entry(entry)
+			if isinstance(badges, Mapping):
+				badge_type_ntiids.update(badges.keys())
+			elif isinstance(badges, is_nonstr_iter):
+				badge_type_ntiids.update(badges)
+			elif isinstance(badges, six.string_types):
+				badge_type_ntiids.add(badges)
+		except KeyError:
+			pass
+		
+	## Could not find badges in vendor info
+	## build possible ntiids basod in the course entry ntiid
+	if not badge_type_ntiids:
+		parts = ntiids.get_parts(course_ntiid)
+		pre_specfic = '.'.join(parts.specific.split('.')[0:-1]) or parts.specific
+		for subtype in _all_badge_types:
+			specfic = '%s.%s' % (pre_specfic, subtype)
+			name = ntiids.make_ntiid(provider=parts.provider,
+									 nttype=parts.nttype,
+									 specific=specfic,
+									 base=parts.date)
+			badge_type_ntiids.add(name.replace(':', '_').replace(',', '_'))
+
+		## check built ntiids against badge file name(s)
+		for badge in source_badges:
+			ntiid = get_base_image_filename(badge)
+			if ntiid in badge_type_ntiids:
+				result.append(badge)
+	else:
+		## make sure the badge ids in course-info are valid
+		for badge in source_badges:
+			ntiid = get_base_image_filename(badge)
+			if badge.name in badge_type_ntiids or ntiid in badge_type_ntiids:
+				result.append(badge)
 	return result
