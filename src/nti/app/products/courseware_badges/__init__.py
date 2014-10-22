@@ -46,6 +46,10 @@ def show_course_badges(user):
 		restoreInteraction()
 
 def get_course_badges(course_iden):
+	## CS: We want to make sure we always query the badges from the DB
+	## in order to return new objects all the time, so they can be
+	## proxied appropriately for the course in case multiple courses
+	## shared a badge
 	result = find_course_badges_from_badges(course_iden, get_all_badges())
 	return result
 
