@@ -29,12 +29,23 @@ def _compare_pseudo_ntiids(a, b):
 	return False
 
 def find_catalog_entry_from_badge(badge):
+	catalog = component.getUtility(ICourseCatalog)
+	
+	# check directly in catalog
+	ntiid = getattr(badge, 'SourceNTIID', None)
+	if ntiid:
+		try:
+			result = catalog.getCatalogEntry(ntiid)
+			return result
+		except KeyError:
+			pass
+	
+	# check badge file name (legacy)
 	filename = get_base_image_filename(badge)
 	if is_course_badge_filename(filename):
 		# remove subtype from NTIID, filename is not a valid NTIID
 		ntiid_root = '.'.join(filename.split('.')[0:-1])
 		# search catalog entries
-		catalog = component.getUtility(ICourseCatalog)
 		for entry in catalog.iterCatalogEntries():
 			# collecct all possible matching ntiids
 			ntiids = { getattr(entry,'ntiid', None) }

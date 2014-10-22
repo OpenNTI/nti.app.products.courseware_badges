@@ -12,7 +12,7 @@ from hamcrest import is_not
 from hamcrest import has_entry
 from hamcrest import has_length
 from hamcrest import assert_that
-from hamcrest import greater_than
+from hamcrest import greater_than_or_equal_to
 
 from nti.badges import interfaces as badge_interfaces
 
@@ -37,7 +37,7 @@ class TestCourses(ApplicationLayerTest):
 		earned_badges_path = '/dataserver2/users/sjohnson%40nextthought.com/Badges/EarnableBadges'
 		res = self.testapp.get(earned_badges_path,
 						  	   status=200)
-		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than(0))))
+		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than_or_equal_to(0))))
 
 		ntiid = 'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.clc_3403_law_and_justice'
 		badges = get_course_badges(ntiid)

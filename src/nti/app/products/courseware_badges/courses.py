@@ -100,4 +100,3 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 			result = (entry.StartDate and now >= entry.StartDate) and \
 				     (not entry.EndDate or now <= entry.EndDate)
 		return result
-
