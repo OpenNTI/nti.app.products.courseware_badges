@@ -14,7 +14,7 @@ from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import greater_than_or_equal_to
 
-from nti.badges import interfaces as badge_interfaces
+from nti.badges.interfaces import IBadgeClass
 
 from nti.app.products.courseware_badges import get_course_badges
 from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
@@ -26,14 +26,16 @@ from nti.app.testing.decorators import WithSharedApplicationMockDS
 class TestCourses(ApplicationLayerTest):
 
 	layer = CourseBadgesApplicationTestLayer
-
+	
 	default_origin = str('http://janux.ou.edu')
-
-	@WithSharedApplicationMockDS(users=True, testapp=True, default_authenticate=True)
+	
+	enrolled_courses_href =  '/dataserver2/users/sjohnson@nextthought.com/Courses/EnrolledCourses'
+	
+	@WithSharedApplicationMockDS(users=True, testapp=True)
 	def test_course_earnable_badges(self):
-		self.testapp.post_json('/dataserver2/users/sjohnson@nextthought.com/Courses/EnrolledCourses',
-							   {'ntiid': 'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.course_info'} )
-
+					
+		self.testapp.post_json(self.enrolled_courses_href, 'CLC 3403', status=201)
+	
 		earned_badges_path = '/dataserver2/users/sjohnson%40nextthought.com/Badges/EarnableBadges'
 		res = self.testapp.get(earned_badges_path,
 						  	   status=200)
@@ -43,6 +45,6 @@ class TestCourses(ApplicationLayerTest):
 		badges = get_course_badges(ntiid)
 		assert_that(badges, has_length(1))
 
-		cp = badge_interfaces.IBadgeClass(badges[0], None)
+		cp = IBadgeClass(badges[0], None)
 		assert_that(cp, is_not(none()))
 

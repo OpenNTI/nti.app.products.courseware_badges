@@ -12,31 +12,16 @@ import shutil
 import tempfile
 
 from zope import component
-from zope.component.interfaces import IComponents
 
-import ZODB
-
-from nti.contenttypes.courses.interfaces import ICourseCatalog
-
-from nti.badges.tahrir import manager
-from nti.badges import interfaces as badge_interfaces
-
-from nti.contentlibrary.interfaces import IContentPackageLibrary
-
-from nti.dataserver import users
+from nti.badges.interfaces import IBadgeManager
+from nti.badges.tahrir.manager import create_badge_manager
 
 from nti.app.products.courseware_badges.tests.badges import generate_db
 
-from nti.dataserver.tests.mock_dataserver import WithMockDS
-from nti.dataserver.tests.mock_dataserver import mock_db_trans
-
-from nti.app.testing.application_webtest import ApplicationTestLayer
-
-from nti.testing.layers import find_test
 from nti.testing.layers import GCLayerMixin
 from nti.testing.layers import ZopeComponentLayer
 from nti.testing.layers import ConfiguringLayerMixin
-
+# 
 from nti.dataserver.tests.mock_dataserver import DSInjectorMixin
 
 import zope.testing.cleanup
@@ -53,35 +38,15 @@ def _restore_ds_dir(cls):
 def _register_sample(cls):
 	import transaction
 	with transaction.manager:
-		cls.old = component.getUtility(badge_interfaces.IBadgeManager)
-		bm = manager.create_badge_manager(defaultSQLite=True)
+		cls.old = component.getUtility(IBadgeManager)
+		bm = create_badge_manager(defaultSQLite=True)
 		generate_db(bm.db)
-		component.provideUtility(bm, badge_interfaces.IBadgeManager)
-
-def _do_then_enumerate_library(do):
-	database = ZODB.DB(ApplicationTestLayer._storage_base, database_name='Users')
-
-	@WithMockDS(database=database)
-	def _create():
-		with mock_db_trans():
-			do()
-
-			lib = component.getUtility(IContentPackageLibrary)
-			try:
-				del lib.contentPackages
-			except AttributeError:
-				pass
-
-			getattr(lib, 'contentPackages')
-
-	_create()
+		component.provideUtility(bm, IBadgeManager)
 
 class SharedConfiguringTestLayer(ZopeComponentLayer,
 								 GCLayerMixin,
 								 ConfiguringLayerMixin,
 								 DSInjectorMixin):
-
-	_library_path = 'Library'
 
 	set_up_packages = ('nti.dataserver',
 					   'nti.app.client_preferences',
@@ -112,42 +77,17 @@ import unittest
 class CourseBadgesTestCase(unittest.TestCase):
 	layer = SharedConfiguringTestLayer
 
-class CourseBadgesApplicationTestLayer(ApplicationTestLayer):
+from nti.app.products.courseware.tests import NotInstructedCourseApplicationTestLayer
 
-	_library_path = 'Library'
+class CourseBadgesApplicationTestLayer(NotInstructedCourseApplicationTestLayer):
 
-	@classmethod
-	def _setup_library(cls, *args, **kwargs):
-		from nti.contentlibrary.filesystem import CachedNotifyingStaticFilesystemLibrary as Library
-		lib = Library(
-			paths=(
-				os.path.join(
-					os.path.dirname(__file__),
-					cls._library_path,
-					'CLC3403_LawAndJustice'),))
-		return lib
-
+	_create_user = False
+	
 	@classmethod
 	def setUp(cls):
 		_change_ds_dir(cls)
 		_register_sample(cls)
-		# Must implement!
-		cls.__old_library = component.getUtility(IContentPackageLibrary)
-		component.provideUtility(cls._setup_library(), IContentPackageLibrary)
-		_do_then_enumerate_library(lambda: users.User.create_user(username='harp4162', password='temp001'))
 
 	@classmethod
 	def tearDown(cls):
 		_restore_ds_dir(cls)
-		# Clean up any side effects of these content packages being
-		# registered
-		def cleanup():
-			del component.getUtility(IContentPackageLibrary).contentPackages
-			try:
-				del cls.__old_library.contentPackages
-			except AttributeError:
-				pass
-			component.provideUtility(cls.__old_library, IContentPackageLibrary)
-
-		_do_then_enumerate_library(cleanup)
-		del cls.__old_library

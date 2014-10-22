@@ -23,26 +23,20 @@ class TestViews(ApplicationLayerTest):
 
 	layer = CourseBadgesApplicationTestLayer
 
-	@WithSharedApplicationMockDS(users=True, testapp=True, default_authenticate=True)
+	default_origin = str('http://janux.ou.edu')
+	
+	@WithSharedApplicationMockDS(users=True, testapp=True)
 	def test_course_badges(self):
-
-		extra_env = self.testapp.extra_environ or {}
-		extra_env.update({b'HTTP_ORIGIN': b'http://janux.ou.edu'})
-		self.testapp.extra_environ = extra_env
-
-		environ = self._make_extra_environ()
-		environ[b'HTTP_ORIGIN'] = b'http://platform.ou.edu'
-
-		entry_href = '/dataserver2/users/CLC3403.ou.nextthought.com/LegacyCourses/CLC3403/Badges'
+		entry_href = '/dataserver2/%2B%2Betc%2B%2Bhostsites/platform.ou.edu/%2B%2Betc%2B%2Bsite/Courses/Fall2013/CLC3403_LawAndJustice/Badges'
 		res = self.testapp.get(entry_href)
 		assert_that(res.json_body, has_entry('Items', has_length(1)))
 
 		item = res.json_body['Items'][0]
 		assert_that(item, has_entry('Type', 'Course'))
 
-		res = self.testapp.get('/dataserver2/users/CLC3403.ou.nextthought.com/LegacyCourses/CLC3403/')
+		res = self.testapp.get('/dataserver2/%2B%2Betc%2B%2Bhostsites/platform.ou.edu/%2B%2Betc%2B%2Bsite/Courses/Fall2013/CLC3403_LawAndJustice')
 		assert_that(res.json_body,
-					has_entries('Class', 'LegacyCommunityBasedCourseInstance',
+					has_entries('Class', 'CourseInstance',
 								'Links', has_item(has_entries('rel', 'Badges',
 															  'href', entry_href))))
 
