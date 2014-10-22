@@ -17,16 +17,14 @@ from zope.security.management import restoreInteraction
 
 from zope.preference.interfaces import IPreferenceGroup
 
-from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
-
 from nti.contenttypes.courses.interfaces import ICourseInstance
+from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
+from  nti.contenttypes.courses.interfaces import IPrincipalEnrollments
 
 from nti.app.products.badges import BADGES
 from nti.app.products.badges import get_badge
 from nti.app.products.badges import get_all_badges
 from nti.app.products.badges import assertion_exists
-
-from nti.app.products.courseware.interfaces import IPrincipalEnrollmentCatalog
 
 from .utils import get_badge_type 
 from .utils import find_course_badges_from_badges
@@ -58,9 +56,9 @@ def get_universe_of_course_badges_for_user(user):
 	return the badges for the courses a user in enrolled in
 	"""
 	result = []
-	for catalog in component.subscribers((user,), IPrincipalEnrollmentCatalog):
-		for course in catalog.iter_enrollments():
-			course = ICourseInstance(course)
+	for enrollments in component.subscribers( (user,), IPrincipalEnrollments):
+		for enrollment in enrollments.iter_enrollments():
+			course = ICourseInstance(enrollment)
 			adapted = ICourseBadgeCatalog(course)
 			result.append((course, adapted.iter_badges()))
 	return result
