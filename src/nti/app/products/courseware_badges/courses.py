@@ -40,12 +40,14 @@ class _CourseBadgeCatalog(object):
 
 	def iter_badges(self):
 		result = []
-		entry = ICourseCatalogEntry(self.course)
-		result.extend(get_course_badges(entry.ntiid))
+		entry = ICourseCatalogEntry(self.course, None)
+		if entry is not None: 
+			result.extend(get_course_badges(entry.ntiid))
 		if not result and ICourseSubInstance.providedBy(self.course):
 			# if no badges for subinstance then check main course
-			entry = ICourseCatalogEntry(self.course.__parent__.__parent__)
-			result.extend(get_course_badges(entry.ntiid))
+			entry = ICourseCatalogEntry(self.course.__parent__.__parent__, None)
+			if entry is not None:
+				result.extend(get_course_badges(entry.ntiid))
 		# for legacy badges scan the content packages
 		if not result:
 			for pack in self.course.ContentPackageBundle.ContentPackages:
