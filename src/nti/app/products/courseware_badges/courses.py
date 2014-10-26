@@ -15,9 +15,12 @@ from zope import interface
 
 from pyramid.threadlocal import get_current_request
 
+from nti.app.products.badges.interfaces import IOpenBadgeAdapter
 from nti.app.products.badges.interfaces import IPrincipalErnableBadges
 from nti.app.products.badges.interfaces import IPrincipalEarnedBadgeFilter
 from nti.app.products.badges.interfaces import IPrincipalEarnableBadgeFilter
+
+from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseSubInstance
@@ -26,6 +29,8 @@ from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.dataserver.interfaces import IUser
 
 from .interfaces import ICourseBadgeCatalog
+
+from .utils import CourseBadgeProxy
 
 from . import get_course_badges
 from . import show_course_badges
@@ -101,4 +106,14 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 			now = datetime.datetime.utcnow()
 			result = (entry.StartDate and now >= entry.StartDate) and \
 				     (not entry.EndDate or now <= entry.EndDate)
+		return result
+
+@component.adapter(IUser)
+@interface.implementer(IOpenBadgeAdapter)
+class _OpenBadgeAdapter(object):
+
+	def adapt(self, context):
+		result = IBadgeClass(context, None)
+		if result is not None and hasattr(context, "SourceNTIID"):
+			result = CourseBadgeProxy(result, context.SourceNTIID)
 		return result

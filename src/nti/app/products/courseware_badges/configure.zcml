@@ -50,6 +50,10 @@
 	<subscriber factory=".decorators._CourseInstanceLinkDecorator"
 				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
 				
+	<!-- Utilities -->
+	
+	<utility factory=".courses._OpenBadgeAdapter" />
+	
 	<!-- Preferences -->
 		
 	<include package="zope.security" file="permissions.zcml"/>
