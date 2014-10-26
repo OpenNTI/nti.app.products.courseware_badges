@@ -9,10 +9,11 @@ __docformat__ = "restructuredtext en"
 
 from hamcrest import none
 from hamcrest import is_not
+from hamcrest import has_item
 from hamcrest import has_entry
 from hamcrest import has_length
 from hamcrest import assert_that
-from hamcrest import greater_than
+from hamcrest import has_entries
 
 from nti.badges.interfaces import IBadgeClass
 
@@ -39,7 +40,9 @@ class TestCourses(ApplicationLayerTest):
 		earned_badges_path = '/dataserver2/users/sjohnson%40nextthought.com/Badges/EarnableBadges'
 		res = self.testapp.get(earned_badges_path,
 						  	   status=200)
-		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than(0))))
+		assert_that(res.json_body, 
+					has_entry(u'Items', has_item(has_entries('Class', 'Badge',
+															 'Type', 'Course'))) )
 
 		ntiid = 'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.clc_3403_law_and_justice'
 		badges = get_course_badges(ntiid)
