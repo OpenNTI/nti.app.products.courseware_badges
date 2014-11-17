@@ -95,9 +95,12 @@ def find_course_badges_from_entry(context):
 
 def find_course_badges_from_badges(source_ntiid, source_badges=()):
 	"""
-	return all the badges for the specified course using the badge image names
+	return all course badges from the specified badge source iterable
 
-	The image file name of a course badge is 'root' course/content pagckage NTIID plus
+	if the source_ntiid is a catalog entry ntiid, we look at the course
+	vendor info (e.g. NTI/Badges) to find the badge names. otherwise
+	we use the badge image file names to determined a course badge. 
+	The image file name of a course badge is 'root' course/content package NTIID plus
 	a period (.) plus course_{type}_badge
 	e.g tag_nextthought.com_2011-10_OU-HTML-CLC3403_LawAndJustice.course_completion_badge.png
 	that is the completion badge of the tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice
@@ -108,25 +111,28 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 		raise ValueError("Invalid course ntiid")
 
 	result = []
-	badge_type_ntiids = set()
+	badge_ntiids = set()
 	catalog = component.queryUtility(ICourseCatalog)
 	if catalog:
 		try:
 			entry = catalog.getCatalogEntry(source_ntiid)
 			badges = find_course_badges_from_entry(entry)
 			if isinstance(badges, Mapping):
-				badge_type_ntiids.update(badges.keys())
+				## keys of the map are the badge names
+				## the values are the badge types
+				badge_ntiids.update(badges.keys())
 			elif is_nonstr_iter(badges):
-				badge_type_ntiids.update(badges)
+				## the iterable contains the badge names
+				badge_ntiids.update(badges)
 			elif isinstance(badges, six.string_types):
-				badge_type_ntiids.add(badges)
+				## a single string it's the badge name
+				badge_ntiids.add(badges)
 				
 			## make sure the badge ids in vendor-info are valid
 			for badge in source_badges:
 				ntiid = get_base_image_filename(badge)
-				if badge.name in badge_type_ntiids or ntiid in badge_type_ntiids:
+				if badge.name in badge_ntiids or ntiid in badge_ntiids:
 					result.append(CourseBadgeProxy(badge, source_ntiid))
-			
 			if result:
 				return result
 		except KeyError:
@@ -134,7 +140,7 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 		
 	## Could not find badges in vendor info
 	## build possible ntiids basod in the course entry ntiid
-	badge_type_ntiids.clear()
+	badge_ntiids.clear()
 	parts = ntiids.get_parts(source_ntiid)
 	pre_specfic = '.'.join(parts.specific.split('.')[0:-1]) or parts.specific
 	for subtype in _all_badge_types:
@@ -143,12 +149,12 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 								 nttype=parts.nttype,
 								 specific=specfic,
 								 base=parts.date)
-		badge_type_ntiids.add(name.replace(':', '_').replace(',', '_'))
+		badge_ntiids.add(name.replace(':', '_').replace(',', '_'))
 
 	## check built ntiids against badge file name(s)
 	for badge in source_badges:
 		ntiid = get_base_image_filename(badge)
-		if ntiid in badge_type_ntiids:
+		if ntiid in badge_ntiids:
 			result.append(CourseBadgeProxy(badge, source_ntiid))
 
 	return result
