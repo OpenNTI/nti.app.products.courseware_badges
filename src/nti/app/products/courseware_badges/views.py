@@ -3,6 +3,7 @@
 """
 .. $Id$
 """
+
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
@@ -62,14 +63,11 @@ class EarnedCourseBadgesView(AbstractAuthenticatedView):
 		result = LocatedExternalDict()
 		result['Items'] = items = []
 
-		request = self.request
 		context = self.request.context
-		if 	request.authenticated_userid == context.username or \
-			show_course_badges(context):
+		if self.remoteUser.username == context.username or show_course_badges(context):
 			badges = get_earned_course_badges(context)
 			items.extend(IBadgeClass(b) for b in badges)
 
 		result.__parent__ = context
 		result.__name__ = self.request.view_name
-		self.request.response.last_modified = context.lastModified
 		return result

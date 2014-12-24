@@ -13,6 +13,8 @@ from hamcrest import has_length
 from hamcrest import has_entries
 from hamcrest import assert_that
 
+import fudge
+
 from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
@@ -24,9 +26,14 @@ class TestViews(ApplicationLayerTest):
 	layer = CourseBadgesApplicationTestLayer
 
 	default_origin = str('http://janux.ou.edu')
+	enrolled_courses_href = '/dataserver2/users/sjohnson@nextthought.com/Courses/EnrolledCourses'
 	
 	@WithSharedApplicationMockDS(users=True, testapp=True)
-	def test_course_badges(self):
+	@fudge.patch('nti.app.products.courseware_badges.views.show_course_badges')
+	def test_course_badges(self, mock_scb):
+		
+		mock_scb.is_callable().with_args().returns(False)
+		
 		entry_href = '/dataserver2/%2B%2Betc%2B%2Bhostsites/platform.ou.edu/%2B%2Betc%2B%2Bsite/Courses/Fall2013/CLC3403_LawAndJustice/Badges'
 		res = self.testapp.get(entry_href)
 		assert_that(res.json_body, has_entry('Items', has_length(1)))
@@ -43,3 +50,18 @@ class TestViews(ApplicationLayerTest):
 		path = '/dataserver2/users/sjohnson%40nextthought.com/EarnedCourseBadges'
 		res = self.testapp.get(path)
 		assert_that(res.json_body, has_entry('Items', has_length(0)))
+
+		# enroll and award
+		self.testapp.post_json( self.enrolled_courses_href,
+								'CLC 3403',
+								status=201 )
+		
+		name = 'Law and Justice'
+		award_badge_path = '/dataserver2/BadgeAdmin/@@award'
+		self.testapp.post_json(award_badge_path,
+							   {"username":self.default_username,
+								"badge":name},
+							   status=204)
+
+		res = self.testapp.get(path)
+		assert_that(res.json_body, has_entry('Items', has_length(1)))
