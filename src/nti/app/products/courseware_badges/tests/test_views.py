@@ -15,10 +15,13 @@ from hamcrest import assert_that
 
 import fudge
 
+from nti.dataserver.users import User
+
 from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
+import nti.dataserver.tests.mock_dataserver as mock_dataserver
 from nti.app.testing.decorators import WithSharedApplicationMockDS
 
 class TestViews(ApplicationLayerTest):
@@ -64,4 +67,26 @@ class TestViews(ApplicationLayerTest):
 							   status=204)
 
 		res = self.testapp.get(path)
+		assert_that(res.json_body, has_entry('Items', has_length(1)))
+		
+		# new user
+		with mock_dataserver.mock_db_trans(self.ds):
+			ds = mock_dataserver.current_mock_ds
+			User.create_user(ds, username="ichigo", password="temp001")
+		enrolled = '/dataserver2/users/ichigo/Courses/EnrolledCourses'
+		self.testapp.post_json( enrolled,
+								'CLC 3403',
+								status=201,
+								extra_environ=self._make_extra_environ("ichigo") )
+		
+		# cannot see it
+		path = '/dataserver2/users/sjohnson%40nextthought.com/EarnedCourseBadges'
+		res = self.testapp.get(path, extra_environ=self._make_extra_environ("ichigo"))
+		assert_that(res.json_body, has_entry('Items', has_length(0)))
+		
+		mock_scb.is_callable().with_args().returns(True)
+		
+		# now it can
+		path = '/dataserver2/users/sjohnson%40nextthought.com/EarnedCourseBadges'
+		res = self.testapp.get(path, extra_environ=self._make_extra_environ("ichigo"))
 		assert_that(res.json_body, has_entry('Items', has_length(1)))
