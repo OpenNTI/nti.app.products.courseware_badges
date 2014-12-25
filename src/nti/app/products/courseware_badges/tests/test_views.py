@@ -90,3 +90,6 @@ class TestViews(ApplicationLayerTest):
 		path = '/dataserver2/users/sjohnson%40nextthought.com/EarnedCourseBadges'
 		res = self.testapp.get(path, extra_environ=self._make_extra_environ("ichigo"))
 		assert_that(res.json_body, has_entry('Items', has_length(1)))
+		assert_that(res.json_body, has_entry('Items', 
+											 has_item(has_entry('image', 'http://localhost/hosted_badge_images/tag_nextthought.com_2011-10_OU-HTML-CLC3403_LawAndJustice.course_badge.png'))))
+		
