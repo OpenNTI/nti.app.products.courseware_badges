@@ -100,7 +100,7 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 		pass
 
 	def allow_badge(self, user, badge):
-		result = True
+		result = False
 		entry = get_catalog_entry_for_badge(badge)
 		if entry is not None:
 			now = datetime.datetime.utcnow()
