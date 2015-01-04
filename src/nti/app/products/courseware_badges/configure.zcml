@@ -13,7 +13,6 @@
 	<include package="nti.app.products.badges" />
 	
 	<!-- Adapters -->
-	
 	<adapter factory=".courses._CourseBadgeCatalog"
 			 for="nti.contenttypes.courses.interfaces.ICourseInstance"
 			 provides=".interfaces.ICourseBadgeCatalog" />
@@ -27,22 +26,21 @@
 			 provides="nti.contenttypes.courses.interfaces.ICourseCatalogEntry" />
 			  	 		  			 
 	<!-- Subscribers -->
-	
 	<subscriber	factory=".courses._CourseErnableBadges"
 				provides="nti.app.products.badges.interfaces.IPrincipalErnableBadges"/>
 			
 	<subscriber	factory=".courses._CoursePrincipalEarnedBadgeFilter"
 				provides="nti.app.products.badges.interfaces.IPrincipalEarnedBadgeFilter"/>
 		
-	<!-- 
-	<subscriber	factory=".courses._CoursePrincipalEarnableBadgeFilter"
-				provides="nti.app.products.badges.interfaces.IPrincipalEarnableBadgeFilter" />
-	-->	
+	<configure zcml:condition="have devmode">
+		<subscriber	factory=".courses._CoursePrincipalEarnableBadgeFilter"
+					provides="nti.app.products.badges.interfaces.IPrincipalEarnableBadgeFilter" />
+	</configure>
+
 	<subscriber	factory=".filters._CourseBadgePrincipalUGDFilter"
 				provides="nti.appserver.interfaces.IPrincipalUGDFilter" />
 					
 	<!-- Decorators -->
-	
 	<subscriber factory=".decorators._BadgeTypeAdder"
 				for="nti.badges.interfaces.IBadgeClass"
 				provides="nti.externalization.interfaces.IExternalObjectDecorator"/>
@@ -51,11 +49,9 @@
 				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
 				
 	<!-- Utilities -->
-	
 	<utility factory=".courses._OpenBadgeAdapter" />
 	
 	<!-- Preferences -->
-		
 	<include package="zope.security" file="permissions.zcml"/>
 	<include package="zope.preference" file="meta.zcml" />
 	<include package="zope.preference" />
