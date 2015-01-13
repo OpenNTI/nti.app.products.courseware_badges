@@ -113,7 +113,7 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 	result = []
 	badge_ntiids = set()
 	catalog = component.queryUtility(ICourseCatalog)
-	if catalog:
+	if catalog is not None:
 		try:
 			entry = catalog.getCatalogEntry(source_ntiid)
 			badges = find_course_badges_from_entry(entry)
