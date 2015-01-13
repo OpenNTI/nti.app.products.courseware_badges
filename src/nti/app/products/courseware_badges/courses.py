@@ -87,8 +87,9 @@ class _CoursePrincipalEarnedBadgeFilter(object):
 		if req is not None:
 			if req.authenticated_userid == user.username:
 				result = True
-			elif get_catalog_entry_for_badge(badge) is not None and \
-				 show_course_badges(user):
+			elif get_catalog_entry_for_badge(badge) is not None:
+				result = show_course_badges(user)
+			else:
 				result = True
 		return result
 
