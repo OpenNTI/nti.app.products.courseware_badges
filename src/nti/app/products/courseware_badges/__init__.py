@@ -36,11 +36,12 @@ VIEW_BADGES = BADGES
 VIEW_EARNED_COURSE_BADGES = u'EarnedCourseBadges'
 
 def show_course_badges(user):
-	prefs = component.getUtility(IPreferenceGroup, name='Badges.Course')
 	endInteraction()
 	try:
 		newInteraction(IParticipation(user))
-		return prefs.show_course_badges
+		prefs = component.getUtility(IPreferenceGroup, name='Badges.Course')
+		result = prefs.show_course_badges
+		return result
 	finally:
 		restoreInteraction()
 
