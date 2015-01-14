@@ -21,7 +21,6 @@ from .interfaces import ICatalogEntryBadgeCache
 
 @component.adapter(IApplicationTransactionOpenedEvent)
 def _after_database_opened_listener(event):
-
 	def build_cache():
 		manager = component.getUtility(ICatalogEntryBadgeCache)
 		manager.build()
