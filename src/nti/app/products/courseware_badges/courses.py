@@ -74,7 +74,7 @@ def get_all_context_badges(context):
 	return result
 	
 @interface.implementer(ICatalogEntryBadgeCache)
-class _CourseBadgesCache(object):
+class _CatalogEntryBadgeCache(object):
 	
 	def __init__(self, *args):
 		pass

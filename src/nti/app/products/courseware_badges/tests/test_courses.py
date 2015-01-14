@@ -7,6 +7,7 @@ __docformat__ = "restructuredtext en"
 # disable: accessing protected members, too many methods
 # pylint: disable=I0011,W0212,R0904
 
+from hamcrest import is_
 from hamcrest import none
 from hamcrest import is_not
 from hamcrest import has_item
@@ -15,9 +16,15 @@ from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import has_entries
 
+import time
+
+from zope import component
+from zope.traversing.interfaces import IEtcNamespace
+
 from nti.badges.interfaces import IBadgeClass
 
 from nti.app.products.courseware_badges.courses import get_course_badges
+from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
 
 from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
 
@@ -25,6 +32,7 @@ from nti.app.testing.application_webtest import ApplicationLayerTest
 
 from nti.app.testing.decorators import WithSharedApplicationMockDS
 
+import nti.dataserver.tests.mock_dataserver as mock_dataserver
 from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
 
 class TestCourses(ApplicationLayerTest):
@@ -59,4 +67,22 @@ class TestCourses(ApplicationLayerTest):
 
 		cp = IBadgeClass(badges[0], None)
 		assert_that(cp, is_not(none()))
+		
+	@WithSharedApplicationMockDS(users=True, testapp=True)
+	def test_catalog_entry_cache(self):
+		with mock_dataserver.mock_db_trans(self.ds):
+			cache = component.queryUtility(ICatalogEntryBadgeCache)
+			assert_that(cache, is_not(none()))
+			oid_1 = id(cache._map)
 
+		with mock_dataserver.mock_db_trans(self.ds):
+			hostsites = component.queryUtility(IEtcNamespace, name='hostsites')
+			assert_that(cache.lastSynchronized, is_(hostsites.lastSynchronized))
+			hostsites.lastSynchronized = time.time() + 10000
+		
+		with mock_dataserver.mock_db_trans(self.ds):
+			cache = component.queryUtility(ICatalogEntryBadgeCache)
+			oid_2 = id(cache._map)
+		
+			assert_that(oid_1, is_not(oid_2))
+			assert_that(cache.lastSynchronized, is_(hostsites.lastSynchronized))
