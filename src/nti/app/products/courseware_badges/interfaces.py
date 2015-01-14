@@ -35,3 +35,18 @@ class ICourseBadgeCatalog(interface.Interface):
 		"""
 		Return an iterable of badges for a course
 		"""
+
+class ICatalogEntryBadgeCache(interface.Interface):
+	"""
+	Marker interface for a course badges cache utility
+	"""
+	
+	def get_badge_names(ntiid):
+		"""
+		return the badge names for the specified catalog entry ntiid
+		"""
+	
+	def is_course_badge(name):
+		"""
+		return if badge is a course name
+		"""

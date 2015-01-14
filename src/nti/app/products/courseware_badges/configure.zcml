@@ -50,6 +50,7 @@
 				
 	<!-- Utilities -->
 	<utility factory=".courses._OpenBadgeAdapter" />
+	<utility factory=".courses._CourseBadgesCache" />
 	
 	<!-- Preferences -->
 	<include package="zope.security" file="permissions.zcml"/>

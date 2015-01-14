@@ -3,6 +3,7 @@
 """
 .. $Id$
 """
+
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
@@ -12,8 +13,11 @@ import datetime
 
 from zope import component
 from zope import interface
+from zope.traversing.interfaces import IEtcNamespace
 
 from pyramid.threadlocal import get_current_request
+
+from nti.app.products.badges import get_badge
 
 from nti.app.products.badges.interfaces import IOpenBadgeAdapter
 from nti.app.products.badges.interfaces import IPrincipalErnableBadges
@@ -22,41 +26,124 @@ from nti.app.products.badges.interfaces import IPrincipalEarnableBadgeFilter
 
 from nti.badges.openbadges.interfaces import IBadgeClass
 
+from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseSubInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.dataserver.interfaces import IUser
 
+from nti.utils.property import Lazy
+from nti.utils.property import CachedProperty
+
+from nti.site.hostpolicy import run_job_in_all_host_sites
+
 from .interfaces import ICourseBadgeCatalog
+from .interfaces import ICatalogEntryBadgeCache
 
-from .utils import CourseBadgeProxy
+from .utils import proxy
+from .utils import find_course_badges_from_badges
 
-from . import get_course_badges
+from . import get_all_badges
 from . import show_course_badges
 from . import get_course_badges_for_user
 from . import get_catalog_entry_for_badge
 
+def get_course_badges(course_iden):
+	## CS: We want to make sure we always query the badges from the DB
+	## in order to return new objects all the time, so they can be
+	## proxied appropriately for the course in case multiple courses
+	## shared a badge
+	result = find_course_badges_from_badges(course_iden, get_all_badges())
+	return result
+
+def get_all_context_badges(context):
+	result = []
+	course = ICourseInstance(context)
+	entry = ICourseCatalogEntry(course, None)
+	if entry is not None: 
+		result.extend(get_course_badges(entry.ntiid))
+	if not result and ICourseSubInstance.providedBy(course):
+		# if no badges for subinstance then check main course
+		entry = ICourseCatalogEntry(course.__parent__.__parent__, None)
+		if entry is not None:
+			result.extend(get_course_badges(entry.ntiid))
+	# for legacy badges scan the content packages
+	if not result:
+		for pack in course.ContentPackageBundle.ContentPackages:
+			result.extend(get_course_badges(pack.ntiid))
+	return result
+	
+@interface.implementer(ICatalogEntryBadgeCache)
+class _CourseBadgesCache(object):
+	
+	def __init__(self, *args):
+		pass
+	
+	@property
+	def lastSynchronized(self):
+		hostsites = component.queryUtility(IEtcNamespace, name='hostsites')
+		result = getattr(hostsites, 'lastSynchronized', 0)
+		return result
+	
+	@classmethod
+	def get_course_badge_names(cls, context):
+		badges = get_all_context_badges(context)
+		result = tuple(b.name for b in badges)
+		return result
+	
+	@CachedProperty("lastSynchronized")
+	def _map(self):
+		result = {}
+		def _func():
+			catalog = component.queryUtility(ICourseCatalog)
+			if catalog is None:
+				return
+			for entry in catalog.iterCatalogEntries():
+				ntiid = getattr(entry, 'ntiid', None)
+				if not ntiid:
+					continue
+				names = self.get_course_badge_names(entry)
+				result[ntiid] = names
+		run_job_in_all_host_sites(_func)
+		return result
+
+	@CachedProperty("lastSynchronized")
+	def _rev_map(self):
+		result = {}
+		for ntiid, names in self._map.items():
+			for name in names or ():
+				result[name] = ntiid
+		return result
+
+	def get_badge_names(self, ntiid):
+		result = self._map.get(ntiid) or ()
+		return result
+	
+	def is_course_badge(self, name):
+		result = name in self._rev_map
+		return result
+	
 @interface.implementer(ICourseBadgeCatalog)
 class _CourseBadgeCatalog(object):
 
-	def __init__(self, course):
-		self.course = ICourseInstance(course)
+	def __init__(self, context):
+		self.context = context
 
+	@Lazy
+	def cache(self):
+		result = component.getUtility(ICatalogEntryBadgeCache)
+		return result
+	
 	def iter_badges(self):
 		result = []
-		entry = ICourseCatalogEntry(self.course, None)
-		if entry is not None: 
-			result.extend(get_course_badges(entry.ntiid))
-		if not result and ICourseSubInstance.providedBy(self.course):
-			# if no badges for subinstance then check main course
-			entry = ICourseCatalogEntry(self.course.__parent__.__parent__, None)
-			if entry is not None:
-				result.extend(get_course_badges(entry.ntiid))
-		# for legacy badges scan the content packages
-		if not result:
-			for pack in self.course.ContentPackageBundle.ContentPackages:
-				result.extend(get_course_badges(pack.ntiid))
+		entry = ICourseCatalogEntry(self.context, None)
+		ntiid = getattr(entry, 'ntiid', None) or u''
+		for name in self.cache.get_badge_names(ntiid):
+			badge = get_badge(name)
+			if badge is not None:
+				badge = proxy(badge, ntiid)
+				result.append(badge)
 		return result
 
 @component.adapter(IUser)
@@ -81,13 +168,18 @@ class _CoursePrincipalEarnedBadgeFilter(object):
 	def __init__(self, *args):
 		pass
 
+	@Lazy
+	def cache(self):
+		result = component.getUtility(ICatalogEntryBadgeCache)
+		return result
+
 	def allow_badge(self, user, badge):
 		result = False
 		req = get_current_request()
 		if req is not None:
 			if req.authenticated_userid == user.username:
 				result = True
-			elif get_catalog_entry_for_badge(badge) is not None:
+			elif self.cache.is_course_badge(badge.name):
 				result = show_course_badges(user)
 			else:
 				result = True
@@ -116,5 +208,5 @@ class _OpenBadgeAdapter(object):
 	def adapt(self, context):
 		result = IBadgeClass(context, None)
 		if result is not None and hasattr(context, "SourceNTIID"):
-			result = CourseBadgeProxy(result, context.SourceNTIID)
+			result = proxy(result, context.SourceNTIID)
 		return result

@@ -3,6 +3,7 @@
 """
 .. $Id$
 """
+
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
@@ -93,6 +94,24 @@ def find_course_badges_from_entry(context):
 	result = traverse(vendor_info, 'NTI/Badges', default=None)
 	return result
 
+from zope.proxy import ProxyBase
+
+class CourseBadgeProxy(ProxyBase):
+	
+	SourceNTIID = property(
+			lambda s: s.__dict__.get('_v_catalog_source_ntiid'),
+			lambda s, v: s.__dict__.__setitem__('_v_catalog_source_ntiid', v))
+		
+	def __new__(cls, base, ntiid):
+		return ProxyBase.__new__(cls, base)
+
+	def __init__(self, base, ntiid):
+		ProxyBase.__init__(self, base)
+		self.SourceNTIID = ntiid
+
+def proxy(badge, ntiid):
+	return CourseBadgeProxy(badge, ntiid)
+
 def find_course_badges_from_badges(source_ntiid, source_badges=()):
 	"""
 	return all course badges from the specified badge source iterable
@@ -111,6 +130,7 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 		raise ValueError("Invalid course ntiid")
 
 	result = []
+	entry = None
 	badge_ntiids = set()
 	catalog = component.queryUtility(ICourseCatalog)
 	if catalog is not None:
@@ -132,14 +152,14 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 			for badge in source_badges:
 				ntiid = get_base_image_filename(badge)
 				if badge.name in badge_ntiids or ntiid in badge_ntiids:
-					result.append(CourseBadgeProxy(badge, source_ntiid))
+					result.append(proxy(badge, source_ntiid))
 			if result:
 				return result
 		except KeyError:
 			pass
 		
 	## Could not find badges in vendor info
-	## build possible ntiids basod in the course entry ntiid
+	## build possible ntiids based in the course entry ntiid
 	badge_ntiids.clear()
 	parts = ntiids.get_parts(source_ntiid)
 	pre_specfic = '.'.join(parts.specific.split('.')[0:-1]) or parts.specific
@@ -155,21 +175,6 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 	for badge in source_badges:
 		ntiid = get_base_image_filename(badge)
 		if ntiid in badge_ntiids:
-			result.append(CourseBadgeProxy(badge, source_ntiid))
+			result.append(proxy(badge, source_ntiid))
 
 	return result
-
-from zope.proxy import ProxyBase
-
-class CourseBadgeProxy(ProxyBase):
-	
-	SourceNTIID = property(
-			lambda s: s.__dict__.get('_v_catalog_source_ntiid'),
-			lambda s, v: s.__dict__.__setitem__('_v_catalog_source_ntiid', v))
-		
-	def __new__(cls, base, ntiid):
-		return ProxyBase.__new__(cls, base)
-
-	def __init__(self, base, ntiid):
-		ProxyBase.__init__(self, base)
-		self.SourceNTIID = ntiid

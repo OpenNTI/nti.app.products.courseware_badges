@@ -17,12 +17,15 @@ from hamcrest import has_entries
 
 from nti.badges.interfaces import IBadgeClass
 
-from nti.app.products.courseware_badges import get_course_badges
+from nti.app.products.courseware_badges.courses import get_course_badges
+
 from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
 from nti.app.testing.decorators import WithSharedApplicationMockDS
+
+from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
 
 class TestCourses(ApplicationLayerTest):
 
@@ -32,6 +35,12 @@ class TestCourses(ApplicationLayerTest):
 	
 	enrolled_courses_href =  '/dataserver2/users/sjohnson@nextthought.com/Courses/EnrolledCourses'
 	
+	@WithMockDSTrans
+	def test_get_course_badges(self):
+		courseId = 'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.clc_3403_law_and_justice'
+		badges = get_course_badges(courseId)
+		assert_that(badges, has_length(1))
+
 	@WithSharedApplicationMockDS(users=True, testapp=True)
 	def test_course_earnable_badges(self):
 					
