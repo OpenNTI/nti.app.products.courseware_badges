@@ -104,7 +104,8 @@ class _CourseBadgesCache(object):
 				if not ntiid:
 					continue
 				names = self.get_course_badge_names(entry)
-				result[ntiid] = names
+				if names:
+					result[ntiid] = names
 		run_job_in_all_host_sites(_func)
 		return result
 
@@ -123,6 +124,11 @@ class _CourseBadgesCache(object):
 	def is_course_badge(self, name):
 		result = name in self._rev_map
 		return result
+	
+def is_course_badge(name, cache=None):
+	cache = cache or component.getUtility(ICatalogEntryBadgeCache)
+	result = cache.is_course_badge(name)
+	return result
 	
 @interface.implementer(ICourseBadgeCatalog)
 class _CourseBadgeCatalog(object):

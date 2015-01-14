@@ -24,7 +24,8 @@ from nti.appserver.interfaces import IPrincipalUGDFilter
 from nti.app.products.badges.interfaces import IAssertionChange
 
 from . import show_course_badges
-from . import get_catalog_entry_for_badge
+
+from .courses import is_course_badge
 
 @component.adapter(IUser)
 @interface.implementer(IPrincipalUGDFilter)
@@ -42,9 +43,7 @@ class _CourseBadgePrincipalUGDFilter(object):
 				user = IUser(assertion)
 				badge = IBadgeClass(assertion)
 				if req.authenticated_userid != user.username:
-					result = get_catalog_entry_for_badge(badge) is None or \
-							 show_course_badges(user)
+					result = not is_course_badge(badge.name) or show_course_badges(user)
 			except (POSKeyError, TypeError):
 				result = False
 		return result
-		

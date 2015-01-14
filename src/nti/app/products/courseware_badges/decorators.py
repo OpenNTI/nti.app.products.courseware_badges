@@ -23,7 +23,8 @@ from nti.externalization.interfaces import IExternalObjectDecorator
 from nti.externalization.interfaces import IExternalMappingDecorator
 
 from . import VIEW_BADGES
-from . import get_catalog_entry_for_badge
+
+from .courses import is_course_badge
 
 LINKS = StandardExternalFields.LINKS
 
@@ -44,6 +45,5 @@ class _BadgeTypeAdder(object):
 	__metaclass__ = SingletonDecorator
 
 	def decorateExternalObject(self, context, mapping):
-		entry = get_catalog_entry_for_badge(context)
-		if entry is not None:
+		if is_course_badge(context.name):
 			mapping['Type'] = 'Course'
