@@ -47,7 +47,6 @@ from .utils import find_course_badges_from_badges
 from . import get_all_badges
 from . import show_course_badges
 from . import get_course_badges_for_user
-from . import get_catalog_entry_for_badge
 
 def get_course_badges(course_iden):
 	## CS: We want to make sure we always query the badges from the DB
@@ -121,6 +120,10 @@ class _CourseBadgesCache(object):
 		result = self._map.get(ntiid) or ()
 		return result
 	
+	def get_badge_catalog_entry_ntiid(self, name):
+		result = self._rev_map.get(name)
+		return result
+
 	def is_course_badge(self, name):
 		result = name in self._rev_map
 		return result
@@ -198,9 +201,27 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 	def __init__(self, *args):
 		pass
 
+	@Lazy
+	def catalog(self):
+		result = component.getUtility(ICourseCatalog)
+		return result
+	
+	@Lazy
+	def cache(self):
+		result = component.getUtility(ICatalogEntryBadgeCache)
+		return result
+	
+	def get_entry(self, badge):
+		ntiid = self.cache.get_badge_catalog_entry_ntiid(badge.name)
+		try:
+			result = self.catalog.getCatalogEntry(ntiid) if ntiid else None
+		except KeyError:
+			result = None
+		return result
+		
 	def allow_badge(self, user, badge):
 		result = True
-		entry = get_catalog_entry_for_badge(badge)
+		entry = self.get_entry(badge)
 		if entry is not None:
 			now = datetime.datetime.utcnow()
 			result = (entry.StartDate and now >= entry.StartDate) and \
