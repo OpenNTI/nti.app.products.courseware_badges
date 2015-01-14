@@ -40,6 +40,8 @@
 	<subscriber	factory=".filters._CourseBadgePrincipalUGDFilter"
 				provides="nti.appserver.interfaces.IPrincipalUGDFilter" />
 					
+	<subscriber handler=".subscribers._after_database_opened_listener" />
+	
 	<!-- Decorators -->
 	<subscriber factory=".decorators._BadgeTypeAdder"
 				for="nti.badges.interfaces.IBadgeClass"

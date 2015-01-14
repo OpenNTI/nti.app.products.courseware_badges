@@ -116,6 +116,10 @@ class _CatalogEntryBadgeCache(object):
 				result[name] = ntiid
 		return result
 
+	def build(self):
+		self._map.get('')
+		self._rev_map.get('')
+
 	def get_badge_names(self, ntiid):
 		result = self._map.get(ntiid) or ()
 		return result
