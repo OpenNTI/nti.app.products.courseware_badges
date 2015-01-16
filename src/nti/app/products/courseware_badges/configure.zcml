@@ -40,11 +40,13 @@
 	<subscriber	factory=".filters._CourseBadgePrincipalUGDFilter"
 				provides="nti.appserver.interfaces.IPrincipalUGDFilter" />
 	
+	<!--
 	<configure zcml:condition="not-have devmode">
 		<configure zcml:condition="not-have testmode">
 			<subscriber handler=".subscribers._after_database_opened_listener" />
 		</configure>
 	</configure>
+	-->
 	
 	<!-- Decorators -->
 	<subscriber factory=".decorators._BadgeTypeAdder"
