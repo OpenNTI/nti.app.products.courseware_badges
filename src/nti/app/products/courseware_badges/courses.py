@@ -13,6 +13,7 @@ import datetime
 
 from zope import component
 from zope import interface
+from zope.component import hooks
 from zope.traversing.interfaces import IEtcNamespace
 
 from pyramid.threadlocal import get_current_request
@@ -35,8 +36,6 @@ from nti.dataserver.interfaces import IUser
 
 from nti.utils.property import Lazy
 from nti.utils.property import CachedProperty
-
-from nti.site.hostpolicy import run_job_in_all_host_sites
 
 from .interfaces import ICourseBadgeCatalog
 from .interfaces import ICatalogEntryBadgeCache
@@ -90,14 +89,11 @@ class _CatalogEntryBadgeCache(object):
 		badges = get_all_context_badges(context)
 		result = tuple(b.name for b in badges)
 		return result
-	
-	@CachedProperty("lastSynchronized")
-	def _map(self):
+		
+	def _gather(self):
 		result = {}
-		def _func():
-			catalog = component.queryUtility(ICourseCatalog)
-			if catalog is None:
-				return
+		catalog = component.queryUtility(ICourseCatalog)
+		if catalog is not None:
 			for entry in catalog.iterCatalogEntries():
 				ntiid = getattr(entry, 'ntiid', None)
 				if not ntiid:
@@ -105,8 +101,23 @@ class _CatalogEntryBadgeCache(object):
 				names = self.get_course_badge_names(entry)
 				if names:
 					result[ntiid] = names
-		run_job_in_all_host_sites(_func)
 		return result
+
+	def _check(self):
+		cur_site = hooks.getSite()
+		cur_site = cur_site.__name__ if cur_site is not None else None
+		if cur_site not in self._sites:
+			result = self._gather()
+			self._map.update(result)
+			self._sites.add(cur_site)
+	
+	@CachedProperty("lastSynchronized")
+	def _sites(self):
+		return set()
+	
+	@CachedProperty("lastSynchronized")
+	def _map(self):
+		return dict()
 
 	@CachedProperty("lastSynchronized")
 	def _rev_map(self):
@@ -117,18 +128,20 @@ class _CatalogEntryBadgeCache(object):
 		return result
 
 	def build(self):
-		self._map.get('')
-		self._rev_map.get('')
+		pass
 
 	def get_badge_names(self, ntiid):
+		self._check()
 		result = self._map.get(ntiid) or ()
 		return result
 	
 	def get_badge_catalog_entry_ntiid(self, name):
+		self._check()
 		result = self._rev_map.get(name)
 		return result
 
 	def is_course_badge(self, name):
+		self._check()
 		result = name in self._rev_map
 		return result
 	
