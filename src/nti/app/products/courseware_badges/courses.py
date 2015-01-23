@@ -103,12 +103,18 @@ class _CatalogEntryBadgeCache(object):
 					result[ntiid] = names
 		return result
 
+	def _update_maps(self, result):
+		self._map.update(result)
+		for ntiid, names in result.items():
+			for name in names or ():
+				self._rev_map[name] = ntiid
+	
 	def _check(self):
 		cur_site = hooks.getSite()
 		cur_site = cur_site.__name__ if cur_site is not None else None
 		if cur_site not in self._sites:
 			result = self._gather()
-			self._map.update(result)
+			self._update_maps(result)
 			self._sites.add(cur_site)
 	
 	@CachedProperty("lastSynchronized")
@@ -121,11 +127,7 @@ class _CatalogEntryBadgeCache(object):
 
 	@CachedProperty("lastSynchronized")
 	def _rev_map(self):
-		result = {}
-		for ntiid, names in self._map.items():
-			for name in names or ():
-				result[name] = ntiid
-		return result
+		return dict()
 
 	def build(self):
 		pass
