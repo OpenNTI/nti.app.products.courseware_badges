@@ -21,6 +21,7 @@ from nti.dataserver.interfaces import IUser
 from nti.dataserver import authorization as nauth
 
 from nti.externalization.interfaces import LocatedExternalDict
+from nti.externalization.interfaces import StandardExternalFields
 
 from . import VIEW_BADGES
 from . import show_course_badges
@@ -28,6 +29,8 @@ from . import get_earned_course_badges
 from . import VIEW_EARNED_COURSE_BADGES
 
 from .interfaces import ICourseBadgeCatalog
+
+ITEMS = StandardExternalFields.ITEMS
 
 @view_config(route_name='objects.generic.traversal',
 			  context=ICourseInstance,
@@ -39,7 +42,7 @@ class CourseBadgesView(AbstractAuthenticatedView):
 
 	def __call__(self):
 		result = LocatedExternalDict()
-		result['Items'] = items = []
+		result[ITEMS] = items = []
 		
 		context = self.request.context
 		badge_catalog = ICourseBadgeCatalog(context, None)
@@ -61,7 +64,7 @@ class EarnedCourseBadgesView(AbstractAuthenticatedView):
 
 	def __call__(self):
 		result = LocatedExternalDict()
-		result['Items'] = items = []
+		result[ITEMS] = items = []
 
 		context = self.request.context
 		if self.remoteUser.username == context.username or show_course_badges(context):
