@@ -45,8 +45,6 @@
 	<subscriber	factory=".filters._CourseBadgePrincipalUGDFilter"
 				provides="nti.appserver.interfaces.IPrincipalUGDFilter" />
 
-	<subscriber handler=".subscribers._libraries_did_sync_event" />
-	<subscriber handler=".subscribers._libraries_will_sync_event" />
 	<subscriber handler=".subscribers._course_instance_available" />
 	
 	<!-- Decorators -->

@@ -80,9 +80,7 @@ def get_all_context_badges(context):
 	
 @interface.implementer(ICatalogEntryBadgeCache)
 class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
-	
-	_v_synchronizing = False
-	
+
 	@property
 	def Items(self):
 		return dict(self)
@@ -90,7 +88,7 @@ class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 	@classmethod
 	def get_course_badge_names(cls, context):
 		badges = get_all_context_badges(context)
-		result = tuple(b.name for b in badges)
+		result = tuple(sorted([b.name for b in badges]))
 		return result
 	
 	@CachedProperty("lastModified")
@@ -104,8 +102,12 @@ class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 	def build(self, context):
 		entry = ICourseCatalogEntry(context, None)
 		if entry is not None:
+			old_names = self.get(entry.ntiid) or ()
 			names = self.get_course_badge_names(entry)
-			self[entry.ntiid] = names
+			if old_names != names:
+				self[entry.ntiid] = names
+				return True
+		return False
 
 	def get_badge_names(self, ntiid):
 		result = self.get(ntiid) or ()
