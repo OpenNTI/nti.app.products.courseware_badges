@@ -83,7 +83,10 @@ class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 
 	@property
 	def Items(self):
-		return dict(self)
+		result = {}
+		for k, v in self.items():
+			result[k] = list(v)
+		return result
 	
 	@classmethod
 	def get_course_badge_names(cls, context):
