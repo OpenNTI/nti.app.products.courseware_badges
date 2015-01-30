@@ -66,7 +66,7 @@ def get_course_badges(course_iden):
 
 def get_all_context_badges(context):
 	result = []
-	course = ICourseInstance(context)
+	course = ICourseInstance(context, None)
 	entry = ICourseCatalogEntry(course, None)
 	if entry is not None: 
 		result.extend(get_course_badges(entry.ntiid))
@@ -76,7 +76,7 @@ def get_all_context_badges(context):
 		if entry is not None:
 			result.extend(get_course_badges(entry.ntiid))
 	# for legacy badges scan the content packages
-	if not result:
+	if not result and course is not None:
 		for pack in course.ContentPackageBundle.ContentPackages:
 			result.extend(get_course_badges(pack.ntiid))
 	return result
@@ -100,7 +100,7 @@ class _CatalogEntryBadgeCache(CreatedAndModifiedTimeMixin,
 		badges = get_all_context_badges(context)
 		result = tuple(b.name for b in badges)
 		return result
-		
+
 	def _gather(self):
 		result = {}
 		catalog = component.queryUtility(ICourseCatalog)
@@ -140,8 +140,14 @@ class _CatalogEntryBadgeCache(CreatedAndModifiedTimeMixin,
 	def _rev_map(self):
 		return dict()
 
-	def build(self):
-		pass
+	def build(self, context):
+		entry = ICourseCatalogEntry(context, None)
+		if entry is not None:
+			names = self.get_course_badge_names(entry)
+			self._catalog[entry.ntiid] = names
+			
+	def clear(self):
+		self._catalog.clear()
 
 	def get_badge_names(self, ntiid):
 		self._check()

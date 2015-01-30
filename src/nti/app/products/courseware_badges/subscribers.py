@@ -13,9 +13,10 @@ from zope import component
 
 from nti.contenttypes.courses.interfaces import CourseInstanceAvailableEvent
 
-#from .interfaces import ICatalogEntryBadgeCache
+from .interfaces import ICatalogEntryBadgeCache
 
 @component.adapter(CourseInstanceAvailableEvent)
 def _course_instance_available(event):
-	pass
-	
+	cache = component.getUtility(ICatalogEntryBadgeCache)
+	cache.build(event.object)
+	cache.updateLastMod()
