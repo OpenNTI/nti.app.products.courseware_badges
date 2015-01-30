@@ -11,9 +11,14 @@ logger = __import__('logging').getLogger(__name__)
 
 import datetime
 
+import BTrees
+
 from zope import component
 from zope import interface
 from zope.component import hooks
+
+from zope.container.contained import Contained
+
 from zope.traversing.interfaces import IEtcNamespace
 
 from pyramid.threadlocal import get_current_request
@@ -34,8 +39,12 @@ from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.dataserver.interfaces import IUser
 
+from nti.dublincore.time_mixins import CreatedAndModifiedTimeMixin
+
 from nti.utils.property import Lazy
 from nti.utils.property import CachedProperty
+
+from nti.zodb.persistentproperty import PersistentPropertyHolder
 
 from .interfaces import ICourseBadgeCatalog
 from .interfaces import ICatalogEntryBadgeCache
@@ -73,10 +82,12 @@ def get_all_context_badges(context):
 	return result
 	
 @interface.implementer(ICatalogEntryBadgeCache)
-class _CatalogEntryBadgeCache(object):
+class _CatalogEntryBadgeCache(CreatedAndModifiedTimeMixin,
+							  PersistentPropertyHolder,
+							  Contained):
 	
-	def __init__(self, *args):
-		pass
+	def __init__(self, *args, **kwargs):
+		self._catalog = BTrees.OOBTree.BTree()
 	
 	@property
 	def lastSynchronized(self):

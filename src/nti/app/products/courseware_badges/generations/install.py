@@ -11,7 +11,11 @@ logger = __import__('logging').getLogger(__name__)
 
 generation = 1
 
+import zope.intid
+
 from zope.generations.generations import SchemaManager
+
+from ..interfaces import ICatalogEntryBadgeCache
 
 class _CoursewareBadgesSchemaManager(SchemaManager):
 	"""
@@ -23,4 +27,20 @@ class _CoursewareBadgesSchemaManager(SchemaManager):
 									minimum_generation=generation,
 									package_name='nti.app.products.courseware_badges.generations')
 def evolve(context):
-	pass
+	install_course_badge_cache(context)
+
+def install_course_badge_cache(context):
+	return
+	conn = context.connection
+	root = conn.root()
+
+	dataserver_folder = root['nti.dataserver']
+	lsm = dataserver_folder.getSiteManager()
+	intids = lsm.getUtility(zope.intid.IIntIds)
+
+	registry = object()
+	registry.__parent__ = dataserver_folder
+	registry.__name__ = '++etc++course++badge++cache'
+	intids.register(registry)
+	lsm.registerUtility(registry, provided=ICatalogEntryBadgeCache)
+	return registry
