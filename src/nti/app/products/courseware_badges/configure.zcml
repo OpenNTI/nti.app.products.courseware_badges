@@ -12,6 +12,11 @@
 	
 	<include package="nti.app.products.badges" />
 	
+	<!-- Generations -->
+	<utility factory=".generations.install._CoursewareBadgesSchemaManager"
+			 name="nti.dataserver-courseware-badges"
+			 provides="zope.generations.interfaces.IInstallableSchemaManager" />
+			 
 	<!-- Adapters -->
 	<adapter factory=".courses._CourseBadgeCatalog"
 			 for="nti.contenttypes.courses.interfaces.ICourseInstance"
