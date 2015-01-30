@@ -15,6 +15,12 @@ from hamcrest import assert_that
 
 import fudge
 
+from zope import component
+
+from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
+
+from nti.contenttypes.courses.interfaces import ICourseCatalog
+
 from nti.dataserver.users import User
 
 from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
@@ -30,11 +36,20 @@ class TestViews(ApplicationLayerTest):
 
 	default_origin = str('http://janux.ou.edu')
 	enrolled_courses_href = '/dataserver2/users/sjohnson@nextthought.com/Courses/EnrolledCourses'
-	
+
+	def _populate_cache(self):
+		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
+			catalog = component.getUtility(ICourseCatalog)
+			for entry in catalog.iterCatalogEntries():
+				cache = component.getUtility(ICatalogEntryBadgeCache)
+				cache.build(entry)
+				
 	@WithSharedApplicationMockDS(users=True, testapp=True)
 	@fudge.patch('nti.app.products.courseware_badges.views.show_course_badges')
 	@fudge.patch('nti.app.products.courseware_badges.courses.show_course_badges')
 	def test_course_badges(self, mock_scb_1, mock_scb_2):
+		# populate cache because badges are loaded after the library 
+		self._populate_cache()
 		
 		mock_scb_1.is_callable().with_args().returns(False)
 		mock_scb_2.is_callable().with_args().returns(False)

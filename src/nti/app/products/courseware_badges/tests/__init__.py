@@ -42,7 +42,7 @@ def _register_sample(cls):
 		bm = create_badge_manager(defaultSQLite=True)
 		generate_db(bm.db)
 		component.provideUtility(bm, IBadgeManager)
-
+		
 class SharedConfiguringTestLayer(ZopeComponentLayer,
 								 GCLayerMixin,
 								 ConfiguringLayerMixin,
@@ -87,7 +87,7 @@ class CourseBadgesApplicationTestLayer(NotInstructedCourseApplicationTestLayer):
 	def setUp(cls):
 		_change_ds_dir(cls)
 		_register_sample(cls)
-
+		
 	@classmethod
 	def tearDown(cls):
 		_restore_ds_dir(cls)

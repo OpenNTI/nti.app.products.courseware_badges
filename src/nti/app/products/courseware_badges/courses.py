@@ -11,15 +11,10 @@ logger = __import__('logging').getLogger(__name__)
 
 import datetime
 
-import BTrees
-
 from zope import component
 from zope import interface
-from zope.component import hooks
 
 from zope.container.contained import Contained
-
-from zope.traversing.interfaces import IEtcNamespace
 
 from pyramid.threadlocal import get_current_request
 
@@ -38,13 +33,10 @@ from nti.contenttypes.courses.interfaces import ICourseSubInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.dataserver.interfaces import IUser
-
-from nti.dublincore.time_mixins import CreatedAndModifiedTimeMixin
+from nti.dataserver.dicts import LastModifiedDict
 
 from nti.utils.property import Lazy
 from nti.utils.property import CachedProperty
-
-from nti.zodb.persistentproperty import PersistentPropertyHolder
 
 from .interfaces import ICourseBadgeCatalog
 from .interfaces import ICatalogEntryBadgeCache
@@ -64,10 +56,15 @@ def get_course_badges(course_iden):
 	result = find_course_badges_from_badges(course_iden, get_all_badges())
 	return result
 
+def catalog_entry(context):
+	if not ICourseCatalogEntry.providedBy(context):
+		context = ICourseCatalogEntry(context, None) 
+	return context
+
 def get_all_context_badges(context):
 	result = []
+	entry = catalog_entry(context)
 	course = ICourseInstance(context, None)
-	entry = ICourseCatalogEntry(course, None)
 	if entry is not None: 
 		result.extend(get_course_badges(entry.ntiid))
 	if not result and ICourseSubInstance.providedBy(course):
@@ -82,95 +79,46 @@ def get_all_context_badges(context):
 	return result
 	
 @interface.implementer(ICatalogEntryBadgeCache)
-class _CatalogEntryBadgeCache(CreatedAndModifiedTimeMixin,
-							  PersistentPropertyHolder,
-							  Contained):
+class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 	
-	_v_snapshot = None
-	
-	def __init__(self, *args, **kwargs):
-		super(_CatalogEntryBadgeCache, self).__init__(*args, **kwargs)
-		self._catalog = BTrees.OOBTree.BTree()
+	_v_synchronizing = False
 	
 	@property
 	def Items(self):
-		return dict(self._catalog)
-	
-	@property
-	def lastSynchronized(self):
-		hostsites = component.queryUtility(IEtcNamespace, name='hostsites')
-		result = getattr(hostsites, 'lastSynchronized', 0)
-		return result
+		return dict(self)
 	
 	@classmethod
 	def get_course_badge_names(cls, context):
 		badges = get_all_context_badges(context)
 		result = tuple(b.name for b in badges)
 		return result
-
-	def _gather(self):
-		result = {}
-		catalog = component.queryUtility(ICourseCatalog)
-		if catalog is not None:
-			for entry in catalog.iterCatalogEntries():
-				ntiid = getattr(entry, 'ntiid', None)
-				if not ntiid:
-					continue
-				names = self.get_course_badge_names(entry)
-				if names:
-					result[ntiid] = names
-		return result
-
-	def _update_maps(self, result):
-		self._map.update(result)
-		for ntiid, names in result.items():
-			for name in names or ():
-				self._rev_map[name] = ntiid
 	
-	def _check(self):
-		cur_site = hooks.getSite()
-		cur_site = cur_site.__name__ if cur_site is not None else None
-		if cur_site not in self._sites:
-			result = self._gather()
-			self._update_maps(result)
-			self._sites.add(cur_site)
-	
-	@CachedProperty("lastSynchronized")
-	def _sites(self):
-		return set()
-	
-	@CachedProperty("lastSynchronized")
-	def _map(self):
-		return dict()
-
-	@CachedProperty("lastSynchronized")
+	@CachedProperty("lastModified")
 	def _rev_map(self):
-		return dict()
+		result = {}
+		for ntiid, names in self.items():
+			for name in names or ():
+				result[name] = ntiid
+		return result
 
 	def build(self, context):
 		entry = ICourseCatalogEntry(context, None)
 		if entry is not None:
 			names = self.get_course_badge_names(entry)
-			self._catalog[entry.ntiid] = names
-			
-	def clear(self):
-		self._catalog.clear()
+			self[entry.ntiid] = names
 
 	def get_badge_names(self, ntiid):
-		self._check()
-		result = self._map.get(ntiid) or ()
+		result = self.get(ntiid) or ()
 		return result
 	
 	def get_badge_catalog_entry_ntiid(self, name):
-		self._check()
 		result = self._rev_map.get(name)
 		return result
 
 	def is_course_badge(self, name):
-		self._check()
 		result = name in self._rev_map
 		return result
-	
+
 def is_course_badge(name, cache=None):
 	cache = cache or component.getUtility(ICatalogEntryBadgeCache)
 	result = cache.is_course_badge(name)

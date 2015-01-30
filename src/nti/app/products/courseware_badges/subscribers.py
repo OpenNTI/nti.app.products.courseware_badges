@@ -21,15 +21,16 @@ from .interfaces import ICatalogEntryBadgeCache
 @component.adapter(CourseInstanceAvailableEvent)
 def _course_instance_available(event):
 	cache = component.getUtility(ICatalogEntryBadgeCache)
-	cache.build(event.object)
-	cache.updateLastMod()
+	## we only want to update this cache is we are synchronizing
+	if getattr(cache, '_v_synchronizing', False):
+		cache.build(event.object)
 
 @component.adapter(IAllContentPackageLibrariesWillSyncEvent)
 def _libraries_will_sync_event(event):
 	cache = component.getUtility(ICatalogEntryBadgeCache)
-	cache._v_snapshot = cache.Items # save a snapshot
+	cache._v_synchronizing = True
 
 @component.adapter(IAllContentPackageLibrariesDidSyncEvent)
 def _libraries_did_sync_event(event):
 	cache = component.getUtility(ICatalogEntryBadgeCache)
-	cache._v_snapshot = cache.Items # save a snapshot
+	cache._v_synchronizing = False

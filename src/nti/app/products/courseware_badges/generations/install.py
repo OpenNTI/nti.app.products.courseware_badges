@@ -15,6 +15,7 @@ import zope.intid
 
 from zope.generations.generations import SchemaManager
 
+from ..courses import _CatalogEntryBadgeCache
 from ..interfaces import ICatalogEntryBadgeCache
 
 class _CoursewareBadgesSchemaManager(SchemaManager):
@@ -30,17 +31,17 @@ def evolve(context):
 	install_course_badge_cache(context)
 
 def install_course_badge_cache(context):
-	return
 	conn = context.connection
 	root = conn.root()
-
+	
 	dataserver_folder = root['nti.dataserver']
 	lsm = dataserver_folder.getSiteManager()
-	intids = lsm.getUtility(zope.intid.IIntIds)
-
-	registry = object()
-	registry.__parent__ = dataserver_folder
-	registry.__name__ = '++etc++course++badge++cache'
-	intids.register(registry)
-	lsm.registerUtility(registry, provided=ICatalogEntryBadgeCache)
-	return registry
+	cache = lsm.queryUtility(ICatalogEntryBadgeCache)
+	if cache is None:
+		intids = lsm.getUtility(zope.intid.IIntIds)
+		cache = _CatalogEntryBadgeCache()
+		cache.__parent__ = dataserver_folder
+		cache.__name__ = '++etc++course++badge++cache'
+		intids.register(cache)
+		lsm.registerUtility(cache, provided=ICatalogEntryBadgeCache)
+	return cache
