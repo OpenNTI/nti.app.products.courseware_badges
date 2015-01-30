@@ -86,8 +86,15 @@ class _CatalogEntryBadgeCache(CreatedAndModifiedTimeMixin,
 							  PersistentPropertyHolder,
 							  Contained):
 	
+	_v_snapshot = None
+	
 	def __init__(self, *args, **kwargs):
+		super(_CatalogEntryBadgeCache, self).__init__(*args, **kwargs)
 		self._catalog = BTrees.OOBTree.BTree()
+	
+	@property
+	def Items(self):
+		return dict(self._catalog)
 	
 	@property
 	def lastSynchronized(self):
