@@ -11,12 +11,11 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import component
 
-from nti.processlifetime import IApplicationTransactionOpenedEvent
+from nti.contenttypes.courses.interfaces import CourseInstanceAvailableEvent
 
-from .interfaces import ICatalogEntryBadgeCache
+#from .interfaces import ICatalogEntryBadgeCache
 
-@component.adapter(IApplicationTransactionOpenedEvent)
-def _after_database_opened_listener(event):
-	manager = component.getUtility(ICatalogEntryBadgeCache)
-	manager.build()
+@component.adapter(CourseInstanceAvailableEvent)
+def _course_instance_available(event):
+	pass
 	
