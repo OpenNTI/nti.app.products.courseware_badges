@@ -35,8 +35,8 @@ from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.dataserver.interfaces import IUser
 from nti.dataserver.dicts import LastModifiedDict
 
-from nti.utils.property import Lazy
-from nti.utils.property import CachedProperty
+from nti.common.property import Lazy
+from nti.common.property import CachedProperty
 
 from .interfaces import ICourseBadgeCatalog
 from .interfaces import ICatalogEntryBadgeCache
