@@ -27,6 +27,9 @@ from nti.app.products.badges.interfaces import IPrincipalEarnableBadgeFilter
 
 from nti.badges.openbadges.interfaces import IBadgeClass
 
+from nti.common.property import Lazy
+from nti.common.property import CachedProperty
+
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseSubInstance
@@ -35,8 +38,7 @@ from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.dataserver.interfaces import IUser
 from nti.dataserver.dicts import LastModifiedDict
 
-from nti.common.property import Lazy
-from nti.common.property import CachedProperty
+from nti.ntiids.ntiids import find_object_with_ntiid
 
 from .interfaces import ICourseBadgeCatalog
 from .interfaces import ICatalogEntryBadgeCache
@@ -209,18 +211,15 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 	
 	def get_entry(self, badge):
 		ntiid = self.cache.get_badge_catalog_entry_ntiid(badge.name)
-		try:
-			result = self.catalog.getCatalogEntry(ntiid) if ntiid else None
-		except KeyError:
-			result = None
-		return result
+		result = find_object_with_ntiid(ntiid) if ntiid else None
+		return ICourseCatalogEntry(result, None)
 		
 	def allow_badge(self, user, badge):
 		result = True
 		entry = self.get_entry(badge)
 		if entry is not None:
 			now = datetime.datetime.utcnow()
-			result = (entry.StartDate and now >= entry.StartDate) and \
+			result = (not entry.StartDate or now >= entry.StartDate) and \
 				     (not entry.EndDate or now <= entry.EndDate)
 		return result
 
