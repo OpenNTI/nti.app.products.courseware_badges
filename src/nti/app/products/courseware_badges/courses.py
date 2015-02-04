@@ -30,7 +30,6 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.common.property import Lazy
 from nti.common.property import CachedProperty
 
-from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseSubInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
@@ -200,11 +199,6 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 		pass
 
 	@Lazy
-	def catalog(self):
-		result = component.getUtility(ICourseCatalog)
-		return result
-	
-	@Lazy
 	def cache(self):
 		result = component.getUtility(ICatalogEntryBadgeCache)
 		return result
@@ -215,12 +209,15 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 		return ICourseCatalogEntry(result, None)
 		
 	def allow_badge(self, user, badge):
-		result = True
-		entry = self.get_entry(badge)
-		if entry is not None:
+		is_course_badge = self.cache.is_course_badge(badge.name)
+		entry = self.get_entry(badge) if is_course_badge else None
+		if is_course_badge:
 			now = datetime.datetime.utcnow()
-			result = (not entry.StartDate or now >= entry.StartDate) and \
+			result = (entry is not None) and \
+					 (now >= entry.StartDate) and \
 				     (not entry.EndDate or now <= entry.EndDate)
+		else:
+			result = True
 		return result
 
 @component.adapter(IUser)
