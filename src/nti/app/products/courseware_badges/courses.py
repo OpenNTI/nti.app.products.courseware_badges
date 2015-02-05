@@ -203,6 +203,24 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 		result = component.getUtility(ICatalogEntryBadgeCache)
 		return result
 	
+	@classmethod
+	def _startDate(self, entry):
+		course = ICourseInstance(entry, None)
+		result = entry.StartDate if entry is not None else None
+		if not result and ICourseSubInstance.providedBy(course):
+			entry = ICourseCatalogEntry(course.__parent__.__parent__, None)
+			result =  entry.StartDate if entry is not None else None
+		return result
+
+	@classmethod
+	def _endDate(self, entry):
+		course = ICourseInstance(entry, None)
+		result = entry.EndDate if entry is not None else None
+		if not result and ICourseSubInstance.providedBy(course):
+			entry = ICourseCatalogEntry(course.__parent__.__parent__, None)
+			result =  entry.EndDate if entry is not None else None
+		return result
+	
 	def get_entry(self, badge):
 		ntiid = self.cache.get_badge_catalog_entry_ntiid(badge.name)
 		result = find_object_with_ntiid(ntiid) if ntiid else None
@@ -212,10 +230,11 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 		is_course_badge = self.cache.is_course_badge(badge.name)
 		entry = self.get_entry(badge) if is_course_badge else None
 		if is_course_badge:
+			endDate = self._endDate(entry)
+			startDate = self._startDate(entry)
 			now = datetime.datetime.utcnow()
 			result = (entry is not None) and \
-					 (now >= entry.StartDate) and \
-				     (not entry.EndDate or now <= entry.EndDate)
+					 (now >= startDate) and (not endDate or now <= endDate)
 		else:
 			result = True
 		return result
