@@ -12,27 +12,33 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 
 from pyramid.view import view_config
+from pyramid.view import view_defaults
 from pyramid import httpexceptions as hexc
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
 from nti.app.products.badges.views import BadgeAdminPathAdapter
 
+from nti.contenttypes.courses.interfaces import ICourseCatalog
+
 from nti.dataserver import authorization as nauth
 
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
 
+from nti.site.hostpolicy import run_job_in_all_host_sites
+
 from .interfaces import ICatalogEntryBadgeCache
 
 ITEMS = StandardExternalFields.ITEMS
 
-@view_config(route_name='objects.generic.traversal',
-			  context=BadgeAdminPathAdapter,
-			  request_method='GET',
-			  permission=nauth.ACT_NTI_ADMIN,
-			  renderer='rest',
-			  name="CourseBadgeCache")
+@view_config(name="CourseBadgeCache")
+@view_config(name="course_badge_cache")
+@view_defaults(	route_name='objects.generic.traversal',
+			  	context=BadgeAdminPathAdapter,
+			 	request_method='GET',
+			 	permission=nauth.ACT_NTI_ADMIN,
+			  	renderer='rest')
 class CourseBadgeCacheView(AbstractAuthenticatedView):
 
 	def __call__(self):
@@ -44,15 +50,37 @@ class CourseBadgeCacheView(AbstractAuthenticatedView):
 		self.request.response.last_modified = cache.lastModified
 		return result
 
-@view_config(route_name='objects.generic.traversal',
-			  context=BadgeAdminPathAdapter,
-			  request_method='POST',
-			  permission=nauth.ACT_NTI_ADMIN,
-			  renderer='rest',
-			  name='ResetCourseBadgeCache')
+@view_config(name='ResetCourseBadgeCache')
+@view_config(name='reset_course_badge_cache')
+@view_defaults(	route_name='objects.generic.traversal',
+			  	context=BadgeAdminPathAdapter,
+			 	request_method='POST',
+			 	permission=nauth.ACT_NTI_ADMIN,
+			  	renderer='rest')
 class ResetCourseBadgeCacheView(AbstractAuthenticatedView):
 
 	def __call__(self):
 		cache = component.getUtility(ICatalogEntryBadgeCache)
 		cache.clear()
+		return hexc.HTTPNoContent()
+
+@view_config(name='RebuildCourseBadgeCache')
+@view_config(name='rebuild_course_badge_cache')
+@view_defaults(	route_name='objects.generic.traversal',
+			  	context=BadgeAdminPathAdapter,
+			 	request_method='POST',
+			 	permission=nauth.ACT_NTI_ADMIN,
+			  	renderer='rest')
+class RebuildCourseBadgeCacheView(AbstractAuthenticatedView):
+
+	def __call__(self):
+		cache = component.getUtility(ICatalogEntryBadgeCache)
+		cache.clear()
+		def _builder():
+			catalog = component.queryUtility(ICourseCatalog)
+			if catalog is None:
+				return
+			for entry in catalog.iterCatalogEntries():
+				cache.build(entry)
+		run_job_in_all_host_sites(_builder)
 		return hexc.HTTPNoContent()

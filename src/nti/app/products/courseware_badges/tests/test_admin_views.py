@@ -50,3 +50,10 @@ class TestAdminViews(ApplicationLayerTest):
 		get_path = '/dataserver2/BadgeAdmin/CourseBadgeCache'
 		res = self.testapp.get(get_path)
 		assert_that(res.json_body, has_entry('Items', has_length(0)))
+		
+		rebuild_path = '/dataserver2/BadgeAdmin/RebuildCourseBadgeCache'
+		self.testapp.post(rebuild_path, status=204)
+		
+		get_path = '/dataserver2/BadgeAdmin/CourseBadgeCache'
+		res = self.testapp.get(get_path)
+		assert_that(res.json_body, has_entry('Items', has_length(3)))
