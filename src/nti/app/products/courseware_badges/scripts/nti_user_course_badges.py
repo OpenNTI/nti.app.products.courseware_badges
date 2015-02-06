@@ -30,7 +30,7 @@ from nti.dataserver.utils import run_with_dataserver
 
 from nti.site.site import get_site_for_site_names
 
-from . import get_course_badges_for_user
+from .. import get_course_badges_for_user
 
 class PluginPoint(Contained):
 
