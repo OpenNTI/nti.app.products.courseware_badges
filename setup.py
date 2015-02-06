@@ -5,6 +5,7 @@ VERSION = '0.0.0'
 
 entry_points = {
     'console_scripts': [
+        "nti_user_course_badges = nti.app.products.courseware_badges.scripts.nti_user_course_badges:main",
     ],
     "z3c.autoinclude.plugin": [
 		'target = nti.app.products',

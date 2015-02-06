@@ -10,6 +10,7 @@ __docformat__ = "restructuredtext en"
 logger = __import__('logging').getLogger(__name__)
 
 import datetime
+from collections import defaultdict
 
 from zope import component
 from zope import interface
@@ -30,6 +31,7 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.common.property import Lazy
 from nti.common.property import CachedProperty
 
+from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseSubInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
@@ -37,6 +39,7 @@ from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.dataserver.interfaces import IUser
 from nti.dataserver.dicts import LastModifiedDict
 
+from nti.ntiids.ntiids import is_valid_ntiid_string
 from nti.ntiids.ntiids import find_object_with_ntiid
 
 from .interfaces import ICourseBadgeCatalog
@@ -61,6 +64,11 @@ def catalog_entry(context):
 	if not ICourseCatalogEntry.providedBy(context):
 		context = ICourseCatalogEntry(context, None) 
 	return context
+
+def entry_id(context):
+	entry = catalog_entry(context)
+	result = entry.ntiid if entry is not None else None
+	return result
 
 def get_all_context_badges(context):
 	result = []
@@ -97,19 +105,20 @@ class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 	
 	@CachedProperty("lastModified")
 	def _rev_map(self):
-		result = {}
+		result = defaultdict(set)
 		for ntiid, names in self.items():
 			for name in names or ():
-				result[name] = ntiid
+				result[name].add(ntiid)
 		return result
 
 	def build(self, context):
 		entry = ICourseCatalogEntry(context, None)
 		if entry is not None:
-			old_names = self.get(entry.ntiid) or ()
+			iden = entry_id(entry)
+			old_names = self.get(iden) or ()
 			names = self.get_course_badge_names(entry)
 			if old_names != names:
-				self[entry.ntiid] = names
+				self[iden] = names
 				return True
 		return False
 
@@ -117,8 +126,8 @@ class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 		result = self.get(ntiid) or ()
 		return result
 	
-	def get_badge_catalog_entry_ntiid(self, name):
-		result = self._rev_map.get(name)
+	def get_badge_catalog_entry_ntiids(self, name):
+		result = self._rev_map.get(name) or ()
 		return result
 
 	def is_course_badge(self, name):
@@ -143,8 +152,8 @@ class _CourseBadgeCatalog(object):
 	
 	def iter_badges(self):
 		result = []
-		entry = ICourseCatalogEntry(self.context, None)
-		ntiid = getattr(entry, 'ntiid', None) or u''
+		entry = catalog_entry(self.context)
+		ntiid = entry_id(entry) or u''
 		for name in self.cache.get_badge_names(ntiid):
 			badge = get_badge(name)
 			if badge is not None:
@@ -199,36 +208,47 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 		pass
 
 	@Lazy
-	def cache(self):
+	def _catalog(self):
+		result = component.getUtility(ICourseCatalog)
+		return result
+	
+	@Lazy
+	def _cache(self):
 		result = component.getUtility(ICatalogEntryBadgeCache)
 		return result
 	
-	@classmethod
 	def _startDate(self, entry):
-		course = ICourseInstance(entry, None)
 		result = entry.StartDate if entry is not None else None
-		if not result and ICourseSubInstance.providedBy(course):
-			entry = ICourseCatalogEntry(course.__parent__.__parent__, None)
-			result =  entry.StartDate if entry is not None else None
 		return result
 
-	@classmethod
 	def _endDate(self, entry):
-		course = ICourseInstance(entry, None)
 		result = entry.EndDate if entry is not None else None
-		if not result and ICourseSubInstance.providedBy(course):
-			entry = ICourseCatalogEntry(course.__parent__.__parent__, None)
-			result =  entry.EndDate if entry is not None else None
 		return result
 	
-	def get_entry(self, badge):
-		ntiid = self.cache.get_badge_catalog_entry_ntiid(badge.name)
-		result = find_object_with_ntiid(ntiid) if ntiid else None
-		return ICourseCatalogEntry(result, None)
+	def _finder(self, iden):
+		result = find_object_with_ntiid(iden) if is_valid_ntiid_string(iden) else None
+		if result is None:
+			try:
+				result = self._catalog.getCatalogEntry(iden)
+			except KeyError:
+				pass
+		return result
+
+	def _get_entry(self, badge):
+		ntiid = getattr(badge, 'SourceNTIID', None)
+		result = self._finder(ntiid) if ntiid else None
+		if result is None:
+			ntiids = self._cache.get_badge_catalog_entry_ntiids(badge.name)
+			for ntiid in ntiids:
+				result = self._finder(ntiid)
+				if result is not None:
+					break
+		result = ICourseCatalogEntry(result, None)
+		return result
 		
 	def allow_badge(self, user, badge):
-		is_course_badge = self.cache.is_course_badge(badge.name)
-		entry = self.get_entry(badge) if is_course_badge else None
+		is_course_badge = self._cache.is_course_badge(badge.name)
+		entry = self._get_entry(badge) if is_course_badge else None
 		if is_course_badge:
 			endDate = self._endDate(entry)
 			startDate = self._startDate(entry)

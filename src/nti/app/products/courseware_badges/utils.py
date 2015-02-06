@@ -126,9 +126,6 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
  	course
  	"""
 
-	if not ntiids.is_valid_ntiid_string(source_ntiid):
-		raise ValueError("Invalid course ntiid")
-
 	result = []
 	entry = None
 	badge_ntiids = set()
@@ -158,6 +155,9 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 		except KeyError:
 			pass
 		
+	if not ntiids.is_valid_ntiid_string(source_ntiid):
+		return result
+	
 	## Could not find badges in vendor info
 	## build possible ntiids based in the course entry ntiid
 	badge_ntiids.clear()
@@ -176,5 +176,4 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 		ntiid = get_base_image_filename(badge)
 		if ntiid in badge_ntiids:
 			result.append(proxy(badge, source_ntiid))
-
 	return result

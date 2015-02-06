@@ -71,11 +71,16 @@ class TestViews(ApplicationLayerTest):
 		res = self.testapp.get(path)
 		assert_that(res.json_body, has_entry('Items', has_length(0)))
 
-		# enroll and award
+		# enroll
 		self.testapp.post_json( self.enrolled_courses_href,
 								'CLC 3403',
 								status=201 )
 		
+		path = '/dataserver2/users/sjohnson%40nextthought.com/Badges/EarnableBadges'
+		res = self.testapp.get(path)
+		assert_that(res.json_body, has_entry('Items', has_length(1)))
+		
+		# and award
 		name = 'Law and Justice'
 		award_badge_path = '/dataserver2/BadgeAdmin/@@award'
 		self.testapp.post_json(award_badge_path,
@@ -83,6 +88,7 @@ class TestViews(ApplicationLayerTest):
 								"badge":name},
 							   status=204)
 
+		path = '/dataserver2/users/sjohnson%40nextthought.com/EarnedCourseBadges'
 		res = self.testapp.get(path)
 		assert_that(res.json_body, has_entry('Items', has_length(1)))
 		
@@ -100,10 +106,6 @@ class TestViews(ApplicationLayerTest):
 		path = '/dataserver2/users/sjohnson%40nextthought.com/EarnedCourseBadges'
 		res = self.testapp.get(path, extra_environ=self._make_extra_environ("ichigo"))
 		assert_that(res.json_body, has_entry('Items', has_length(0)))
-		
-		path = '/dataserver2/users/sjohnson%40nextthought.com/Badges/EarnedBadges'
-		#res = self.testapp.get(path, extra_environ=self._make_extra_environ("ichigo"))
-		#assert_that(res.json_body, has_entry('Items', has_length(0)))
 		
 		mock_scb_1.is_callable().with_args().returns(True)
 		mock_scb_2.is_callable().with_args().returns(True)

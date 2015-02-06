@@ -54,7 +54,7 @@ class ICatalogEntryBadgeCache(interface.Interface):
 		return if badge is a course name
 		"""
 		
-	def get_badge_catalog_entry_ntiid(name):
+	def get_badge_catalog_entry_ntiids(name):
 		"""
-		return the catalog entry NTIID for the specified course badge name
+		return the catalog entry NTIIDs for the specified course badge name
 		"""
