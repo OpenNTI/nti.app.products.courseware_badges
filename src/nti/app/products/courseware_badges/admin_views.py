@@ -19,8 +19,13 @@ from nti.app.base.abstract_views import AbstractAuthenticatedView
 
 from nti.app.products.badges.views import BadgeAdminPathAdapter
 
+from nti.badges.openbadges.interfaces import IBadgeClass
+
+from nti.common.maps import CaseInsensitiveDict
+
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 
+from nti.dataserver.users import User
 from nti.dataserver import authorization as nauth
 
 from nti.externalization.interfaces import LocatedExternalDict
@@ -29,6 +34,8 @@ from nti.externalization.interfaces import StandardExternalFields
 from nti.site.hostpolicy import run_job_in_all_host_sites
 
 from .interfaces import ICatalogEntryBadgeCache
+
+from . import get_course_badges_for_user
 
 ITEMS = StandardExternalFields.ITEMS
 
@@ -84,3 +91,27 @@ class RebuildCourseBadgeCacheView(AbstractAuthenticatedView):
 				cache.build(entry)
 		run_job_in_all_host_sites(_builder)
 		return hexc.HTTPNoContent()
+
+@view_config(name="UserCourseBadges")
+@view_config(name="user_course_badges")
+@view_defaults(	route_name='objects.generic.traversal',
+			  	context=BadgeAdminPathAdapter,
+			 	request_method='GET',
+			 	permission=nauth.ACT_NTI_ADMIN,
+			  	renderer='rest')
+class UserCourseBadgesView(AbstractAuthenticatedView):
+
+	def __call__(self):
+		values = CaseInsensitiveDict(**self.request.params)
+		username = values.get('username')
+		if not username:
+			raise hexc.HTTPUnprocessableEntity("Must specify a username")
+		
+		user = User.get_user(username)
+		if user is None:
+			raise hexc.HTTPUnprocessableEntity("User cannot be found")
+		
+		badges = get_course_badges_for_user(user)
+		result = LocatedExternalDict()
+		result[ITEMS] = [IBadgeClass(x) for x in badges]
+		return result
