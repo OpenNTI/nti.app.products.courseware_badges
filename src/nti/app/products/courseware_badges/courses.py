@@ -65,7 +65,7 @@ def catalog_entry(context):
 		context = ICourseCatalogEntry(context, None) 
 	return context
 
-def entry_id(context):
+def entry_ntiid(context):
 	entry = catalog_entry(context)
 	result = entry.ntiid if entry is not None else None
 	return result
@@ -114,11 +114,11 @@ class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 	def build(self, context):
 		entry = ICourseCatalogEntry(context, None)
 		if entry is not None:
-			iden = entry_id(entry)
-			old_names = self.get(iden) or ()
+			ntiid = entry_ntiid(entry)
+			old_names = self.get(ntiid) or ()
 			names = self.get_course_badge_names(entry)
 			if old_names != names:
-				self[iden] = names
+				self[ntiid] = names
 				return True
 		return False
 
@@ -153,7 +153,7 @@ class _CourseBadgeCatalog(object):
 	def iter_badges(self):
 		result = []
 		entry = catalog_entry(self.context)
-		ntiid = entry_id(entry) or u''
+		ntiid = entry_ntiid(entry) or u''
 		for name in self.cache.get_badge_names(ntiid):
 			badge = get_badge(name)
 			if badge is not None:
