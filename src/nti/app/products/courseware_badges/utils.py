@@ -23,9 +23,13 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
+from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.interfaces import ICourseInstanceVendorInfo
 
-from nti.ntiids import ntiids
+from nti.ntiids.ntiids import get_parts
+from nti.ntiids.ntiids import make_ntiid
+from nti.ntiids.ntiids import is_valid_ntiid_string
+from nti.ntiids.ntiids import find_object_with_ntiid
 
 from .interfaces import COURSE_COMPLETION
 from .interfaces import COURSE_BADGE_TYPES
@@ -40,13 +44,13 @@ def base_root_ntiid(ntiid):
 	tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.clc_3403_law_and_justice
 	we get tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice
 	"""
-	if ntiid and ntiids.is_valid_ntiid_string(ntiid):
-		parts = ntiids.get_parts(ntiid)
+	if ntiid and is_valid_ntiid_string(ntiid):
+		parts = get_parts(ntiid)
 		specfic = parts.specific.split('.')[0]
-		result = ntiids.make_ntiid(provider=parts.provider,
-								   nttype=parts.nttype,
-								   specific=specfic,
-								   base=parts.date)
+		result = make_ntiid(provider=parts.provider,
+							nttype=parts.nttype,
+							specific=specfic,
+							base=parts.date)
 		return result
 	return None
 
@@ -112,6 +116,22 @@ class CourseBadgeProxy(ProxyBase):
 def proxy(badge, ntiid):
 	return CourseBadgeProxy(badge, ntiid)
 
+def catalog_entry(context):
+	if not ICourseCatalogEntry.providedBy(context):
+		context = ICourseCatalogEntry(context, None) 
+	return context
+
+def find_catalog_entry(iden):
+	catalog = component.queryUtility(ICourseCatalog)
+	if catalog is not None:
+		try:
+			entry = catalog.getCatalogEntry(iden)
+		except KeyError:
+			entry = find_object_with_ntiid(iden) if is_valid_ntiid_string(iden) else None
+		entry = catalog_entry(entry)
+		return entry
+	return None
+
 def find_course_badges_from_badges(source_ntiid, source_badges=()):
 	"""
 	return all course badges from the specified badge source iterable
@@ -127,48 +147,43 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
  	"""
 
 	result = []
-	entry = None
 	badge_ntiids = set()
-	catalog = component.queryUtility(ICourseCatalog)
-	if catalog is not None:
-		try:
-			entry = catalog.getCatalogEntry(source_ntiid)
-			badges = find_course_badges_from_entry(entry)
-			if isinstance(badges, Mapping):
-				## keys of the map are the badge names
-				## the values are the badge types
-				badge_ntiids.update(badges.keys())
-			elif is_nonstr_iter(badges):
-				## the iterable contains the badge names
-				badge_ntiids.update(badges)
-			elif isinstance(badges, six.string_types):
-				## a single string it's the badge name
-				badge_ntiids.add(badges)
-				
-			## make sure the badge ids in vendor-info are valid
-			for badge in source_badges:
-				ntiid = get_base_image_filename(badge)
-				if badge.name in badge_ntiids or ntiid in badge_ntiids:
-					result.append(proxy(badge, source_ntiid))
-			if result:
-				return result
-		except KeyError:
-			pass
-		
-	if not ntiids.is_valid_ntiid_string(source_ntiid):
+	entry = find_catalog_entry(source_ntiid)
+	if entry is not None:
+		badges = find_course_badges_from_entry(entry)
+		if isinstance(badges, Mapping):
+			## keys of the map are the badge names
+			## the values are the badge types
+			badge_ntiids.update(badges.keys())
+		elif is_nonstr_iter(badges):
+			## the iterable contains the badge names
+			badge_ntiids.update(badges)
+		elif isinstance(badges, six.string_types):
+			## a single string it's the badge name
+			badge_ntiids.add(badges)
+			
+		## make sure the badge ids in vendor-info are valid
+		for badge in source_badges:
+			ntiid = get_base_image_filename(badge)
+			if badge.name in badge_ntiids or ntiid in badge_ntiids:
+				result.append(proxy(badge, source_ntiid))
+		if result:
+			return result
+	
+	if not is_valid_ntiid_string(source_ntiid):
 		return result
 	
 	## Could not find badges in vendor info
 	## build possible ntiids based in the course entry ntiid
 	badge_ntiids.clear()
-	parts = ntiids.get_parts(source_ntiid)
+	parts = get_parts(source_ntiid)
 	pre_specfic = '.'.join(parts.specific.split('.')[0:-1]) or parts.specific
 	for subtype in _all_badge_types:
 		specfic = '%s.%s' % (pre_specfic, subtype)
-		name = ntiids.make_ntiid(provider=parts.provider,
-								 nttype=parts.nttype,
-								 specific=specfic,
-								 base=parts.date)
+		name = make_ntiid(provider=parts.provider,
+						  nttype=parts.nttype,
+						  specific=specfic,
+						  base=parts.date)
 		badge_ntiids.add(name.replace(':', '_').replace(',', '_'))
 
 	## check built ntiids against badge file name(s)

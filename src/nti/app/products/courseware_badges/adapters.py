@@ -19,6 +19,7 @@ from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.badges.interfaces import IBadgeClass
 
 from .utils import base_root_ntiid
+from .utils import find_catalog_entry
 from .utils import get_base_image_filename
 from .utils import is_course_badge_filename
 
@@ -32,14 +33,11 @@ def _compare_pseudo_ntiids(a, b):
 def find_catalog_entry_from_badge(badge):
 	catalog = component.getUtility(ICourseCatalog)
 	
-	# check directly in catalog
+	# check directly by source
 	ntiid = getattr(badge, 'SourceNTIID', None)
-	if ntiid:
-		try:
-			result = catalog.getCatalogEntry(ntiid)
-			return result
-		except KeyError:
-			pass
+	result = find_catalog_entry(ntiid) if ntiid else None
+	if result is not None:
+		return result
 	
 	# check badge file name (legacy)
 	filename = get_base_image_filename(badge)

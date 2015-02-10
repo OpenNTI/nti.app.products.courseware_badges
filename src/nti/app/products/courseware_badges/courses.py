@@ -31,7 +31,6 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.common.property import Lazy
 from nti.common.property import CachedProperty
 
-from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseSubInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
@@ -39,13 +38,12 @@ from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.dataserver.interfaces import IUser
 from nti.dataserver.dicts import LastModifiedDict
 
-from nti.ntiids.ntiids import is_valid_ntiid_string
-from nti.ntiids.ntiids import find_object_with_ntiid
-
 from .interfaces import ICourseBadgeCatalog
 from .interfaces import ICatalogEntryBadgeCache
 
 from .utils import proxy
+from .utils import catalog_entry
+from .utils import find_catalog_entry
 from .utils import find_course_badges_from_badges
 
 from . import get_all_badges
@@ -59,11 +57,6 @@ def get_course_badges(course_iden):
 	## shared a badge
 	result = find_course_badges_from_badges(course_iden, get_all_badges())
 	return result
-
-def catalog_entry(context):
-	if not ICourseCatalogEntry.providedBy(context):
-		context = ICourseCatalogEntry(context, None) 
-	return context
 
 def entry_ntiid(context):
 	entry = catalog_entry(context)
@@ -135,7 +128,7 @@ class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 		return result
 
 def is_course_badge(name, cache=None):
-	cache = cache or component.getUtility(ICatalogEntryBadgeCache)
+	cache = cache if cache is not None else component.getUtility(ICatalogEntryBadgeCache)
 	result = cache.is_course_badge(name)
 	return result
 	
@@ -180,7 +173,7 @@ class _CourseErnableBadges(object):
 @interface.implementer(IPrincipalEarnedBadgeFilter)
 class _CoursePrincipalEarnedBadgeFilter(object):
 
-	def __init__(self, *args):
+	def __init__(self, *args, **kwargs):
 		pass
 
 	@Lazy
@@ -204,13 +197,8 @@ class _CoursePrincipalEarnedBadgeFilter(object):
 @interface.implementer(IPrincipalEarnableBadgeFilter)
 class _CoursePrincipalEarnableBadgeFilter(object):
 
-	def __init__(self, *args):
+	def __init__(self, *args, **kwargs):
 		pass
-
-	@Lazy
-	def _catalog(self):
-		result = component.getUtility(ICourseCatalog)
-		return result
 	
 	@Lazy
 	def _cache(self):
@@ -224,19 +212,10 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 	def _endDate(self, entry):
 		result = entry.EndDate if entry is not None else None
 		return result
-	
-	def _finder(self, iden):
-		result = find_object_with_ntiid(iden) if is_valid_ntiid_string(iden) else None
-		if result is None:
-			try:
-				result = self._catalog.getCatalogEntry(iden)
-			except KeyError:
-				pass
-		return result
 
 	def _get_entry(self, badge):
 		ntiid = getattr(badge, 'SourceNTIID', None)
-		result = self._finder(ntiid) if ntiid else None
+		result = find_catalog_entry(ntiid) if ntiid else None
 		if result is None:
 			ntiids = self._cache.get_badge_catalog_entry_ntiids(badge.name)
 			for ntiid in ntiids:
