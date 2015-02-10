@@ -243,7 +243,7 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 				result = self._finder(ntiid)
 				if result is not None:
 					break
-		result = ICourseCatalogEntry(result, None)
+		result = catalog_entry(result)
 		return result
 		
 	def allow_badge(self, user, badge):
