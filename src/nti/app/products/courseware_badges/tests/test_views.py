@@ -86,7 +86,7 @@ class TestViews(ApplicationLayerTest):
 		self.testapp.post_json(award_badge_path,
 							   {"username":self.default_username,
 								"badge":name},
-							   status=204)
+							   status=200)
 
 		path = '/dataserver2/users/sjohnson%40nextthought.com/EarnedCourseBadges'
 		res = self.testapp.get(path)
