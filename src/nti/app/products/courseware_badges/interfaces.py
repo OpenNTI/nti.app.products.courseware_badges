@@ -41,19 +41,19 @@ class ICatalogEntryBadgeCache(interface.Interface):
 	"""
 	Marker interface for a course badges cache utility
 	"""
-	
+
 	Items = interface.Attribute("Items in cache")
-	
+
 	def get_badge_names(ntiid):
 		"""
 		return the badge names for the specified catalog entry ntiid
 		"""
-	
+
 	def is_course_badge(name):
 		"""
 		return if badge is a course name
 		"""
-		
+
 	def get_badge_catalog_entry_ntiids(name):
 		"""
 		return the catalog entry NTIIDs for the specified course badge name

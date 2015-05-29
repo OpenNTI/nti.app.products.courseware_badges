@@ -27,7 +27,7 @@ from nti.app.products.badges import get_badge
 from nti.app.products.badges import get_all_badges
 from nti.app.products.badges import assertion_exists
 
-from .utils import get_badge_type 
+from .utils import get_badge_type
 from .utils import find_course_badges_from_badges
 
 from .interfaces import ICourseBadgeCatalog
@@ -50,7 +50,7 @@ def get_universe_of_course_badges_for_user(user):
 	return the badges for the courses a user in enrolled in
 	"""
 	result = []
-	for enrollments in component.subscribers( (user,), IPrincipalEnrollments):
+	for enrollments in component.subscribers((user,), IPrincipalEnrollments):
 		for enrollment in enrollments.iter_enrollments():
 			course = ICourseInstance(enrollment)
 			adapted = ICourseBadgeCatalog(course)

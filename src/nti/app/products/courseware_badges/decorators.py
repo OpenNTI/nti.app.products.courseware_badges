@@ -23,9 +23,9 @@ from nti.externalization.interfaces import IExternalMappingDecorator
 
 from nti.links.links import Link
 
-from . import VIEW_BADGES
-
 from .courses import is_course_badge
+
+from . import VIEW_BADGES
 
 LINKS = StandardExternalFields.LINKS
 

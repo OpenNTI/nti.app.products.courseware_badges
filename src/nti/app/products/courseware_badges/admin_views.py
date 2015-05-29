@@ -41,7 +41,7 @@ ITEMS = StandardExternalFields.ITEMS
 
 @view_config(name="CourseBadgeCache")
 @view_config(name="course_badge_cache")
-@view_defaults(	route_name='objects.generic.traversal',
+@view_defaults(route_name='objects.generic.traversal',
 			  	context=BadgeAdminPathAdapter,
 			 	request_method='GET',
 			 	permission=nauth.ACT_NTI_ADMIN,
@@ -59,7 +59,7 @@ class CourseBadgeCacheView(AbstractAuthenticatedView):
 
 @view_config(name='ResetCourseBadgeCache')
 @view_config(name='reset_course_badge_cache')
-@view_defaults(	route_name='objects.generic.traversal',
+@view_defaults(route_name='objects.generic.traversal',
 			  	context=BadgeAdminPathAdapter,
 			 	request_method='POST',
 			 	permission=nauth.ACT_NTI_ADMIN,
@@ -73,7 +73,7 @@ class ResetCourseBadgeCacheView(AbstractAuthenticatedView):
 
 @view_config(name='RebuildCourseBadgeCache')
 @view_config(name='rebuild_course_badge_cache')
-@view_defaults(	route_name='objects.generic.traversal',
+@view_defaults(route_name='objects.generic.traversal',
 			  	context=BadgeAdminPathAdapter,
 			 	request_method='POST',
 			 	permission=nauth.ACT_NTI_ADMIN,
@@ -94,7 +94,7 @@ class RebuildCourseBadgeCacheView(AbstractAuthenticatedView):
 
 @view_config(name="UserCourseBadges")
 @view_config(name="user_course_badges")
-@view_defaults(	route_name='objects.generic.traversal',
+@view_defaults(route_name='objects.generic.traversal',
 			  	context=BadgeAdminPathAdapter,
 			 	request_method='GET',
 			 	permission=nauth.ACT_NTI_ADMIN,
@@ -106,11 +106,11 @@ class UserCourseBadgesView(AbstractAuthenticatedView):
 		username = values.get('username')
 		if not username:
 			raise hexc.HTTPUnprocessableEntity("Must specify a username")
-		
+
 		user = User.get_user(username)
 		if user is None:
 			raise hexc.HTTPUnprocessableEntity("User cannot be found")
-		
+
 		badges = get_course_badges_for_user(user)
 		result = LocatedExternalDict()
 		result[ITEMS] = [IBadgeClass(x) for x in badges]

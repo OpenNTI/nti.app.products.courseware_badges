@@ -32,13 +32,13 @@ def _compare_pseudo_ntiids(a, b):
 
 def find_catalog_entry_from_badge(badge):
 	catalog = component.getUtility(ICourseCatalog)
-	
+
 	# check directly by source
 	ntiid = getattr(badge, 'SourceNTIID', None)
 	result = find_catalog_entry(ntiid) if ntiid else None
 	if result is not None:
 		return result
-	
+
 	# check badge file name (legacy)
 	filename = get_base_image_filename(badge)
 	if is_course_badge_filename(filename):
@@ -47,7 +47,7 @@ def find_catalog_entry_from_badge(badge):
 		# search catalog entries
 		for entry in catalog.iterCatalogEntries():
 			# collecct all possible matching ntiids
-			ntiids = { getattr(entry,'ntiid', None) }
+			ntiids = { getattr(entry, 'ntiid', None) }
 			course = ICourseInstance(entry, None)
 			if course is not None:
 				# for legacy badges get the ntiids of the content packages
@@ -57,10 +57,10 @@ def find_catalog_entry_from_badge(badge):
 					ntiids.add(getattr(bundle, 'ContentPackageNTIID', None))
 					for pack in bundle.ContentPackages:
 						ntiids.add(pack.ntiid)
-				except AttributeError: # in case no ContentPackageBundle
+				except AttributeError:  # in case no ContentPackageBundle
 					pass
-	
-			ntiids.discard(None)	
+
+			ntiids.discard(None)
 			for ntiid in ntiids:
 				if ntiid and _compare_pseudo_ntiids(ntiid_root, base_root_ntiid(ntiid)):
 					return entry

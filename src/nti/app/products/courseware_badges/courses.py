@@ -51,10 +51,10 @@ from . import show_course_badges
 from . import get_course_badges_for_user
 
 def get_course_badges(course_iden):
-	## CS: We want to make sure we always query the badges from the DB
-	## in order to return new objects all the time, so they can be
-	## proxied appropriately for the course in case multiple courses
-	## shared a badge
+	# CS: We want to make sure we always query the badges from the DB
+	# in order to return new objects all the time, so they can be
+	# proxied appropriately for the course in case multiple courses
+	# shared a badge
 	result = find_course_badges_from_badges(course_iden, get_all_badges())
 	return result
 
@@ -67,7 +67,7 @@ def get_all_context_badges(context):
 	result = []
 	entry = catalog_entry(context)
 	course = ICourseInstance(context, None)
-	if entry is not None: 
+	if entry is not None:
 		result.extend(get_course_badges(entry.ntiid))
 	if not result and ICourseSubInstance.providedBy(course):
 		# if no badges for subinstance then check main course
@@ -79,7 +79,7 @@ def get_all_context_badges(context):
 		for pack in course.ContentPackageBundle.ContentPackages:
 			result.extend(get_course_badges(pack.ntiid))
 	return result
-	
+
 @interface.implementer(ICatalogEntryBadgeCache)
 class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 
@@ -89,13 +89,13 @@ class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 		for k, v in self.items():
 			result[k] = list(v)
 		return result
-	
+
 	@classmethod
 	def get_course_badge_names(cls, context):
 		badges = get_all_context_badges(context)
 		result = tuple(sorted([b.name for b in badges]))
 		return result
-	
+
 	@CachedProperty("lastModified")
 	def _rev_map(self):
 		result = defaultdict(set)
@@ -118,7 +118,7 @@ class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 	def get_badge_names(self, ntiid):
 		result = self.get(ntiid) or ()
 		return result
-	
+
 	def get_badge_catalog_entry_ntiids(self, name):
 		result = self._rev_map.get(name) or ()
 		return result
@@ -131,7 +131,7 @@ def is_course_badge(name, cache=None):
 	cache = cache if cache is not None else component.getUtility(ICatalogEntryBadgeCache)
 	result = cache.is_course_badge(name)
 	return result
-	
+
 @interface.implementer(ICourseBadgeCatalog)
 class _CourseBadgeCatalog(object):
 
@@ -142,7 +142,7 @@ class _CourseBadgeCatalog(object):
 	def cache(self):
 		result = component.getUtility(ICatalogEntryBadgeCache)
 		return result
-	
+
 	def iter_badges(self):
 		result = []
 		entry = catalog_entry(self.context)
@@ -199,12 +199,12 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 
 	def __init__(self, *args, **kwargs):
 		pass
-	
+
 	@Lazy
 	def _cache(self):
 		result = component.getUtility(ICatalogEntryBadgeCache)
 		return result
-	
+
 	def _startDate(self, entry):
 		result = entry.StartDate if entry is not None else None
 		return result
@@ -224,7 +224,7 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 					break
 		result = catalog_entry(result)
 		return result
-		
+
 	def allow_badge(self, user, badge):
 		is_course_badge = self._cache.is_course_badge(badge.name)
 		entry = self._get_entry(badge) if is_course_badge else None

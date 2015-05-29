@@ -27,13 +27,14 @@ class _CoursewareBadgesSchemaManager(SchemaManager):
 									generation=generation,
 									minimum_generation=generation,
 									package_name='nti.app.products.courseware_badges.generations')
+
 def evolve(context):
 	install_course_badge_cache(context)
 
 def install_course_badge_cache(context):
 	conn = context.connection
 	root = conn.root()
-	
+
 	dataserver_folder = root['nti.dataserver']
 	lsm = dataserver_folder.getSiteManager()
 	cache = lsm.queryUtility(ICatalogEntryBadgeCache)

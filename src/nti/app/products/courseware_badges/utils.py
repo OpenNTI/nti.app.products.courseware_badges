@@ -152,17 +152,17 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 	if entry is not None:
 		badges = find_course_badges_from_entry(entry)
 		if isinstance(badges, Mapping):
-			## keys of the map are the badge names
-			## the values are the badge types
+			# keys of the map are the badge names
+			# the values are the badge types
 			badge_ntiids.update(badges.keys())
 		elif is_nonstr_iter(badges):
-			## the iterable contains the badge names
+			# the iterable contains the badge names
 			badge_ntiids.update(badges)
 		elif isinstance(badges, six.string_types):
-			## a single string it's the badge name
+			# a single string it's the badge name
 			badge_ntiids.add(badges)
 			
-		## make sure the badge ids in vendor-info are valid
+		# make sure the badge ids in vendor-info are valid
 		for badge in source_badges:
 			ntiid = get_base_image_filename(badge)
 			if badge.name in badge_ntiids or ntiid in badge_ntiids:
@@ -173,8 +173,8 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 	if not is_valid_ntiid_string(source_ntiid):
 		return result
 	
-	## Could not find badges in vendor info
-	## build possible ntiids based in the course entry ntiid
+	# Could not find badges in vendor info
+	# build possible ntiids based in the course entry ntiid
 	badge_ntiids.clear()
 	parts = get_parts(source_ntiid)
 	pre_specfic = '.'.join(parts.specific.split('.')[0:-1]) or parts.specific
@@ -186,7 +186,7 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 						  base=parts.date)
 		badge_ntiids.add(name.replace(':', '_').replace(',', '_'))
 
-	## check built ntiids against badge file name(s)
+	# check built ntiids against badge file name(s)
 	for badge in source_badges:
 		ntiid = get_base_image_filename(badge)
 		if ntiid in badge_ntiids:
