@@ -24,28 +24,30 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.common.maps import CaseInsensitiveDict
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.dataserver.users import User
 from nti.dataserver import authorization as nauth
 
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
+from nti.externalization.externalization import to_external_object
 
 from nti.site.hostpolicy import run_job_in_all_host_sites
 
 from .interfaces import ICatalogEntryBadgeCache
 
-from . import get_course_badges_for_user
+from . import get_universe_of_course_badges_for_user
 
 ITEMS = StandardExternalFields.ITEMS
 
 @view_config(name="CourseBadgeCache")
 @view_config(name="course_badge_cache")
 @view_defaults(route_name='objects.generic.traversal',
-			  	context=BadgeAdminPathAdapter,
-			 	request_method='GET',
-			 	permission=nauth.ACT_NTI_ADMIN,
-			  	renderer='rest')
+			   context=BadgeAdminPathAdapter,
+			   request_method='GET',
+			   permission=nauth.ACT_NTI_ADMIN,
+			   renderer='rest')
 class CourseBadgeCacheView(AbstractAuthenticatedView):
 
 	def __call__(self):
@@ -60,10 +62,10 @@ class CourseBadgeCacheView(AbstractAuthenticatedView):
 @view_config(name='ResetCourseBadgeCache')
 @view_config(name='reset_course_badge_cache')
 @view_defaults(route_name='objects.generic.traversal',
-			  	context=BadgeAdminPathAdapter,
-			 	request_method='POST',
-			 	permission=nauth.ACT_NTI_ADMIN,
-			  	renderer='rest')
+			   context=BadgeAdminPathAdapter,
+			   request_method='POST',
+			   permission=nauth.ACT_NTI_ADMIN,
+			    renderer='rest')
 class ResetCourseBadgeCacheView(AbstractAuthenticatedView):
 
 	def __call__(self):
@@ -74,10 +76,10 @@ class ResetCourseBadgeCacheView(AbstractAuthenticatedView):
 @view_config(name='RebuildCourseBadgeCache')
 @view_config(name='rebuild_course_badge_cache')
 @view_defaults(route_name='objects.generic.traversal',
-			  	context=BadgeAdminPathAdapter,
-			 	request_method='POST',
-			 	permission=nauth.ACT_NTI_ADMIN,
-			  	renderer='rest')
+			   context=BadgeAdminPathAdapter,
+			   request_method='POST',
+			   permission=nauth.ACT_NTI_ADMIN,
+			   renderer='rest')
 class RebuildCourseBadgeCacheView(AbstractAuthenticatedView):
 
 	def __call__(self):
@@ -95,10 +97,10 @@ class RebuildCourseBadgeCacheView(AbstractAuthenticatedView):
 @view_config(name="UserCourseBadges")
 @view_config(name="user_course_badges")
 @view_defaults(route_name='objects.generic.traversal',
-			  	context=BadgeAdminPathAdapter,
-			 	request_method='GET',
-			 	permission=nauth.ACT_NTI_ADMIN,
-			  	renderer='rest')
+			   context=BadgeAdminPathAdapter,
+			   request_method='GET',
+			   permission=nauth.ACT_NTI_ADMIN,
+			   renderer='rest')
 class UserCourseBadgesView(AbstractAuthenticatedView):
 
 	def __call__(self):
@@ -111,7 +113,10 @@ class UserCourseBadgesView(AbstractAuthenticatedView):
 		if user is None:
 			raise hexc.HTTPUnprocessableEntity("User cannot be found")
 
-		badges = get_course_badges_for_user(user)
 		result = LocatedExternalDict()
-		result[ITEMS] = [IBadgeClass(x) for x in badges]
+		items = result[ITEMS] = {}
+		universe = get_universe_of_course_badges_for_user(user)
+		for course, badge in universe:
+			ntiid = ICourseCatalogEntry(course).ntiid
+			items[ntiid] = to_external_object(IBadgeClass(badge))
 		return result
