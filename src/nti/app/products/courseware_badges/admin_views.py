@@ -116,7 +116,7 @@ class UserCourseBadgesView(AbstractAuthenticatedView):
 		result = LocatedExternalDict()
 		items = result[ITEMS] = {}
 		universe = get_universe_of_course_badges_for_user(user)
-		for course, badge in universe:
+		for course, badges in universe:
 			ntiid = ICourseCatalogEntry(course).ntiid
-			items[ntiid] = to_external_object(IBadgeClass(badge))
+			items[ntiid] = [to_external_object(IBadgeClass(x)) for x in badges]
 		return result
