@@ -21,10 +21,10 @@ from pyramid.compat import is_nonstr_iter
 
 from nti.badges.openbadges.interfaces import IBadgeClass
 
+from nti.contenttypes.courses import get_course_vendor_info
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
-from nti.contenttypes.courses.interfaces import ICourseInstanceVendorInfo
 
 from nti.ntiids.ntiids import get_parts
 from nti.ntiids.ntiids import make_ntiid
@@ -94,7 +94,7 @@ _all_badge_types = tuple(['course_%s_badge' % x for x in COURSE_BADGE_TYPES] + [
 
 def find_course_badges_from_entry(context):
 	course = ICourseInstance(context, None)
-	vendor_info = ICourseInstanceVendorInfo(course, {})
+	vendor_info = get_course_vendor_info(course, False) or {}
 	result = traverse(vendor_info, 'NTI/Badges', default=None)
 	return result
 
