@@ -12,11 +12,18 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from nti.app.products.badges.interfaces import SC_BADGE_EARNED
+
+from nti.appserver.interfaces import ITrustedTopLevelContainerContextProvider
+
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
+from nti.dataserver.interfaces import IStreamChangeEvent
+
 from nti.badges.interfaces import IBadgeClass
+from nti.badges.interfaces import IBadgeAssertion
 
 from .utils import base_root_ntiid
 from .utils import find_catalog_entry
@@ -71,3 +78,18 @@ def find_catalog_entry_from_badge(badge):
 def badge_to_course_catalog_entry(badge):
 	result = find_catalog_entry_from_badge(badge)
 	return result
+
+@interface.implementer(ITrustedTopLevelContainerContextProvider)
+@component.adapter(IBadgeAssertion)
+def _trusted_context_from_assertion(assertion):
+	badge = IBadgeClass( assertion )
+	catalog_entry = find_catalog_entry_from_badge( badge )
+	return (catalog_entry,) if catalog_entry is not None else ()
+
+@interface.implementer(ITrustedTopLevelContainerContextProvider)
+@component.adapter(IStreamChangeEvent)
+def _trusted_context_from_change(obj):
+	obj_type = getattr( obj, 'type', '' )
+	obj = getattr( obj, 'object', None )
+	if obj_type == SC_BADGE_EARNED and obj is not None:
+		return _trusted_context_from_assertion(obj)

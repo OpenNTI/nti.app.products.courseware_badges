@@ -14,6 +14,7 @@ import tempfile
 from zope import component
 
 from nti.badges.interfaces import IBadgeManager
+from nti.badges.tahrir.interfaces import ITahrirBadgeManager
 from nti.badges.tahrir.manager import create_badge_manager
 
 from nti.app.products.courseware_badges.tests.badges import generate_db
@@ -21,7 +22,7 @@ from nti.app.products.courseware_badges.tests.badges import generate_db
 from nti.testing.layers import GCLayerMixin
 from nti.testing.layers import ZopeComponentLayer
 from nti.testing.layers import ConfiguringLayerMixin
-# 
+#
 from nti.dataserver.tests.mock_dataserver import DSInjectorMixin
 
 import zope.testing.cleanup
@@ -31,18 +32,20 @@ def _change_ds_dir(cls):
 	cls.new_data_dir = tempfile.mkdtemp(dir="/tmp")
 	os.environ['DATASERVER_DATA_DIR'] = cls.new_data_dir
 
-def _restore_ds_dir(cls):
+def _restore(cls):
 	shutil.rmtree(cls.new_data_dir, True)
 	os.environ['DATASERVER_DATA_DIR'] = cls.old_data_dir or '/tmp'
+	component.provideUtility(cls.old_manager, ITahrirBadgeManager)
 
 def _register_sample(cls):
 	import transaction
 	with transaction.manager:
-		cls.old = component.getUtility(IBadgeManager)
+		cls.old_manager = component.getUtility(IBadgeManager)
+		component.getGlobalSiteManager().unregisterUtility( cls.old_manager )
 		bm = create_badge_manager(defaultSQLite=True)
+		component.provideUtility(bm, ITahrirBadgeManager)
 		generate_db(bm.db)
-		component.provideUtility(bm, IBadgeManager)
-		
+
 class SharedConfiguringTestLayer(ZopeComponentLayer,
 								 GCLayerMixin,
 								 ConfiguringLayerMixin,
@@ -62,7 +65,7 @@ class SharedConfiguringTestLayer(ZopeComponentLayer,
 	def tearDown(cls):
 		cls.tearDownPackages()
 		zope.testing.cleanup.cleanUp()
-		_restore_ds_dir(cls)
+		_restore(cls)
 
 	@classmethod
 	def testSetUp(cls, test=None):
@@ -82,12 +85,12 @@ from nti.app.products.courseware.tests import NotInstructedCourseApplicationTest
 class CourseBadgesApplicationTestLayer(NotInstructedCourseApplicationTestLayer):
 
 	_create_user = False
-	
+
 	@classmethod
 	def setUp(cls):
 		_change_ds_dir(cls)
 		_register_sample(cls)
-		
+
 	@classmethod
 	def tearDown(cls):
-		_restore_ds_dir(cls)
+		_restore(cls)

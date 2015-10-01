@@ -101,11 +101,11 @@ def find_course_badges_from_entry(context):
 from zope.proxy import ProxyBase
 
 class CourseBadgeProxy(ProxyBase):
-	
+
 	SourceNTIID = property(
 			lambda s: s.__dict__.get('_v_catalog_source_ntiid'),
 			lambda s, v: s.__dict__.__setitem__('_v_catalog_source_ntiid', v))
-		
+
 	def __new__(cls, base, ntiid):
 		return ProxyBase.__new__(cls, base)
 
@@ -118,7 +118,7 @@ def proxy(badge, ntiid):
 
 def catalog_entry(context):
 	if not ICourseCatalogEntry.providedBy(context):
-		context = ICourseCatalogEntry(context, None) 
+		context = ICourseCatalogEntry(context, None)
 	return context
 
 def find_catalog_entry(iden):
@@ -138,7 +138,7 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 
 	if the source_ntiid is a catalog entry ntiid, we look at the course
 	vendor info (e.g. NTI/Badges) to find the badge names. otherwise
-	we use the badge image file names to determined a course badge. 
+	we use the badge image file names to determined a course badge.
 	The image file name of a course badge is 'root' course/content package NTIID plus
 	a period (.) plus course_{type}_badge
 	e.g tag_nextthought.com_2011-10_OU-HTML-CLC3403_LawAndJustice.course_completion_badge.png
@@ -161,7 +161,7 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 		elif isinstance(badges, six.string_types):
 			# a single string it's the badge name
 			badge_ntiids.add(badges)
-			
+
 		# make sure the badge ids in vendor-info are valid
 		for badge in source_badges:
 			ntiid = get_base_image_filename(badge)
@@ -169,10 +169,10 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 				result.append(proxy(badge, source_ntiid))
 		if result:
 			return result
-	
+
 	if not is_valid_ntiid_string(source_ntiid):
 		return result
-	
+
 	# Could not find badges in vendor info
 	# build possible ntiids based in the course entry ntiid
 	badge_ntiids.clear()

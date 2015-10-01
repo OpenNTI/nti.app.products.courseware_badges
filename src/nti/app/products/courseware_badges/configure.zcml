@@ -9,34 +9,42 @@
 	<include package="zope.security" file="meta.zcml" />
 	<include package="zope.component" />
 	<include package="zope.security" />
-	
+
 	<include package="nti.app.products.badges" />
-	
+
 	<!-- Generations -->
 	<utility factory=".generations.install._CoursewareBadgesSchemaManager"
 			 name="nti.dataserver-courseware-badges"
 			 provides="zope.generations.interfaces.IInstallableSchemaManager" />
-			 
+
 	<!-- Adapters -->
 	<adapter factory=".courses._CourseBadgeCatalog"
 			 for="nti.contenttypes.courses.interfaces.ICourseInstance"
 			 provides=".interfaces.ICourseBadgeCatalog" />
-	
+
 	<adapter factory=".courses._CourseBadgeCatalog"
 			 for="nti.app.products.courseware.interfaces.ICourseInstanceEnrollment"
 			 provides=".interfaces.ICourseBadgeCatalog" />
-	
+
 	<adapter factory=".adapters.badge_to_course_catalog_entry"
 			 for="nti.badges.interfaces.IBadgeClass"
 			 provides="nti.contenttypes.courses.interfaces.ICourseCatalogEntry" />
-			  	 		  			 
+
+	<subscriber factory=".adapters._trusted_context_from_assertion"
+				provides="nti.appserver.interfaces.ITrustedTopLevelContainerContextProvider"
+				for="nti.badges.interfaces.IBadgeAssertion"/>
+
+	<subscriber factory=".adapters._trusted_context_from_change"
+				provides="nti.appserver.interfaces.ITrustedTopLevelContainerContextProvider"
+				for="nti.dataserver.interfaces.IStreamChangeEvent"/>
+
 	<!-- Subscribers -->
 	<subscriber	factory=".courses._CourseErnableBadges"
 				provides="nti.app.products.badges.interfaces.IPrincipalErnableBadges"/>
-			
+
 	<subscriber	factory=".courses._CoursePrincipalEarnedBadgeFilter"
 				provides="nti.app.products.badges.interfaces.IPrincipalEarnedBadgeFilter"/>
-		
+
 	<subscriber	factory=".courses._CoursePrincipalEarnableBadgeFilter"
 					provides="nti.app.products.badges.interfaces.IPrincipalEarnableBadgeFilter" />
 
@@ -44,15 +52,15 @@
 				provides="nti.appserver.interfaces.IPrincipalUGDFilter" />
 
 	<subscriber handler=".subscribers._course_instance_available" />
-	
+
 	<!-- Decorators -->
 	<subscriber factory=".decorators._BadgeTypeAdder"
 				for="nti.badges.interfaces.IBadgeClass"
 				provides="nti.externalization.interfaces.IExternalObjectDecorator"/>
-				
+
 	<subscriber factory=".decorators._CourseInstanceLinkDecorator"
 				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
-				
+
 	<!-- Utilities -->
 	<utility factory=".courses._OpenBadgeAdapter" />
 
@@ -60,10 +68,10 @@
 	<include package="zope.security" file="permissions.zcml"/>
 	<include package="zope.preference" file="meta.zcml" />
 	<include package="zope.preference" />
-		
+
 	<preferenceGroup
 		id="Badges.Course"
 		title="Course Badge Settings"
 		schema=".interfaces.ICourseBadgeSettings" />
-		
+
 </configure>
