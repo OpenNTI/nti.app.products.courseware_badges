@@ -65,7 +65,7 @@ class CourseBadgeCacheView(AbstractAuthenticatedView):
 			   context=BadgeAdminPathAdapter,
 			   request_method='POST',
 			   permission=nauth.ACT_NTI_ADMIN,
-			    renderer='rest')
+				renderer='rest')
 class ResetCourseBadgeCacheView(AbstractAuthenticatedView):
 
 	def __call__(self):
@@ -119,4 +119,5 @@ class UserCourseBadgesView(AbstractAuthenticatedView):
 		for course, badges in universe:
 			ntiid = ICourseCatalogEntry(course).ntiid
 			items[ntiid] = [to_external_object(IBadgeClass(x)) for x in badges]
+		result['Total'] = result['ItemCount'] = len(items)
 		return result
