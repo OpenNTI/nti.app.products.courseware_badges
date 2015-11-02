@@ -8,8 +8,10 @@ from __future__ import print_function, unicode_literals, absolute_import, divisi
 __docformat__ = "restructuredtext en"
 
 from zope import interface
-from zope.schema import vocabulary
+
 from zope.interface.interface import taggedValue
+
+from zope.schema import vocabulary
 
 from nti.app.client_preferences.interfaces import TAG_EXTERNAL_PREFERENCE_GROUP
 

@@ -20,8 +20,7 @@ from nti.dataserver.utils.base_script import create_context
 from .. import get_course_badges_for_user
 
 def _process_args(args):
-	if args.site:
-		set_site(args.site)
+	set_site(args.site)
 
 	user = User.get_user(args.username)
 	if user is None:

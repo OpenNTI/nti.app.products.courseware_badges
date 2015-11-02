@@ -18,14 +18,14 @@ from zope.security.management import restoreInteraction
 
 from zope.preference.interfaces import IPreferenceGroup
 
-from nti.contenttypes.courses.interfaces import ICourseInstance
-from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
-from nti.contenttypes.courses.interfaces import IPrincipalEnrollments
-
 from nti.app.products.badges import BADGES
 from nti.app.products.badges import get_badge
 from nti.app.products.badges import get_all_badges
 from nti.app.products.badges import assertion_exists
+
+from nti.contenttypes.courses.interfaces import ICourseInstance
+from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
+from nti.contenttypes.courses.interfaces import IPrincipalEnrollments
 
 from .utils import get_badge_type
 from .utils import find_course_badges_from_badges

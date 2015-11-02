@@ -82,14 +82,14 @@ def badge_to_course_catalog_entry(badge):
 @interface.implementer(ITrustedTopLevelContainerContextProvider)
 @component.adapter(IBadgeAssertion)
 def _trusted_context_from_assertion(assertion):
-	badge = IBadgeClass( assertion )
-	catalog_entry = find_catalog_entry_from_badge( badge )
+	badge = IBadgeClass(assertion)
+	catalog_entry = find_catalog_entry_from_badge(badge)
 	return (catalog_entry,) if catalog_entry is not None else ()
 
 @interface.implementer(ITrustedTopLevelContainerContextProvider)
 @component.adapter(IStreamChangeEvent)
 def _trusted_context_from_change(obj):
-	obj_type = getattr( obj, 'type', '' )
-	obj = getattr( obj, 'object', None )
+	obj_type = getattr(obj, 'type', '')
+	obj = getattr(obj, 'object', None)
 	if obj_type == SC_BADGE_EARNED and obj is not None:
 		return _trusted_context_from_assertion(obj)

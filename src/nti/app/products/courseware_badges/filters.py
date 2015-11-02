@@ -12,17 +12,17 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
-from ZODB.POSException import POSKeyError
+from ZODB.POSException import POSError
 
 from pyramid.threadlocal import get_current_request
+
+from nti.app.products.badges.interfaces import IAssertionChange
+
+from nti.appserver.interfaces import IPrincipalUGDFilter
 
 from nti.badges.interfaces import IBadgeClass
 
 from nti.dataserver.interfaces import IUser
-
-from nti.appserver.interfaces import IPrincipalUGDFilter
-
-from nti.app.products.badges.interfaces import IAssertionChange
 
 from . import show_course_badges
 
@@ -45,6 +45,6 @@ class _CourseBadgePrincipalUGDFilter(object):
 				badge = IBadgeClass(assertion)
 				if req.authenticated_userid != user.username:
 					result = not is_course_badge(badge.name) or show_course_badges(user)
-			except (POSKeyError, TypeError):
+			except (POSError, TypeError):
 				result = False
 		return result

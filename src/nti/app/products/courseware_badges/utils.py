@@ -15,6 +15,9 @@ import six
 from collections import Mapping
 
 from zope import component
+
+from zope.proxy import ProxyBase
+
 from zope.traversing.api import traverse
 
 from pyramid.compat import is_nonstr_iter
@@ -97,8 +100,6 @@ def find_course_badges_from_entry(context):
 	vendor_info = get_course_vendor_info(course, False) or {}
 	result = traverse(vendor_info, 'NTI/Badges', default=None)
 	return result
-
-from zope.proxy import ProxyBase
 
 class CourseBadgeProxy(ProxyBase):
 

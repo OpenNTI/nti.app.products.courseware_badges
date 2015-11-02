@@ -16,6 +16,7 @@ import zope.intid
 from zope.generations.generations import SchemaManager
 
 from ..courses import _CatalogEntryBadgeCache
+
 from ..interfaces import ICatalogEntryBadgeCache
 
 class _CoursewareBadgesSchemaManager(SchemaManager):
