@@ -36,18 +36,18 @@ from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
 class TestCourses(ApplicationLayerTest):
 
 	layer = CourseBadgesApplicationTestLayer
-	
+
 	default_origin = str('http://janux.ou.edu')
-	
+
 	enrolled_courses_href =  '/dataserver2/users/sjohnson@nextthought.com/Courses/EnrolledCourses'
-	
+
 	def _populate_cache(self):
 		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
 			catalog = component.getUtility(ICourseCatalog)
 			for entry in catalog.iterCatalogEntries():
 				cache = component.getUtility(ICatalogEntryBadgeCache)
 				cache.build(entry)
-				
+
 	@WithMockDSTrans
 	def test_get_course_badges(self):
 		courseId = 'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.clc_3403_law_and_justice'
@@ -56,15 +56,17 @@ class TestCourses(ApplicationLayerTest):
 
 	@WithSharedApplicationMockDS(users=True, testapp=True)
 	def test_course_earnable_badges(self):
-				
+
 		self._populate_cache()
-			
-		self.testapp.post_json(self.enrolled_courses_href, 'CLC 3403', status=201)
-	
+
+		self.testapp.post_json(self.enrolled_courses_href,
+							'tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice',
+							status=201)
+
 		earned_badges_path = '/dataserver2/users/sjohnson%40nextthought.com/Badges/EarnableBadges'
 		res = self.testapp.get(earned_badges_path,
 						  	   status=200)
-		assert_that(res.json_body, 
+		assert_that(res.json_body,
 					has_entry(u'Items', has_item(has_entries('Class', 'Badge',
 															 'Type', 'Course'))) )
 

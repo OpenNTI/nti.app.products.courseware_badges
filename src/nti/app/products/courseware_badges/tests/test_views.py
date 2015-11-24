@@ -73,7 +73,7 @@ class TestViews(ApplicationLayerTest):
 
 		# enroll
 		self.testapp.post_json( self.enrolled_courses_href,
-								'CLC 3403',
+								'tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice',
 								status=201 )
 
 		path = '/dataserver2/users/sjohnson%40nextthought.com/Badges/EarnableBadges'
@@ -99,7 +99,7 @@ class TestViews(ApplicationLayerTest):
 
 		enrolled = '/dataserver2/users/ichigo/Courses/EnrolledCourses'
 		self.testapp.post_json( enrolled,
-								'CLC 3403',
+								'tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice',
 								status=201,
 								extra_environ=self._make_extra_environ("ichigo") )
 
