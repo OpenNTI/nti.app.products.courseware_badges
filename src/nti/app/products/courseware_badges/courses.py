@@ -31,6 +31,7 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.common.property import Lazy
 from nti.common.property import CachedProperty
 
+from nti.contenttypes.courses.utils import get_course_packages
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseSubInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
@@ -76,7 +77,7 @@ def get_all_context_badges(context):
 			result.extend(get_course_badges(entry.ntiid))
 	# for legacy badges scan the content packages
 	if not result and course is not None:
-		for pack in course.ContentPackageBundle.ContentPackages:
+		for pack in get_course_packages(course):
 			result.extend(get_course_badges(pack.ntiid))
 	return result
 
