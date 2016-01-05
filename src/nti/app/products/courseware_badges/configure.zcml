@@ -51,6 +51,7 @@
 	<subscriber	factory=".filters._CourseBadgePrincipalUGDFilter"
 				provides="nti.appserver.interfaces.IPrincipalUGDFilter" />
 
+	<subscriber handler=".subscribers._on_course_instance_added" />
 	<subscriber handler=".subscribers._course_instance_available" />
 
 	<!-- Decorators -->

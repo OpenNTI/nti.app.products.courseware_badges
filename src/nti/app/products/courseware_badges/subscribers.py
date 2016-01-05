@@ -11,11 +11,19 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import component
 
-from nti.contenttypes.courses.interfaces import CourseInstanceAvailableEvent
+from zope.lifecycleevent.interfaces import IObjectAddedEvent
+
+from nti.contenttypes.courses.interfaces import ICourseInstance
+from nti.contenttypes.courses.interfaces import ICourseInstanceAvailableEvent
 
 from .interfaces import ICatalogEntryBadgeCache
 
-@component.adapter(CourseInstanceAvailableEvent)
+@component.adapter(ICourseInstanceAvailableEvent)
 def _course_instance_available(event):
 	cache = component.getUtility(ICatalogEntryBadgeCache)
 	cache.build(event.object)
+
+@component.adapter(ICourseInstance, IObjectAddedEvent)
+def _on_course_instance_added(course, event):
+	cache = component.getUtility(ICatalogEntryBadgeCache)
+	cache.build(course)
