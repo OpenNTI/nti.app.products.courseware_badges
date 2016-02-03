@@ -26,30 +26,32 @@ from nti.app.products.badges.interfaces import IPrincipalErnableBadges
 from nti.app.products.badges.interfaces import IPrincipalEarnedBadgeFilter
 from nti.app.products.badges.interfaces import IPrincipalEarnableBadgeFilter
 
+from nti.app.products.courseware_badges import get_all_badges
+from nti.app.products.courseware_badges import show_course_badges
+from nti.app.products.courseware_badges import get_course_badges_for_user
+
+from nti.app.products.courseware_badges.interfaces import ICourseBadgeCatalog
+from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
+
+from nti.app.products.courseware_badges.utils import proxy
+from nti.app.products.courseware_badges.utils import catalog_entry
+from nti.app.products.courseware_badges.utils import find_catalog_entry
+from nti.app.products.courseware_badges.utils import find_course_badges_from_badges
+
 from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.common.property import Lazy
 from nti.common.property import CachedProperty
 
-from nti.contenttypes.courses.utils import get_course_packages
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseSubInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
-from nti.dataserver.interfaces import IUser
+from nti.contenttypes.courses.utils import get_course_packages
+
 from nti.dataserver.dicts import LastModifiedDict
 
-from .interfaces import ICourseBadgeCatalog
-from .interfaces import ICatalogEntryBadgeCache
-
-from .utils import proxy
-from .utils import catalog_entry
-from .utils import find_catalog_entry
-from .utils import find_course_badges_from_badges
-
-from . import get_all_badges
-from . import show_course_badges
-from . import get_course_badges_for_user
+from nti.dataserver.interfaces import IUser
 
 def get_course_badges(course_iden):
 	# CS: We want to make sure we always query the badges from the DB
@@ -127,6 +129,7 @@ class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 	def is_course_badge(self, name):
 		result = name in self._rev_map
 		return result
+CatalogEntryBadgeCache = _CatalogEntryBadgeCache
 
 def is_course_badge(name, cache=None):
 	cache = cache if cache is not None else component.getUtility(ICatalogEntryBadgeCache)

@@ -11,13 +11,13 @@ logger = __import__('logging').getLogger(__name__)
 
 generation = 2
 
-import zope.intid
-
 from zope.generations.generations import SchemaManager
 
-from ..courses import _CatalogEntryBadgeCache
+from zope.intid.interfaces import IIntIds
 
-from ..interfaces import ICatalogEntryBadgeCache
+from nti.app.products.courseware_badges.courses import CatalogEntryBadgeCache
+
+from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
 
 class _CoursewareBadgesSchemaManager(SchemaManager):
 	"""
@@ -40,8 +40,8 @@ def install_course_badge_cache(context):
 	lsm = dataserver_folder.getSiteManager()
 	cache = lsm.queryUtility(ICatalogEntryBadgeCache)
 	if cache is None:
-		intids = lsm.getUtility(zope.intid.IIntIds)
-		cache = _CatalogEntryBadgeCache()
+		intids = lsm.getUtility(IIntIds)
+		cache = CatalogEntryBadgeCache()
 		cache.__parent__ = dataserver_folder
 		cache.__name__ = '++etc++course++badge++cache'
 		intids.register(cache)

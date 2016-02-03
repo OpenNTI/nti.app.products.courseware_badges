@@ -11,7 +11,7 @@ logger = __import__('logging').getLogger(__name__)
 
 generation = 2
 
-from .install import install_course_badge_cache
+from nti.app.products.courseware_badges.generations.install import install_course_badge_cache
 
 def do_evolve(context):
 	install_course_badge_cache(context)
