@@ -23,16 +23,19 @@ from nti.app.products.badges import get_badge
 from nti.app.products.badges import get_all_badges
 from nti.app.products.badges import assertion_exists
 
+from nti.app.products.courseware_badges.interfaces import ICourseBadgeCatalog
+
+from nti.app.products.courseware_badges.utils import get_badge_type
+from nti.app.products.courseware_badges.utils import find_course_badges_from_badges
+
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.interfaces import IPrincipalEnrollments
 
-from .utils import get_badge_type
-from .utils import find_course_badges_from_badges
-
-from .interfaces import ICourseBadgeCatalog
-
+#: Badged view
 VIEW_BADGES = BADGES
+
+#: Earned basges view
 VIEW_EARNED_COURSE_BADGES = u'EarnedCourseBadges'
 
 def show_course_badges(user):

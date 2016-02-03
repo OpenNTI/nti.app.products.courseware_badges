@@ -14,6 +14,11 @@ from zope import interface
 
 from nti.app.products.badges.interfaces import SC_BADGE_EARNED
 
+from nti.app.products.courseware_badges.utils import base_root_ntiid
+from nti.app.products.courseware_badges.utils import find_catalog_entry
+from nti.app.products.courseware_badges.utils import get_base_image_filename
+from nti.app.products.courseware_badges.utils import is_course_badge_filename
+
 from nti.appserver.interfaces import ITrustedTopLevelContainerContextProvider
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
@@ -24,11 +29,6 @@ from nti.dataserver.interfaces import IStreamChangeEvent
 
 from nti.badges.interfaces import IBadgeClass
 from nti.badges.interfaces import IBadgeAssertion
-
-from .utils import base_root_ntiid
-from .utils import find_catalog_entry
-from .utils import get_base_image_filename
-from .utils import is_course_badge_filename
 
 def _compare_pseudo_ntiids(a, b):
 	if a and b:
@@ -41,10 +41,13 @@ def find_catalog_entry_from_badge(badge):
 	catalog = component.getUtility(ICourseCatalog)
 
 	# check directly by source
-	ntiid = getattr(badge, 'SourceNTIID', None)
-	result = find_catalog_entry(ntiid) if ntiid else None
-	if result is not None:
-		return result
+	try:
+		ntiid = badge.SourceNTIID
+		result = find_catalog_entry(ntiid) if ntiid else None
+		if result is not None:
+			return result
+	except AttributeError:
+		pass
 
 	# check badge file name (legacy)
 	filename = get_base_image_filename(badge)
@@ -79,15 +82,15 @@ def badge_to_course_catalog_entry(badge):
 	result = find_catalog_entry_from_badge(badge)
 	return result
 
-@interface.implementer(ITrustedTopLevelContainerContextProvider)
 @component.adapter(IBadgeAssertion)
+@interface.implementer(ITrustedTopLevelContainerContextProvider)
 def _trusted_context_from_assertion(assertion):
 	badge = IBadgeClass(assertion)
 	catalog_entry = find_catalog_entry_from_badge(badge)
 	return (catalog_entry,) if catalog_entry is not None else ()
 
-@interface.implementer(ITrustedTopLevelContainerContextProvider)
 @component.adapter(IStreamChangeEvent)
+@interface.implementer(ITrustedTopLevelContainerContextProvider)
 def _trusted_context_from_change(obj):
 	obj_type = getattr(obj, 'type', '')
 	obj = getattr(obj, 'object', None)

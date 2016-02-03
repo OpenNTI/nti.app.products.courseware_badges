@@ -11,13 +11,18 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import component
 
+from pyramid import httpexceptions as hexc
+
 from pyramid.view import view_config
 from pyramid.view import view_defaults
-from pyramid import httpexceptions as hexc
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
 from nti.app.products.badges.views import BadgeAdminPathAdapter
+
+from nti.app.products.courseware_badges import get_universe_of_course_badges_for_user
+
+from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
 
 from nti.badges.openbadges.interfaces import IBadgeClass
 
@@ -26,18 +31,16 @@ from nti.common.maps import CaseInsensitiveDict
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
-from nti.dataserver.users import User
 from nti.dataserver import authorization as nauth
+
+from nti.dataserver.users import User
+
+from nti.externalization.externalization import to_external_object
 
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
-from nti.externalization.externalization import to_external_object
 
 from nti.site.hostpolicy import run_job_in_all_host_sites
-
-from .interfaces import ICatalogEntryBadgeCache
-
-from . import get_universe_of_course_badges_for_user
 
 ITEMS = StandardExternalFields.ITEMS
 
