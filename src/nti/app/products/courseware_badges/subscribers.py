@@ -14,11 +14,11 @@ from zope import component
 from zope.lifecycleevent.interfaces import IObjectAddedEvent
 from zope.lifecycleevent.interfaces import IObjectRemovedEvent
 
+from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
+
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import	ICourseCatalogEntry
 from nti.contenttypes.courses.interfaces import ICourseInstanceAvailableEvent
-
-from .interfaces import ICatalogEntryBadgeCache
 
 @component.adapter(ICourseInstanceAvailableEvent)
 def _course_instance_available(event):

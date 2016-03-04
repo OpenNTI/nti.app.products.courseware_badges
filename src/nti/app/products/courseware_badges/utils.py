@@ -22,9 +22,13 @@ from zope.traversing.api import traverse
 
 from pyramid.compat import is_nonstr_iter
 
+from nti.app.products.courseware_badges.interfaces import COURSE_COMPLETION
+from nti.app.products.courseware_badges.interfaces import COURSE_BADGE_TYPES
+
 from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.contenttypes.courses import get_course_vendor_info
+
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
@@ -33,9 +37,6 @@ from nti.ntiids.ntiids import get_parts
 from nti.ntiids.ntiids import make_ntiid
 from nti.ntiids.ntiids import is_valid_ntiid_string
 from nti.ntiids.ntiids import find_object_with_ntiid
-
-from .interfaces import COURSE_COMPLETION
-from .interfaces import COURSE_BADGE_TYPES
 
 ROOT = "tag:nextthought.com,2011-10:"
 SAFE_ROOT = ROOT.replace(':', '_').replace(',', '_')

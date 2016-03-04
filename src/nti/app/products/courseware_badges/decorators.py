@@ -12,6 +12,10 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from nti.app.products.courseware_badges import VIEW_BADGES
+
+from nti.app.products.courseware_badges.courses import is_course_badge
+
 from nti.badges.interfaces import IBadgeClass
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -22,10 +26,6 @@ from nti.externalization.interfaces import IExternalObjectDecorator
 from nti.externalization.interfaces import IExternalMappingDecorator
 
 from nti.links.links import Link
-
-from .courses import is_course_badge
-
-from . import VIEW_BADGES
 
 LINKS = StandardExternalFields.LINKS
 

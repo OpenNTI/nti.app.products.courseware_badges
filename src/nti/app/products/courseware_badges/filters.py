@@ -18,15 +18,15 @@ from pyramid.threadlocal import get_current_request
 
 from nti.app.products.badges.interfaces import IAssertionChange
 
+from nti.app.products.courseware_badges import show_course_badges
+
+from nti.app.products.courseware_badges.courses import is_course_badge
+
 from nti.appserver.interfaces import IPrincipalUGDFilter
 
 from nti.badges.interfaces import IBadgeClass
 
 from nti.dataserver.interfaces import IUser
-
-from . import show_course_badges
-
-from .courses import is_course_badge
 
 @component.adapter(IUser)
 @interface.implementer(IPrincipalUGDFilter)

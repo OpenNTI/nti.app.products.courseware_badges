@@ -49,6 +49,8 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseSubInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
+from nti.contenttypes.courses.utils import get_parent_course
+
 from nti.dataserver.dicts import LastModifiedDict
 
 from nti.dataserver.interfaces import IUser
@@ -74,7 +76,7 @@ def get_all_context_badges(context):
 		result.extend(get_course_badges(entry.ntiid))
 	if not result and ICourseSubInstance.providedBy(course):
 		# if no badges for subinstance then check main course
-		entry = ICourseCatalogEntry(course.__parent__.__parent__, None)
+		entry = ICourseCatalogEntry(get_parent_course(course), None)
 		if entry is not None:
 			result.extend(get_course_badges(entry.ntiid))
 	# for legacy badges scan the content packages
