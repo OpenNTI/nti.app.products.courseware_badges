@@ -18,12 +18,18 @@ from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCach
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import	ICourseCatalogEntry
+from nti.contenttypes.courses.interfaces import ICourseInstanceImportedEvent
 from nti.contenttypes.courses.interfaces import ICourseInstanceAvailableEvent
 
-@component.adapter(ICourseInstanceAvailableEvent)
-def _course_instance_available(event):
+@component.adapter(ICourseInstance, ICourseInstanceAvailableEvent)
+def _course_instance_available(course, event):
 	cache = component.getUtility(ICatalogEntryBadgeCache)
-	cache.build(event.object)
+	cache.build(course)
+
+@component.adapter(ICourseInstance, ICourseInstanceImportedEvent)
+def _course_instance_imported(course, event):
+	cache = component.getUtility(ICatalogEntryBadgeCache)
+	cache.build(course)
 
 @component.adapter(ICourseInstance, IObjectAddedEvent)
 def _on_course_instance_added(course, event):
