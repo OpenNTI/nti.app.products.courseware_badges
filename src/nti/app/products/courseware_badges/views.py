@@ -13,22 +13,24 @@ from pyramid.view import view_config
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
+from nti.app.products.courseware_badges import VIEW_BADGES
+from nti.app.products.courseware_badges import VIEW_EARNED_COURSE_BADGES
+
+from nti.app.products.courseware_badges import show_course_badges
+from nti.app.products.courseware_badges import get_earned_course_badges
+
+from nti.app.products.courseware_badges.interfaces import ICourseBadgeCatalog
+
 from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
-from nti.dataserver.interfaces import IUser
 from nti.dataserver import authorization as nauth
+
+from nti.dataserver.interfaces import IUser
 
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
-
-from .interfaces import ICourseBadgeCatalog
-
-from . import VIEW_BADGES
-from . import show_course_badges
-from . import get_earned_course_badges
-from . import VIEW_EARNED_COURSE_BADGES
 
 ITEMS = StandardExternalFields.ITEMS
 
@@ -72,7 +74,6 @@ class EarnedCourseBadgesView(AbstractAuthenticatedView):
 			badges = get_earned_course_badges(context)
 			items.extend(IBadgeClass(b) for b in badges)
 		result['Total'] = result['ItemCount'] = len(items)
-
 		result.__parent__ = context
 		result.__name__ = self.request.view_name
 		return result

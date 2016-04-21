@@ -9,8 +9,9 @@ __docformat__ = "restructuredtext en"
 
 from zope import interface
 
-from zope.interface.interface import taggedValue
 from zope.interface.common.mapping import IMapping
+
+from zope.interface.interface import taggedValue
 
 from zope.schema import vocabulary
 

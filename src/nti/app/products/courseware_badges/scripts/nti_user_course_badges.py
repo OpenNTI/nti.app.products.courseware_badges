@@ -12,12 +12,13 @@ logger = __import__('logging').getLogger(__name__)
 import os
 import argparse
 
+from nti.app.products.courseware_badges import get_course_badges_for_user
+
 from nti.dataserver.users import User
+
 from nti.dataserver.utils import run_with_dataserver
 from nti.dataserver.utils.base_script import set_site
 from nti.dataserver.utils.base_script import create_context
-
-from .. import get_course_badges_for_user
 
 def _process_args(args):
 	set_site(args.site)
