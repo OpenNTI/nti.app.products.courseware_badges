@@ -68,7 +68,6 @@ class EarnedCourseBadgesView(AbstractAuthenticatedView):
 	def __call__(self):
 		result = LocatedExternalDict()
 		result[ITEMS] = items = []
-
 		context = self.request.context
 		if self.remoteUser.username == context.username or show_course_badges(context):
 			badges = get_earned_course_badges(context)

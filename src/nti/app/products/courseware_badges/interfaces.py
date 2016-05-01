@@ -13,7 +13,8 @@ from zope.interface.common.mapping import IMapping
 
 from zope.interface.interface import taggedValue
 
-from zope.schema import vocabulary
+from zope.schema.vocabulary import SimpleTerm
+from zope.schema.vocabulary import SimpleVocabulary
 
 from nti.app.client_preferences.interfaces import TAG_EXTERNAL_PREFERENCE_GROUP
 
@@ -21,8 +22,7 @@ from nti.schema.field import Bool
 
 COURSE_COMPLETION = u'completion'
 COURSE_BADGE_TYPES = (COURSE_COMPLETION,)
-COURSE_BADGE_TYPES_VOCABULARY = \
-	vocabulary.SimpleVocabulary([vocabulary.SimpleTerm(_x) for _x in COURSE_BADGE_TYPES])
+COURSE_BADGE_TYPES_VOCABULARY = SimpleVocabulary([SimpleTerm(_x) for _x in COURSE_BADGE_TYPES])
 
 class ICourseBadgeSettings(interface.Interface):
 	"""

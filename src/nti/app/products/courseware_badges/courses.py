@@ -92,13 +92,13 @@ class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 	def Items(self):
 		result = {}
 		for k, v in self.items():
-			result[k] = list(v)
+			result[k] = tuple(v)
 		return result
 
 	@classmethod
 	def get_course_badge_names(cls, context):
 		badges = get_all_context_badges(context)
-		result = tuple(sorted([b.name for b in badges]))
+		result = tuple(sorted(b.name for b in badges))
 		return result
 
 	@CachedProperty("lastModified")
@@ -133,8 +133,11 @@ class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 		return result
 CatalogEntryBadgeCache = _CatalogEntryBadgeCache
 
+def get_badge_cache():
+	return component.getUtility(ICatalogEntryBadgeCache)
+
 def is_course_badge(name, cache=None):
-	cache = cache if cache is not None else component.getUtility(ICatalogEntryBadgeCache)
+	cache = cache if cache is not None else get_badge_cache()
 	result = cache.is_course_badge(name)
 	return result
 
@@ -146,7 +149,7 @@ class _CourseBadgeCatalog(object):
 
 	@Lazy
 	def cache(self):
-		result = component.getUtility(ICatalogEntryBadgeCache)
+		result = get_badge_cache()
 		return result
 
 	def iter_badges(self):
@@ -184,7 +187,7 @@ class _CoursePrincipalEarnedBadgeFilter(object):
 
 	@Lazy
 	def cache(self):
-		result = component.getUtility(ICatalogEntryBadgeCache)
+		result = get_badge_cache()
 		return result
 
 	def allow_badge(self, user, badge):
@@ -208,7 +211,7 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 
 	@Lazy
 	def _cache(self):
-		result = component.getUtility(ICatalogEntryBadgeCache)
+		result = get_badge_cache()
 		return result
 
 	def _startDate(self, entry):
@@ -224,7 +227,7 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 		result = find_catalog_entry(ntiid) if ntiid else None
 		if result is None:
 			ntiids = self._cache.get_badge_catalog_entry_ntiids(badge.name)
-			for ntiid in ntiids:
+			for ntiid in ntiids or ():
 				result = self._finder(ntiid)
 				if result is not None:
 					break
@@ -238,8 +241,9 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 			endDate = self._endDate(entry)
 			startDate = self._startDate(entry)
 			now = datetime.datetime.utcnow()
-			result = (entry is not None) and \
-					 (now >= startDate) and (not endDate or now <= endDate)
+			result = 	 (entry is not None) \
+					 and (now >= startDate) \
+					 and (not endDate or now <= endDate)
 		else:
 			result = True
 		return result

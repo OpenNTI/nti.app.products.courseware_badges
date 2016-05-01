@@ -20,10 +20,11 @@ from nti.badges.interfaces import IBadgeClass
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
-from nti.externalization.singleton import SingletonDecorator
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IExternalObjectDecorator
 from nti.externalization.interfaces import IExternalMappingDecorator
+
+from nti.externalization.singleton import SingletonDecorator
 
 from nti.links.links import Link
 
