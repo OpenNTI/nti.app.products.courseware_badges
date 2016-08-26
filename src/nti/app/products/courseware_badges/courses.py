@@ -40,9 +40,6 @@ from nti.app.products.courseware_badges.utils import find_course_badges_from_bad
 
 from nti.badges.openbadges.interfaces import IBadgeClass
 
-from nti.common.property import Lazy
-from nti.common.property import CachedProperty
-
 from nti.contenttypes.courses.common import get_course_packages
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -54,6 +51,9 @@ from nti.contenttypes.courses.utils import get_parent_course
 from nti.dataserver.dicts import LastModifiedDict
 
 from nti.dataserver.interfaces import IUser
+
+from nti.property.property import Lazy
+from nti.property.property import CachedProperty
 
 def get_course_badges(course_iden):
 	# CS: We want to make sure we always query the badges from the DB
