@@ -119,9 +119,7 @@ def proxy(badge, ntiid):
 	return CourseBadgeProxy(badge, ntiid)
 
 def catalog_entry(context):
-	if not ICourseCatalogEntry.providedBy(context):
-		context = ICourseCatalogEntry(context, None)
-	return context
+	return ICourseCatalogEntry(context, None)
 
 def find_catalog_entry(iden):
 	catalog = component.queryUtility(ICourseCatalog)
@@ -130,8 +128,7 @@ def find_catalog_entry(iden):
 			entry = catalog.getCatalogEntry(iden)
 		except KeyError:
 			entry = find_object_with_ntiid(iden) if is_valid_ntiid_string(iden) else None
-		entry = catalog_entry(entry)
-		return entry
+		return catalog_entry(entry)
 	return None
 
 def find_course_badges_from_badges(source_ntiid, source_badges=()):
