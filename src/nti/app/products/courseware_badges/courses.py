@@ -252,6 +252,11 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 @interface.implementer(IOpenBadgeAdapter)
 class _OpenBadgeAdapter(object):
 
+	__slots__ = ()
+
+	def __init__(self, *args, **kwargs):
+		pass
+
 	def adapt(self, context):
 		result = IBadgeClass(context, None)
 		if result is not None and hasattr(context, "SourceNTIID"):

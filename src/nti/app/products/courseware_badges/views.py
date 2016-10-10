@@ -33,6 +33,8 @@ from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
 
 ITEMS = StandardExternalFields.ITEMS
+TOTAL = StandardExternalFields.TOTAL
+ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 
 @view_config(route_name='objects.generic.traversal',
 			  context=ICourseInstance,
@@ -72,7 +74,7 @@ class EarnedCourseBadgesView(AbstractAuthenticatedView):
 		if self.remoteUser.username == context.username or show_course_badges(context):
 			badges = get_earned_course_badges(context)
 			items.extend(IBadgeClass(b) for b in badges)
-		result['Total'] = result['ItemCount'] = len(items)
+		result[TOTAL] = result[ITEM_COUNT] = len(items)
 		result.__parent__ = context
 		result.__name__ = self.request.view_name
 		return result
