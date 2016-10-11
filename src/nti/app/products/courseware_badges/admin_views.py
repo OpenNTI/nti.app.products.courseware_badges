@@ -11,6 +11,8 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import component
 
+from zope.intid.interfaces import IIntIds
+
 from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
@@ -28,7 +30,7 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.common.maps import CaseInsensitiveDict
 
-from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseCatalog, ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.dataserver import authorization as nauth
@@ -86,14 +88,20 @@ class ResetCourseBadgeCacheView(AbstractAuthenticatedView):
 class RebuildCourseBadgeCacheView(AbstractAuthenticatedView):
 
 	def __call__(self):
+		intids = component.getUtility(IIntIds)
 		cache = component.getUtility(ICatalogEntryBadgeCache)
 		cache.clear()
+		seen = set()
 		def _builder():
 			catalog = component.queryUtility(ICourseCatalog)
 			if catalog is None:
 				return
 			for entry in catalog.iterCatalogEntries():
-				cache.build(entry)
+				course = ICourseInstance(entry, None)
+				uid = intids.queryId(course)
+				if uid is not None and uid not in seen:
+					seen.add(uid)
+					cache.build(entry)
 		run_job_in_all_host_sites(_builder)
 		return hexc.HTTPNoContent()
 
