@@ -11,17 +11,21 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import component
 
+from zope.catalog.interfaces import ICatalog
+
+from zope.preference.interfaces import IPreferenceGroup
+
 from zope.security.interfaces import IParticipation
 from zope.security.management import endInteraction
 from zope.security.management import newInteraction
 from zope.security.management import restoreInteraction
 
-from zope.preference.interfaces import IPreferenceGroup
-
 from nti.app.products.badges import BADGES
 from nti.app.products.badges import get_badge
 from nti.app.products.badges import get_all_badges
 from nti.app.products.badges import assertion_exists
+
+from nti.app.products.courseware_badges.index import COURSE_BADGES_CATALOG_NAME
 
 from nti.app.products.courseware_badges.interfaces import ICourseBadgeCatalog
 
@@ -80,5 +84,7 @@ def get_earned_course_badges(user):
 	return result
 
 def get_catalog_entry_for_badge(badge):
-	entry = ICourseCatalogEntry(badge, None)
-	return entry
+	return ICourseCatalogEntry(badge, None)
+
+def get_course_badges_catalog():
+	return component.queryUtility(ICatalog, COURSE_BADGES_CATALOG_NAME)
