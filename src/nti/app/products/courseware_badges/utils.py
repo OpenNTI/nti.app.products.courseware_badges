@@ -162,18 +162,12 @@ def get_course_badges_map(context):
 		
 def find_course_badges_from_badges(source_ntiid, source_badges=()):
 	"""
-	return all course badges from the specified badge source iterable
-
-	if the source_ntiid is a catalog entry ntiid, we look at the course
-	vendor info (e.g. NTI/Badges) to find the badge names. otherwise
-	we use the badge image file names to determined a course badge.
-	The image file name of a course badge is 'root' course/content package NTIID plus
-	a period (.) plus course_{type}_badge
-	e.g tag_nextthought.com_2011-10_OU-HTML-CLC3403_LawAndJustice.course_completion_badge.png
-	that is the completion badge of the tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice
- 	course
+	return all course badges from the specified source ntiid from
+	the badge source iterable
  	"""
 
+	# 1. if the source_ntiid is a catalog entry ntiid, we look at the course
+	# vendor info (e.g. NTI/Badges) to find the badge names. 
 	result = []
 	entry = find_catalog_entry(source_ntiid)
 	if entry is not None:
@@ -189,9 +183,14 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 	if not is_valid_ntiid_string(source_ntiid):
 		return result
 
-	# Could not find badges in vendor info
-	# build possible ntiids based in the course entry ntiid
+	# 2. otherwise we use the badge image file names to determined a course badge.
+	# The image file name of a course badge is 'root' course/content package NTIID plus
+	# a period (.) plus course_{type}_badge
+	# e.g tag_nextthought.com_2011-10_OU-HTML-CLC3403_LawAndJustice.course_completion_badge.png
+	# that is the completion badge of the tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice course
+	
 	# This is LEGACY code
+	# build possible ntiids based in the course entry ntiid
 	badge_ntiids = set()
 	parts = get_parts(source_ntiid)
 	pre_specfic = '.'.join(parts.specific.split('.')[0:-1]) or parts.specific
