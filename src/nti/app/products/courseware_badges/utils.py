@@ -72,6 +72,9 @@ def get_base_image_filename(badge):
 
 type_pattern = re.compile("course_(.+)_badge", re.I | re.U)
 def get_badge_type_from_filename(filename):
+	"""
+	return if the badge type using the file name
+	"""
 	m = type_pattern.match(filename)
 	if m is not None:
 		result = m.groups()[0].lower()
@@ -80,16 +83,25 @@ def get_badge_type_from_filename(filename):
 	return result
 
 def get_badge_type(badge):
+	"""
+	return if the type of the specfied badge using is image file name
+	"""
 	filename = get_base_image_filename(badge)
 	result = get_badge_type_from_filename(filename)
 	return result
 
 filename_pattern = re.compile("(.+\.course_.+_badge$)|(.+\.course_badge$)", re.I | re.U)
 def is_course_badge_filename(filename):
+	"""
+	return if the specified filename correspond to a course badge
+	"""
 	result = filename_pattern.match(filename) if filename else None
 	return True if result else False
 
 def is_course_badge(badge):
+	"""
+	return if the specified badge is a couse badge using the badge image filename
+	"""
 	filename = get_base_image_filename(badge)
 	result = is_course_badge_filename(filename)
 	return result
@@ -97,6 +109,10 @@ def is_course_badge(badge):
 _all_badge_types = tuple(['course_%s_badge' % x for x in COURSE_BADGE_TYPES] + ['course_badge'])
 
 def find_course_badges_from_entry(context):
+	"""
+	scan the vendor info from the specified course and return the element
+	at the NTI/Badges entry
+	"""
 	course = ICourseInstance(context, None)
 	vendor_info = get_course_vendor_info(course, False) or {}
 	result = traverse(vendor_info, 'NTI/Badges', default=None)
@@ -131,6 +147,19 @@ def find_catalog_entry(iden):
 		return catalog_entry(entry)
 	return None
 
+def get_course_badges_map(context):
+	badges = find_course_badges_from_entry(context)
+	if not isinstance(badges, Mapping):
+		if isinstance(badges, six.string_types):
+			# a single string it's the badge name
+			badges = {badges:COURSE_COMPLETION}
+		elif is_nonstr_iter(badges):
+			# a list of badge names
+			badges = {x:COURSE_COMPLETION for x in badges}
+		else: # can't resolve
+			badges = dict()
+	return badges
+		
 def find_course_badges_from_badges(source_ntiid, source_badges=()):
 	"""
 	return all course badges from the specified badge source iterable
@@ -146,25 +175,13 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
  	"""
 
 	result = []
-	badge_ntiids = set()
 	entry = find_catalog_entry(source_ntiid)
 	if entry is not None:
-		badges = find_course_badges_from_entry(entry)
-		if isinstance(badges, Mapping):
-			# keys of the map are the badge names
-			# the values are the badge types
-			badge_ntiids.update(badges.keys())
-		elif is_nonstr_iter(badges):
-			# the iterable contains the badge names
-			badge_ntiids.update(badges)
-		elif isinstance(badges, six.string_types):
-			# a single string it's the badge name
-			badge_ntiids.add(badges)
-
+		badges = get_course_badges_map(entry)
 		# make sure the badge ids in vendor-info are valid
-		for badge in source_badges:
+		for badge in source_badges or ():
 			ntiid = get_base_image_filename(badge)
-			if badge.name in badge_ntiids or ntiid in badge_ntiids:
+			if badge.name in badges or ntiid in badges:
 				result.append(proxy(badge, source_ntiid))
 		if result:
 			return result
@@ -174,7 +191,8 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 
 	# Could not find badges in vendor info
 	# build possible ntiids based in the course entry ntiid
-	badge_ntiids.clear()
+	# This is LEGACY code
+	badge_ntiids = set()
 	parts = get_parts(source_ntiid)
 	pre_specfic = '.'.join(parts.specific.split('.')[0:-1]) or parts.specific
 	for subtype in _all_badge_types:
