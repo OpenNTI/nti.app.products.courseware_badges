@@ -89,7 +89,7 @@ class CourseBadgesIndex(AttributeSetIndex):
 class CourseBadgesCatalog(Catalog):
 	pass
 
-def install_courses_catalog(site_manager_container, intids=None):
+def install_course_badges_catalog(site_manager_container, intids=None):
 	lsm = site_manager_container.getSiteManager()
 	intids = lsm.getUtility(IIntIds) if intids is None else intids
 	catalog = lsm.queryUtility(ICatalog, name=COURSE_BADGES_CATALOG_NAME)
