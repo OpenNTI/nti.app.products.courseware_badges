@@ -19,6 +19,8 @@ from zope.location import locate
 
 from nti.app.products.courseware_badges.utils import get_course_badges_map
 
+from nti.common.string import to_unicode
+
 from nti.contenttypes.courses.common import get_course_site
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -58,7 +60,7 @@ class ValidatingCatalogEntryID(object):
 		if ICourseInstance.providedBy(obj):
 			entry = ICourseCatalogEntry(obj, None)
 			if entry is not None:
-				self.ntiid = unicode(entry.ntiid)
+				self.ntiid = to_unicode(entry.ntiid)
 
 	def __reduce__(self):
 		raise TypeError()
@@ -74,7 +76,7 @@ class ValidatingCourseBadges(object):
 	def __init__(self, obj, default=None):
 		if ICourseInstance.providedBy(obj):
 			badges = get_course_badges_map(obj)
-			self.badges = self.badges if badges else ()
+			self.badges = list(self.badges.keys()) if badges else ()
 
 	def __reduce__(self):
 		raise TypeError()
