@@ -45,6 +45,8 @@ from nti.externalization.interfaces import StandardExternalFields
 from nti.site.hostpolicy import run_job_in_all_host_sites
 
 ITEMS = StandardExternalFields.ITEMS
+TOTAL = StandardExternalFields.TOTAL
+ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 
 @view_config(name="CourseBadgeCache")
 @view_config(name="course_badge_cache")
@@ -130,5 +132,5 @@ class UserCourseBadgesView(AbstractAuthenticatedView):
 		for course, badges in universe:
 			ntiid = ICourseCatalogEntry(course).ntiid
 			items[ntiid] = [to_external_object(IBadgeClass(x)) for x in badges]
-		result['Total'] = result['ItemCount'] = len(items)
+		result[TOTAL] = result[ITEM_COUNT] = len(items)
 		return result
