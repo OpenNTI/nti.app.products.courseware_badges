@@ -30,7 +30,8 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.common.maps import CaseInsensitiveDict
 
-from nti.contenttypes.courses.interfaces import ICourseCatalog, ICourseInstance
+from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.dataserver import authorization as nauth
