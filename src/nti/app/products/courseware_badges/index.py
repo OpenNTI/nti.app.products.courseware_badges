@@ -17,7 +17,8 @@ from zope.intid.interfaces import IIntIds
 
 from zope.location import locate
 
-from nti.app.products.courseware_badges.courses import get_all_context_badges
+#from nti.app.products.courseware_badges.utils import get_all_context_badges
+from nti.app.products.courseware_badges.utils import get_course_badges_map
 
 from nti.common.string import to_unicode
 
@@ -41,7 +42,7 @@ class ValidatingCourseSiteName(object):
 
 	__slots__ = (b'site',)
 
-	def __init__(self, obj, default=None):
+	def __init__(self, obj, unused_default=None):
 		if ICourseInstance.providedBy(obj):
 			self.site = get_course_site(obj)
 
@@ -56,7 +57,7 @@ class ValidatingCatalogEntryID(object):
 
 	__slots__ = (b'ntiid',)
 
-	def __init__(self, obj, default=None):
+	def __init__(self, obj, unused_default=None):
 		if ICourseInstance.providedBy(obj):
 			entry = ICourseCatalogEntry(obj, None)
 			if entry is not None:
@@ -73,10 +74,12 @@ class ValidatingCourseBadges(object):
 
 	__slots__ = (b'badges',)
 
-	def __init__(self, obj, default=None):
+	def __init__(self, obj, unused_default=None):
 		if ICourseInstance.providedBy(obj):
-			badges = get_all_context_badges( obj )
-			self.badges = list((x.name for x in badges)) if badges else ()
+			badges = get_course_badges_map(obj)
+			self.badges = list(badges.keys()) if badges else ()
+# 			badges = get_all_context_badges( obj )
+# 			self.badges = list((x.name for x in badges)) if badges else ()
 
 	def __reduce__(self):
 		raise TypeError()
