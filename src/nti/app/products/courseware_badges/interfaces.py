@@ -9,6 +9,8 @@ __docformat__ = "restructuredtext en"
 
 from zope import interface
 
+from zope.deprecation import deprecated
+
 from zope.interface.common.mapping import IMapping
 
 from zope.interface.interface import taggedValue
@@ -41,6 +43,7 @@ class ICourseBadgeCatalog(interface.Interface):
 		Return an iterable of badges for a course
 		"""
 
+deprecated('ICatalogEntryBadgeCache', 'Use lastest index implementation')
 class ICatalogEntryBadgeCache(IMapping):
 	"""
 	Marker interface for a course badges cache utility
