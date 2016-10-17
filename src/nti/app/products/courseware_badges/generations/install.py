@@ -9,13 +9,15 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-generation = 2
+generation = 3
 
 from zope.generations.generations import SchemaManager
 
 from zope.intid.interfaces import IIntIds
 
 from nti.app.products.courseware_badges.courses import CatalogEntryBadgeCache
+
+from nti.app.products.courseware_badges.index import install_course_badges_catalog
 
 from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
 
@@ -31,11 +33,11 @@ class _CoursewareBadgesSchemaManager(SchemaManager):
 
 def evolve(context):
 	install_course_badge_cache(context)
+	install_catalog(context)
 
 def install_course_badge_cache(context):
 	conn = context.connection
 	root = conn.root()
-
 	dataserver_folder = root['nti.dataserver']
 	lsm = dataserver_folder.getSiteManager()
 	cache = lsm.queryUtility(ICatalogEntryBadgeCache)
@@ -47,3 +49,11 @@ def install_course_badge_cache(context):
 		intids.register(cache)
 		lsm.registerUtility(cache, provided=ICatalogEntryBadgeCache)
 	return cache
+
+def install_catalog(context):
+	conn = context.connection
+	root = conn.root()
+	dataserver_folder = root['nti.dataserver']
+	lsm = dataserver_folder.getSiteManager()
+	intids = lsm.getUtility(IIntIds)
+	install_course_badges_catalog(dataserver_folder, intids)

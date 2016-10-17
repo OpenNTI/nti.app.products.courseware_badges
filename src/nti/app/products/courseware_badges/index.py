@@ -17,8 +17,7 @@ from zope.intid.interfaces import IIntIds
 
 from zope.location import locate
 
-#from nti.app.products.courseware_badges.utils import get_all_context_badges
-from nti.app.products.courseware_badges.utils import get_course_badges_map
+from nti.app.products.courseware_badges.utils import get_all_context_badges
 
 from nti.common.string import to_unicode
 
@@ -76,10 +75,8 @@ class ValidatingCourseBadges(object):
 
 	def __init__(self, obj, unused_default=None):
 		if ICourseInstance.providedBy(obj):
-			badges = get_course_badges_map(obj)
-			self.badges = list(badges.keys()) if badges else ()
-# 			badges = get_all_context_badges( obj )
-# 			self.badges = list((x.name for x in badges)) if badges else ()
+			badges = get_all_context_badges( obj )
+			self.badges = list((x.name for x in badges)) if badges else ()
 
 	def __reduce__(self):
 		raise TypeError()

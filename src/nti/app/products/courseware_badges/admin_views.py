@@ -22,6 +22,7 @@ from nti.app.base.abstract_views import AbstractAuthenticatedView
 
 from nti.app.products.badges.views import BadgeAdminPathAdapter
 
+from nti.app.products.courseware_badges import get_course_badges_catalog
 from nti.app.products.courseware_badges import get_universe_of_course_badges_for_user
 
 from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
@@ -67,20 +68,6 @@ class CourseBadgeCacheView(AbstractAuthenticatedView):
 		self.request.response.last_modified = cache.lastModified
 		return result
 
-@view_config(name='ResetCourseBadgeCache')
-@view_config(name='reset_course_badge_cache')
-@view_defaults(route_name='objects.generic.traversal',
-			   context=BadgeAdminPathAdapter,
-			   request_method='POST',
-			   permission=nauth.ACT_NTI_ADMIN,
-				renderer='rest')
-class ResetCourseBadgeCacheView(AbstractAuthenticatedView):
-
-	def __call__(self):
-		cache = component.getUtility(ICatalogEntryBadgeCache)
-		cache.clear()
-		return hexc.HTTPNoContent()
-
 @view_config(name='RebuildCourseBadgeCache')
 @view_config(name='rebuild_course_badge_cache')
 @view_defaults(route_name='objects.generic.traversal',
@@ -92,8 +79,7 @@ class RebuildCourseBadgeCacheView(AbstractAuthenticatedView):
 
 	def __call__(self):
 		intids = component.getUtility(IIntIds)
-		cache = component.getUtility(ICatalogEntryBadgeCache)
-		cache.clear()
+		badge_catalog = get_course_badges_catalog()
 		seen = set()
 		def _builder():
 			catalog = component.queryUtility(ICourseCatalog)
@@ -104,7 +90,7 @@ class RebuildCourseBadgeCacheView(AbstractAuthenticatedView):
 				uid = intids.queryId(course)
 				if uid is not None and uid not in seen:
 					seen.add(uid)
-					cache.build(entry)
+					badge_catalog.index_doc(uid, course)
 		run_job_in_all_host_sites(_builder)
 		return hexc.HTTPNoContent()
 

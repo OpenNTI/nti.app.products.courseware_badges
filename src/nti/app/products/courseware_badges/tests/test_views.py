@@ -17,9 +17,12 @@ import fudge
 
 from zope import component
 
-from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
+from zope.intid.interfaces import IIntIds
+
+from nti.app.products.courseware_badges import get_course_badges_catalog
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseInstance
 
 from nti.dataserver.users import User
 
@@ -40,9 +43,13 @@ class TestViews(ApplicationLayerTest):
 	def _populate_cache(self):
 		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
 			catalog = component.getUtility(ICourseCatalog)
+			intids = component.getUtility(IIntIds)
+			badges_catalog = get_course_badges_catalog()
 			for entry in catalog.iterCatalogEntries():
-				cache = component.getUtility(ICatalogEntryBadgeCache)
-				cache.build(entry)
+				course = ICourseInstance(entry)
+				doc_id = intids.queryId(course)
+				if doc_id is not None:
+					badges_catalog.index_doc(doc_id, course)
 
 	@WithSharedApplicationMockDS(users=True, testapp=True)
 	@fudge.patch('nti.app.products.courseware_badges.views.show_course_badges')

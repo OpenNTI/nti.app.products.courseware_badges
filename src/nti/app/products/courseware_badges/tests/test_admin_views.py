@@ -13,9 +13,12 @@ from hamcrest import assert_that
 
 from zope import component
 
-from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
+from zope.intid.interfaces import IIntIds
+
+from nti.app.products.courseware_badges import get_course_badges_catalog
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseInstance
 
 from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
 
@@ -28,32 +31,32 @@ class TestAdminViews(ApplicationLayerTest):
 
 	layer = CourseBadgesApplicationTestLayer
 
+	default_origin = b'http://janux.ou.edu'
+
 	def _populate_cache(self):
 		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
 			catalog = component.getUtility(ICourseCatalog)
+			intids = component.getUtility(IIntIds)
+			badges_catalog = get_course_badges_catalog()
 			for entry in catalog.iterCatalogEntries():
-				cache = component.getUtility(ICatalogEntryBadgeCache)
-				cache.build(entry)
-				
+				course = ICourseInstance(entry)
+				doc_id = intids.queryId(course)
+				if doc_id is not None:
+					badges_catalog.index_doc(doc_id, course)
+
 	@WithSharedApplicationMockDS(users=True, testapp=True)
 	def test_views(self):
-		# populate cache because badges are loaded after the library 
+		# Since we plug our badges in after course layer is synced, we
+		# need to rebuild our cache here.
 		self._populate_cache()
-	
+
 		get_path = '/dataserver2/BadgeAdmin/CourseBadgeCache'
 		res = self.testapp.get(get_path)
 		assert_that(res.json_body, has_entry('Items', has_length(3)))
 
-		reset_path = '/dataserver2/BadgeAdmin/ResetCourseBadgeCache'
-		self.testapp.post_json(reset_path, status=204 )
-		
-		get_path = '/dataserver2/BadgeAdmin/CourseBadgeCache'
-		res = self.testapp.get(get_path)
-		assert_that(res.json_body, has_entry('Items', has_length(0)))
-		
 		rebuild_path = '/dataserver2/BadgeAdmin/RebuildCourseBadgeCache'
 		self.testapp.post(rebuild_path, status=204)
-		
+
 		get_path = '/dataserver2/BadgeAdmin/CourseBadgeCache'
 		res = self.testapp.get(get_path)
 		assert_that(res.json_body, has_entry('Items', has_length(3)))

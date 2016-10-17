@@ -11,34 +11,18 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import component
 
-from zope.lifecycleevent.interfaces import IObjectAddedEvent
-from zope.lifecycleevent.interfaces import IObjectRemovedEvent
+from zope.intid.interfaces import IIntIds
 
-from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
+from nti.app.products.courseware_badges import get_course_badges_catalog
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
-from nti.contenttypes.courses.interfaces import	ICourseCatalogEntry
-from nti.contenttypes.courses.interfaces import ICourseInstanceImportedEvent
 from nti.contenttypes.courses.interfaces import ICourseInstanceAvailableEvent
 
 @component.adapter(ICourseInstance, ICourseInstanceAvailableEvent)
 def _course_instance_available(course, event):
-	cache = component.getUtility(ICatalogEntryBadgeCache)
-	cache.build(course)
-
-@component.adapter(ICourseInstance, ICourseInstanceImportedEvent)
-def _course_instance_imported(course, event):
-	cache = component.getUtility(ICatalogEntryBadgeCache)
-	cache.build(course)
-
-@component.adapter(ICourseInstance, IObjectAddedEvent)
-def _on_course_instance_added(course, event):
-	cache = component.getUtility(ICatalogEntryBadgeCache)
-	cache.build(course)
-
-@component.adapter(ICourseInstance, IObjectRemovedEvent)
-def _on_course_instance_removed(course, event):
-	cache = component.getUtility(ICatalogEntryBadgeCache)
-	entry = ICourseCatalogEntry(course, None)
-	if entry is not None and entry.ntiid in cache:
-		del cache[entry.ntiid]
+	catalog = get_course_badges_catalog()
+	if catalog is not None:
+		intids = component.getUtility( IIntIds )
+		doc_id = intids.queryId( course )
+		if doc_id is not None:
+			catalog.index_doc(doc_id, course)

@@ -22,6 +22,8 @@ from zope.traversing.api import traverse
 
 from pyramid.compat import is_nonstr_iter
 
+from nti.app.products.courseware_badges import get_all_badges
+
 from nti.app.products.courseware_badges.interfaces import COURSE_COMPLETION
 from nti.app.products.courseware_badges.interfaces import COURSE_BADGE_TYPES
 
@@ -29,9 +31,14 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.contenttypes.courses import get_course_vendor_info
 
+from nti.contenttypes.courses.common import get_course_packages
+
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
+from nti.contenttypes.courses.interfaces import ICourseSubInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
+
+from nti.contenttypes.courses.utils import get_parent_course
 
 from nti.ntiids.ntiids import get_parts
 from nti.ntiids.ntiids import make_ntiid
@@ -159,7 +166,37 @@ def get_course_badges_map(context):
 		else: # can't resolve
 			badges = dict()
 	return badges
-		
+
+def get_course_badges(course_iden):
+	# CS: We want to make sure we always query the badges from the DB
+	# in order to return new objects all the time, so they can be
+	# proxied appropriately for the course in case multiple courses
+	# shared a badge
+	result = find_course_badges_from_badges(course_iden, get_all_badges())
+	return result
+
+def entry_ntiid(context):
+	entry = catalog_entry(context)
+	result = entry.ntiid if entry is not None else None
+	return result
+
+def get_all_context_badges(context):
+	result = []
+	entry = catalog_entry(context)
+	course = ICourseInstance(context, None)
+	if entry is not None:
+		result.extend(get_course_badges(entry.ntiid))
+	if not result and ICourseSubInstance.providedBy(course):
+		# if no badges for subinstance then check main course
+		entry = ICourseCatalogEntry(get_parent_course(course), None)
+		if entry is not None:
+			result.extend(get_course_badges(entry.ntiid))
+	# for legacy badges scan the content packages
+	if not result and course is not None:
+		for pack in get_course_packages(course):
+			result.extend(get_course_badges(pack.ntiid))
+	return result
+
 def find_course_badges_from_badges(source_ntiid, source_badges=()):
 	"""
 	return all course badges from the specified source ntiid from
@@ -167,7 +204,7 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
  	"""
 
 	# 1. if the source_ntiid is a catalog entry ntiid, we look at the course
-	# vendor info (e.g. NTI/Badges) to find the badge names. 
+	# vendor info (e.g. NTI/Badges) to find the badge names.
 	result = []
 	entry = find_catalog_entry(source_ntiid)
 	if entry is not None:
@@ -188,7 +225,7 @@ def find_course_badges_from_badges(source_ntiid, source_badges=()):
 	# a period (.) plus course_{type}_badge
 	# e.g tag_nextthought.com_2011-10_OU-HTML-CLC3403_LawAndJustice.course_completion_badge.png
 	# that is the completion badge of the tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice course
-	
+
 	# This is LEGACY code
 	# build possible ntiids based in the course entry ntiid
 	badge_ntiids = set()

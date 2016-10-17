@@ -17,12 +17,16 @@ from hamcrest import has_entries
 
 from zope import component
 
+from zope.intid.interfaces import IIntIds
+
 from nti.badges.interfaces import IBadgeClass
 
-from nti.app.products.courseware_badges.courses import get_course_badges
-from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
+from nti.app.products.courseware_badges import get_course_badges_catalog
+
+from nti.app.products.courseware_badges.utils import get_course_badges
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseInstance
 
 from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
 
@@ -44,9 +48,13 @@ class TestCourses(ApplicationLayerTest):
 	def _populate_cache(self):
 		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
 			catalog = component.getUtility(ICourseCatalog)
+			intids = component.getUtility(IIntIds)
+			badges_catalog = get_course_badges_catalog()
 			for entry in catalog.iterCatalogEntries():
-				cache = component.getUtility(ICatalogEntryBadgeCache)
-				cache.build(entry)
+				course = ICourseInstance(entry)
+				doc_id = intids.queryId(course)
+				if doc_id is not None:
+					badges_catalog.index_doc(doc_id, course)
 
 	@WithMockDSTrans
 	def test_get_course_badges(self):
