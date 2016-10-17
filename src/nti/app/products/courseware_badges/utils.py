@@ -151,7 +151,7 @@ def find_catalog_entry(iden):
 			entry = catalog.getCatalogEntry(iden)
 		except KeyError:
 			entry = find_object_with_ntiid(iden) if is_valid_ntiid_string(iden) else None
-		return catalog_entry(entry)
+		return ICourseCatalogEntry(entry, None)
 	return None
 
 def get_course_badges_map(context):
@@ -182,7 +182,7 @@ def entry_ntiid(context):
 
 def get_all_context_badges(context):
 	result = []
-	entry = catalog_entry(context)
+	entry = ICourseCatalogEntry(context, None)
 	course = ICourseInstance(context, None)
 	if entry is not None:
 		result.extend(get_course_badges(entry.ntiid))

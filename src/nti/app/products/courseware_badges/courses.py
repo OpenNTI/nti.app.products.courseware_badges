@@ -38,8 +38,6 @@ from nti.app.products.courseware_badges.interfaces import ICourseBadgeCatalog
 from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
 
 from nti.app.products.courseware_badges.utils import proxy
-from nti.app.products.courseware_badges.utils import entry_ntiid
-from nti.app.products.courseware_badges.utils import catalog_entry
 from nti.app.products.courseware_badges.utils import find_catalog_entry
 
 from nti.badges.openbadges.interfaces import IBadgeClass
@@ -130,8 +128,8 @@ class _CourseBadgeCatalog(object):
 
 	def iter_badges(self):
 		result = []
-		entry = catalog_entry(self.context)
-		ntiid = entry_ntiid(entry) or u''
+		entry = ICourseCatalogEntry(self.context, None)
+		ntiid = getattr(entry, 'ntiid', None) or u''
 		for name in self.cache.get_badge_names(ntiid):
 			badge = get_badge(name)
 			if badge is not None:
@@ -207,7 +205,7 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 				result = self._finder(ntiid)
 				if result is not None:
 					break
-		result = catalog_entry(result)
+		result = ICourseCatalogEntry(result, None)
 		return result
 
 	def allow_badge(self, user, badge):
