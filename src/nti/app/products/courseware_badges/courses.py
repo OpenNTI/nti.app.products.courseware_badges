@@ -49,11 +49,35 @@ from nti.dataserver.dicts import LastModifiedDict
 
 from nti.dataserver.interfaces import IUser
 
-from nti.ntiids.ntiids import find_object_with_ntiid
-
-from nti.property.property import Lazy
-
 from nti.site.site import get_component_hierarchy_names
+
+def get_badge_catalog_entry_ntiids(name):
+	result = []
+	intids = component.getUtility(IIntIds)
+	badge_index = get_course_badges_catalog()[IX_BADGES]
+	course_uids = badge_index.values_to_documents.get(name)
+	for course_uid in course_uids or ():
+		course = intids.queryObject(course_uid)
+		if ICourseInstance.providedBy(course):
+			entry = ICourseCatalogEntry(course)
+			result.append(entry.ntiid)
+	return result
+
+def is_course_badge(name, *args):
+	return bool(get_badge_catalog_entry_ntiids(name))
+
+def get_badge_names(ntiid, intids=None):
+	result = ()
+	entry = find_catalog_entry(ntiid)
+	intids = component.getUtility(IIntIds) if intids is None else intids
+	if entry is not None:
+		course = ICourseInstance(entry)
+		course_uid = intids.queryId(course)
+		badge_index = get_course_badges_catalog()[IX_BADGES]
+		if course_uid is not None:
+			badge_names = badge_index.documents_to_values.get(course_uid)
+			result = tuple(badge_names or ())
+	return result
 
 @interface.implementer(ICatalogEntryBadgeCache)
 class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
@@ -68,69 +92,36 @@ class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 		for doc_id in catalog.apply(query) or ():
 			course = intids.queryObject(doc_id)
 			if ICourseInstance.providedBy(course):
-				entry = ICourseCatalogEntry( course )
-				badge_names = self.get_badge_names( entry.ntiid, intids=intids )
+				entry = ICourseCatalogEntry(course)
+				badge_names = get_badge_names(entry.ntiid, intids=intids)
 				if badge_names:
 					result[entry.ntiid] = badge_names
 		return result
 
 	def get_badge_names(self, ntiid, intids=None):
-		entry = find_object_with_ntiid( ntiid )
-		if entry is None:
-			return ()
-		course = ICourseInstance( entry )
-		catalog = get_course_badges_catalog()
-		badge_index = catalog[IX_BADGES]
-		intids = component.getUtility(IIntIds) if not intids else intids
-		course_uid = intids.queryId( course )
-		result = ()
-		if course_uid is not None:
-			badge_names = badge_index.documents_to_values.get( course_uid )
-			result = tuple( badge_names or () )
-		return result
+		return get_badge_names(ntiid, intids)
 
 	def get_badge_catalog_entry_ntiids(self, name):
-		catalog = get_course_badges_catalog()
-		badge_index = catalog[IX_BADGES]
-		intids = component.getUtility(IIntIds)
-		course_uids = badge_index.values_to_documents.get( name )
-		result = []
-		for course_uid in course_uids or ():
-			course = intids.queryObject( course_uid )
-			if course is not None:
-				entry = ICourseCatalogEntry( course )
-				result.append( entry.ntiid )
-		return result
+		return get_badge_catalog_entry_ntiids(name)
 
 	def is_course_badge(self, name):
-		return bool( self.get_badge_catalog_entry_ntiids( name ) )
+		return bool(get_badge_catalog_entry_ntiids(name))
 
 CatalogEntryBadgeCache = _CatalogEntryBadgeCache
-
-def get_badge_cache():
-	return component.getUtility(ICatalogEntryBadgeCache)
-
-def is_course_badge(name, cache=None):
-	cache = cache if cache is not None else get_badge_cache()
-	result = cache.is_course_badge(name)
-	return result
 
 @interface.implementer(ICourseBadgeCatalog)
 class _CourseBadgeCatalog(object):
 
+	__slots__ = ('context',)
+
 	def __init__(self, context):
 		self.context = context
-
-	@Lazy
-	def cache(self):
-		result = get_badge_cache()
-		return result
 
 	def iter_badges(self):
 		result = []
 		entry = ICourseCatalogEntry(self.context, None)
 		ntiid = getattr(entry, 'ntiid', None) or u''
-		for name in self.cache.get_badge_names(ntiid):
+		for name in get_badge_names(ntiid):
 			badge = get_badge(name)
 			if badge is not None:
 				badge = proxy(badge, ntiid)
@@ -141,6 +132,8 @@ class _CourseBadgeCatalog(object):
 @interface.implementer(IPrincipalErnableBadges)
 class _CourseErnableBadges(object):
 
+	__slots__ = ('user',)
+		
 	def __init__(self, user):
 		self.user = user
 
@@ -156,13 +149,10 @@ class _CourseErnableBadges(object):
 @interface.implementer(IPrincipalEarnedBadgeFilter)
 class _CoursePrincipalEarnedBadgeFilter(object):
 
+	__slots__ = ()
+
 	def __init__(self, *args, **kwargs):
 		pass
-
-	@Lazy
-	def cache(self):
-		result = get_badge_cache()
-		return result
 
 	def allow_badge(self, user, badge):
 		result = False
@@ -170,7 +160,7 @@ class _CoursePrincipalEarnedBadgeFilter(object):
 		if req is not None:
 			if req.authenticated_userid == user.username:
 				result = True
-			elif self.cache.is_course_badge(badge.name):
+			elif is_course_badge(badge.name):
 				result = show_course_badges(user)
 			else:
 				result = True
@@ -180,13 +170,10 @@ class _CoursePrincipalEarnedBadgeFilter(object):
 @interface.implementer(IPrincipalEarnableBadgeFilter)
 class _CoursePrincipalEarnableBadgeFilter(object):
 
+	__slots__ = ()
+
 	def __init__(self, *args, **kwargs):
 		pass
-
-	@Lazy
-	def _cache(self):
-		result = get_badge_cache()
-		return result
 
 	def _startDate(self, entry):
 		result = entry.StartDate if entry is not None else None
@@ -200,8 +187,8 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 		ntiid = getattr(badge, 'SourceNTIID', None)
 		result = find_catalog_entry(ntiid) if ntiid else None
 		if result is None:
-			ntiids = self._cache.get_badge_catalog_entry_ntiids(badge.name)
-			for ntiid in ntiids or ():
+			ntiids = get_badge_catalog_entry_ntiids(badge.name)
+			for ntiid in ntiids or (): # find first
 				result = find_catalog_entry(ntiid)
 				if result is not None:
 					break
@@ -209,9 +196,9 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 		return result
 
 	def allow_badge(self, user, badge):
-		is_course_badge = self._cache.is_course_badge(badge.name)
-		entry = self._get_entry(badge) if is_course_badge else None
-		if is_course_badge:
+		is_cb = is_course_badge(badge.name)
+		entry = self._get_entry(badge) if is_cb else None
+		if is_cb:
 			endDate = self._endDate(entry)
 			startDate = self._startDate(entry)
 			now = datetime.datetime.utcnow()
