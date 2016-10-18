@@ -22,8 +22,6 @@ from zope.intid.interfaces import IIntIds
 
 from pyramid.threadlocal import get_current_request
 
-from persistent.persistence import Persistent
-
 from nti.app.products.badges import get_badge
 
 from nti.app.products.badges.interfaces import IOpenBadgeAdapter
@@ -47,6 +45,8 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
+
+from nti.dataserver.dicts import LastModifiedDict
 
 from nti.dataserver.interfaces import IUser
 
@@ -211,5 +211,5 @@ class _OpenBadgeAdapter(object):
 		return result
 
 deprecated('_CatalogEntryBadgeCache', 'Use lastest index implementation')
-class _CatalogEntryBadgeCache(Persistent, Contained):
+class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 	pass
