@@ -145,14 +145,15 @@ def catalog_entry(context):
 	return ICourseCatalogEntry(context, None)
 
 def find_catalog_entry(iden):
-	catalog = component.queryUtility(ICourseCatalog)
-	if catalog is not None:
+	result = find_object_with_ntiid(iden)
+	result = ICourseCatalogEntry(result, None)
+	if result is None:
 		try:
-			entry = catalog.getCatalogEntry(iden)
+			catalog = component.queryUtility(ICourseCatalog)
+			result = catalog.getCatalogEntry(iden)
 		except KeyError:
-			entry = find_object_with_ntiid(iden) if is_valid_ntiid_string(iden) else None
-		return ICourseCatalogEntry(entry, None)
-	return None
+			result = None
+	return result
 
 def get_course_badges_map(context):
 	badges = find_course_badges_from_entry(context)
