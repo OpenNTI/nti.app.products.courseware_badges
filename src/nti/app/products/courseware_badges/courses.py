@@ -79,6 +79,21 @@ def get_badge_names(ntiid, intids=None):
 			result = tuple(badge_names or ())
 	return result
 
+def course_badge_cache():
+	result = dict()
+	sites = get_component_hierarchy_names()
+	query = { IX_SITE: {'any_of': sites} }
+	catalog = get_course_badges_catalog()
+	intids = component.getUtility(IIntIds)
+	for doc_id in catalog.apply(query) or ():
+		course = intids.queryObject(doc_id)
+		if ICourseInstance.providedBy(course):
+			entry = ICourseCatalogEntry(course)
+			badge_names = get_badge_names(entry.ntiid, intids=intids)
+			if badge_names:
+				result[entry.ntiid] = badge_names
+	return result
+
 @interface.implementer(ICatalogEntryBadgeCache)
 class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
 

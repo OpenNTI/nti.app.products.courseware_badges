@@ -25,7 +25,7 @@ from nti.app.products.badges.views import BadgeAdminPathAdapter
 from nti.app.products.courseware_badges import get_course_badges_catalog
 from nti.app.products.courseware_badges import get_universe_of_course_badges_for_user
 
-from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
+from nti.app.products.courseware_badges.courses import course_badge_cache
 
 from nti.badges.openbadges.interfaces import IBadgeClass
 
@@ -60,12 +60,10 @@ ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 class CourseBadgeCacheView(AbstractAuthenticatedView):
 
 	def __call__(self):
-		cache = component.getUtility(ICatalogEntryBadgeCache)
 		result = LocatedExternalDict()
-		result[ITEMS] = cache.Items
+		result[ITEMS] = course_badge_cache()
 		result.__parent__ = self.request.context
 		result.__name__ = self.request.view_name
-		self.request.response.last_modified = cache.lastModified
 		return result
 
 @view_config(name='RebuildCourseBadgeCache')
