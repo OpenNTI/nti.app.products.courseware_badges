@@ -202,7 +202,7 @@ class _CoursePrincipalEarnableBadgeFilter(object):
 		if result is None:
 			ntiids = self._cache.get_badge_catalog_entry_ntiids(badge.name)
 			for ntiid in ntiids or ():
-				result = self._finder(ntiid)
+				result = find_catalog_entry(ntiid)
 				if result is not None:
 					break
 		result = ICourseCatalogEntry(result, None)
