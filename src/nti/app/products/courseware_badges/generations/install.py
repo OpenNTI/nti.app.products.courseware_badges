@@ -15,11 +15,7 @@ from zope.generations.generations import SchemaManager
 
 from zope.intid.interfaces import IIntIds
 
-from nti.app.products.courseware_badges.courses import CatalogEntryBadgeCache
-
 from nti.app.products.courseware_badges.index import install_course_badges_catalog
-
-from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
 
 class _CoursewareBadgesSchemaManager(SchemaManager):
 	"""
@@ -31,25 +27,6 @@ class _CoursewareBadgesSchemaManager(SchemaManager):
 									minimum_generation=generation,
 									package_name='nti.app.products.courseware_badges.generations')
 
-def evolve(context):
-	install_course_badge_cache(context)
-	install_catalog(context)
-
-def install_course_badge_cache(context):
-	conn = context.connection
-	root = conn.root()
-	dataserver_folder = root['nti.dataserver']
-	lsm = dataserver_folder.getSiteManager()
-	cache = lsm.queryUtility(ICatalogEntryBadgeCache)
-	if cache is None:
-		intids = lsm.getUtility(IIntIds)
-		cache = CatalogEntryBadgeCache()
-		cache.__parent__ = dataserver_folder
-		cache.__name__ = '++etc++course++badge++cache'
-		intids.register(cache)
-		lsm.registerUtility(cache, provided=ICatalogEntryBadgeCache)
-	return cache
-
 def install_catalog(context):
 	conn = context.connection
 	root = conn.root()
@@ -57,3 +34,6 @@ def install_catalog(context):
 	lsm = dataserver_folder.getSiteManager()
 	intids = lsm.getUtility(IIntIds)
 	install_course_badges_catalog(dataserver_folder, intids)
+
+def evolve(context):
+	install_catalog(context)

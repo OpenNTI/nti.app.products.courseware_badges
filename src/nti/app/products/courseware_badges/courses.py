@@ -16,9 +16,13 @@ from zope import interface
 
 from zope.container.contained import Contained
 
+from zope.deprecation import deprecated
+
 from zope.intid.interfaces import IIntIds
 
 from pyramid.threadlocal import get_current_request
+
+from persistent.persistence import Persistent
 
 from nti.app.products.badges import get_badge
 
@@ -35,7 +39,6 @@ from nti.app.products.courseware_badges.index import IX_SITE
 from nti.app.products.courseware_badges.index import IX_BADGES
 
 from nti.app.products.courseware_badges.interfaces import ICourseBadgeCatalog
-from nti.app.products.courseware_badges.interfaces import ICatalogEntryBadgeCache
 
 from nti.app.products.courseware_badges.utils import proxy
 from nti.app.products.courseware_badges.utils import find_catalog_entry
@@ -44,8 +47,6 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
-
-from nti.dataserver.dicts import LastModifiedDict
 
 from nti.dataserver.interfaces import IUser
 
@@ -93,36 +94,6 @@ def course_badge_cache():
 			if badge_names:
 				result[entry.ntiid] = badge_names
 	return result
-
-@interface.implementer(ICatalogEntryBadgeCache)
-class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
-
-	@property
-	def Items(self):
-		sites = get_component_hierarchy_names()
-		query = { IX_SITE: {'any_of': sites} }
-		catalog = get_course_badges_catalog()
-		intids = component.getUtility(IIntIds)
-		result = dict()
-		for doc_id in catalog.apply(query) or ():
-			course = intids.queryObject(doc_id)
-			if ICourseInstance.providedBy(course):
-				entry = ICourseCatalogEntry(course)
-				badge_names = get_badge_names(entry.ntiid, intids=intids)
-				if badge_names:
-					result[entry.ntiid] = badge_names
-		return result
-
-	def get_badge_names(self, ntiid, intids=None):
-		return get_badge_names(ntiid, intids)
-
-	def get_badge_catalog_entry_ntiids(self, name):
-		return get_badge_catalog_entry_ntiids(name)
-
-	def is_course_badge(self, name):
-		return bool(get_badge_catalog_entry_ntiids(name))
-
-CatalogEntryBadgeCache = _CatalogEntryBadgeCache
 
 @interface.implementer(ICourseBadgeCatalog)
 class _CourseBadgeCatalog(object):
@@ -238,3 +209,7 @@ class _OpenBadgeAdapter(object):
 		if result is not None and hasattr(context, "SourceNTIID"):
 			result = proxy(result, context.SourceNTIID)
 		return result
+
+deprecated('_CatalogEntryBadgeCache', 'Use lastest index implementation')
+class _CatalogEntryBadgeCache(Persistent, Contained):
+	pass
