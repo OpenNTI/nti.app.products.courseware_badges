@@ -52,7 +52,7 @@ from nti.dataserver.interfaces import IUser
 
 from nti.site.site import get_component_hierarchy_names
 
-def get_badge_catalog_entry_ntiids(name):
+def get_badge_catalog_entries(name):
 	result = []
 	intids = component.getUtility(IIntIds)
 	badge_index = get_course_badges_catalog()[IX_BADGES]
@@ -61,8 +61,12 @@ def get_badge_catalog_entry_ntiids(name):
 		course = intids.queryObject(course_uid)
 		if ICourseInstance.providedBy(course):
 			entry = ICourseCatalogEntry(course)
-			result.append(entry.ntiid)
+			result.append(entry)
 	return result
+
+def get_badge_catalog_entry_ntiids(name):
+	result = get_badge_catalog_entries(name)
+	return [x.ntiid for x in result]
 
 def is_course_badge(name, *args):
 	return bool(get_badge_catalog_entry_ntiids(name))
