@@ -29,6 +29,8 @@ from nti.app.products.badges.interfaces import IPrincipalErnableBadges
 from nti.app.products.badges.interfaces import IPrincipalEarnedBadgeFilter
 from nti.app.products.badges.interfaces import IPrincipalEarnableBadgeFilter
 
+from nti.app.products.courseware.utils import ZERO_DATETIME
+
 from nti.app.products.courseware_badges import show_course_badges
 from nti.app.products.courseware_badges import get_course_badges_catalog
 from nti.app.products.courseware_badges import get_course_badges_for_user
@@ -62,6 +64,7 @@ def get_badge_catalog_entries(name):
 		if ICourseInstance.providedBy(course):
 			entry = ICourseCatalogEntry(course)
 			result.append(entry)
+	result.sort(key=lambda x:x.StartDate or ZERO_DATETIME, reverse=True)
 	return result
 
 def get_badge_catalog_entry_ntiids(name):
