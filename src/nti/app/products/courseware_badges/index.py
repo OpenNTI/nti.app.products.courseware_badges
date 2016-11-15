@@ -21,7 +21,7 @@ from nti.app.products.courseware_badges.utils import get_all_context_badges
 
 from nti.common.string import to_unicode
 
-from nti.contenttypes.courses.common import get_course_site
+from nti.contenttypes.courses.common import get_course_site_name
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
@@ -43,7 +43,7 @@ class ValidatingCourseSiteName(object):
 
 	def __init__(self, obj, unused_default=None):
 		if ICourseInstance.providedBy(obj):
-			self.site = get_course_site(obj)
+			self.site = get_course_site_name(obj)
 
 	def __reduce__(self):
 		raise TypeError()
@@ -75,7 +75,7 @@ class ValidatingCourseBadges(object):
 
 	def __init__(self, obj, unused_default=None):
 		if ICourseInstance.providedBy(obj):
-			badges = get_all_context_badges( obj )
+			badges = get_all_context_badges(obj)
 			self.badges = list((x.name for x in badges)) if badges else ()
 
 	def __reduce__(self):

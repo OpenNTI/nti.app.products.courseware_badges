@@ -173,8 +173,7 @@ def get_course_badges(course_iden):
 	# in order to return new objects all the time, so they can be
 	# proxied appropriately for the course in case multiple courses
 	# shared a badge
-	result = find_course_badges_from_badges(course_iden, get_all_badges())
-	return result
+	return find_course_badges_from_badges(course_iden, get_all_badges())
 
 def entry_ntiid(context):
 	entry = catalog_entry(context)
