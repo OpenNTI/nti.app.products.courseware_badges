@@ -62,8 +62,9 @@ def get_badge_catalog_entries(name):
 	for course_uid in course_uids or ():
 		course = intids.queryObject(course_uid)
 		if ICourseInstance.providedBy(course):
-			entry = ICourseCatalogEntry(course)
-			result.append(entry)
+			entry = ICourseCatalogEntry(course, None)
+			if entry is not None:
+				result.append(entry)
 	result.sort(key=lambda x:x.StartDate or ZERO_DATETIME, reverse=True)
 	return result
 
@@ -126,7 +127,7 @@ class _CourseBadgeCatalog(object):
 class _CourseErnableBadges(object):
 
 	__slots__ = ('user',)
-		
+
 	def __init__(self, user):
 		self.user = user
 
