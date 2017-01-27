@@ -116,8 +116,8 @@ class TestViews(ApplicationLayerTest):
 
         # cannot see it
         path = '/dataserver2/users/sjohnson%40nextthought.com/EarnedCourseBadges'
-        res = self.testapp.get(
-            path, extra_environ=self._make_extra_environ("ichigo"))
+        res = self.testapp.get(path, 
+                               extra_environ=self._make_extra_environ("ichigo"))
         assert_that(res.json_body, has_entry('Items', has_length(0)))
 
         mock_scb_1.is_callable().with_args().returns(True)
@@ -127,16 +127,16 @@ class TestViews(ApplicationLayerTest):
         # now it can
         path = '/dataserver2/users/sjohnson%40nextthought.com/EarnedCourseBadges'
         res = self.testapp.get(path, 
-							   extra_environ=self._make_extra_environ("ichigo"))
+                               extra_environ=self._make_extra_environ("ichigo"))
         assert_that(res.json_body, has_entry('Items', has_length(1)))
         assert_that(res.json_body, has_entry('Items',
                                              has_item(has_entry('image', img_url))))
 
         path = '/dataserver2/users/sjohnson%40nextthought.com/Badges/EarnedBadges'
-        res = self.testapp.get(
-            path, extra_environ=self._make_extra_environ("ichigo"))
+        res = self.testapp.get(path, 
+                               extra_environ=self._make_extra_environ("ichigo"))
         assert_that(res.json_body, has_entry('Items', has_length(1)))
         assert_that(res.json_body, has_entry('Items',
-                                             has_item(has_entries('href', unquote('/dataserver2/OpenBadges/Law%20and%20Justice'),
+                                             has_item(has_entries('href', '/dataserver2/OpenBadges/Law%20and%20Justice',
                                                                   'Type', 'Course',
                                                                   'image', unquote(img_url)))))
