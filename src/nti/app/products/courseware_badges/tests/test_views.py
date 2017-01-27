@@ -139,4 +139,4 @@ class TestViews(ApplicationLayerTest):
         assert_that(res.json_body, has_entry('Items',
                                              has_item(has_entries('href', unquote('/dataserver2/OpenBadges/Law%20and%20Justice'),
                                                                   'Type', 'Course',
-                                                                  'image', img_url))))
+                                                                  'image', unquote(img_url)))))
