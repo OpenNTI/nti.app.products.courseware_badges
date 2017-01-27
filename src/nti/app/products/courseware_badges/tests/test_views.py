@@ -64,7 +64,7 @@ class TestViews(ApplicationLayerTest):
         mock_scb_1.is_callable().with_args().returns(False)
         mock_scb_2.is_callable().with_args().returns(False)
 
-        entry_href = '/dataserver2/%2B%2Betc%2B%2Bhostsites/platform.ou.edu/%2B%2Betc%2B%2Bsite/Courses/Fall2013/CLC3403_LawAndJustice/Badges'
+        entry_href = unquote('/dataserver2/%2B%2Betc%2B%2Bhostsites/platform.ou.edu/%2B%2Betc%2B%2Bsite/Courses/Fall2013/CLC3403_LawAndJustice/Badges')
         res = self.testapp.get(entry_href)
         assert_that(res.json_body, has_entry('Items', has_length(1)))
 
