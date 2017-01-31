@@ -34,7 +34,7 @@ from nti.app.testing.application_webtest import ApplicationLayerTest
 
 from nti.app.testing.decorators import WithSharedApplicationMockDS
 
-import nti.dataserver.tests.mock_dataserver as mock_dataserver
+from nti.dataserver.tests import mock_dataserver 
 from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
 
 
