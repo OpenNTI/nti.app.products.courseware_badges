@@ -24,39 +24,40 @@ from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTest
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
-import nti.dataserver.tests.mock_dataserver as mock_dataserver
 from nti.app.testing.decorators import WithSharedApplicationMockDS
+
+from nti.dataserver.tests import mock_dataserver
 
 class TestAdminViews(ApplicationLayerTest):
 
-	layer = CourseBadgesApplicationTestLayer
+    layer = CourseBadgesApplicationTestLayer
 
-	default_origin = b'http://janux.ou.edu'
+    default_origin = b'http://janux.ou.edu'
 
-	def _populate_cache(self):
-		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
-			catalog = component.getUtility(ICourseCatalog)
-			intids = component.getUtility(IIntIds)
-			badges_catalog = get_course_badges_catalog()
-			for entry in catalog.iterCatalogEntries():
-				course = ICourseInstance(entry)
-				doc_id = intids.queryId(course)
-				if doc_id is not None:
-					badges_catalog.index_doc(doc_id, course)
+    def _populate_cache(self):
+        with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
+            catalog = component.getUtility(ICourseCatalog)
+            intids = component.getUtility(IIntIds)
+            badges_catalog = get_course_badges_catalog()
+            for entry in catalog.iterCatalogEntries():
+                course = ICourseInstance(entry)
+                doc_id = intids.queryId(course)
+                if doc_id is not None:
+                    badges_catalog.index_doc(doc_id, course)
 
-	@WithSharedApplicationMockDS(users=True, testapp=True)
-	def test_views(self):
-		# Since we plug our badges in after course layer is synced, we
-		# need to rebuild our cache here.
-		self._populate_cache()
+    @WithSharedApplicationMockDS(users=True, testapp=True)
+    def test_views(self):
+        # Since we plug our badges in after course layer is synced, we
+        # need to rebuild our cache here.
+        self._populate_cache()
 
-		get_path = '/dataserver2/BadgeAdmin/CourseBadgeCache'
-		res = self.testapp.get(get_path)
-		assert_that(res.json_body, has_entry('Items', has_length(3)))
+        get_path = '/dataserver2/BadgeAdmin/CourseBadgeCache'
+        res = self.testapp.get(get_path)
+        assert_that(res.json_body, has_entry('Items', has_length(3)))
 
-		rebuild_path = '/dataserver2/BadgeAdmin/RebuildCourseBadgeCache'
-		self.testapp.post(rebuild_path, status=204)
+        rebuild_path = '/dataserver2/BadgeAdmin/RebuildCourseBadgeCache'
+        self.testapp.post(rebuild_path, status=204)
 
-		get_path = '/dataserver2/BadgeAdmin/CourseBadgeCache'
-		res = self.testapp.get(get_path)
-		assert_that(res.json_body, has_entry('Items', has_length(3)))
+        get_path = '/dataserver2/BadgeAdmin/CourseBadgeCache'
+        res = self.testapp.get(get_path)
+        assert_that(res.json_body, has_entry('Items', has_length(3)))

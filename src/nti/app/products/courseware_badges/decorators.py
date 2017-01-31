@@ -30,22 +30,24 @@ from nti.links.links import Link
 
 LINKS = StandardExternalFields.LINKS
 
+
 @component.adapter(ICourseInstance)
 @interface.implementer(IExternalMappingDecorator)
 class _CourseInstanceLinkDecorator(object):
 
-	__metaclass__ = SingletonDecorator
+    __metaclass__ = SingletonDecorator
 
-	def decorateExternalMapping(self, context, result):
-		_links = result.setdefault(LINKS, [])
-		_links.append(Link(context, elements=(VIEW_BADGES,), rel=VIEW_BADGES))
+    def decorateExternalMapping(self, context, result):
+        _links = result.setdefault(LINKS, [])
+        _links.append(Link(context, elements=(VIEW_BADGES,), rel=VIEW_BADGES))
+
 
 @component.adapter(IBadgeClass)
 @interface.implementer(IExternalObjectDecorator)
 class _BadgeTypeAdder(object):
 
-	__metaclass__ = SingletonDecorator
+    __metaclass__ = SingletonDecorator
 
-	def decorateExternalObject(self, context, mapping):
-		if is_course_badge(context.name):
-			mapping['Type'] = 'Course'
+    def decorateExternalObject(self, context, mapping):
+        if is_course_badge(context.name):
+            mapping['Type'] = 'Course'

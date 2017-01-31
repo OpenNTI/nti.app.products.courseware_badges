@@ -27,70 +27,76 @@ from nti.dataserver.tests.mock_dataserver import DSInjectorMixin
 
 import zope.testing.cleanup
 
+
 def _change_ds_dir(cls):
-	cls.old_data_dir = os.getenv('DATASERVER_DATA_DIR')
-	cls.new_data_dir = tempfile.mkdtemp(dir="/tmp")
-	os.environ['DATASERVER_DATA_DIR'] = cls.new_data_dir
+    cls.old_data_dir = os.getenv('DATASERVER_DATA_DIR')
+    cls.new_data_dir = tempfile.mkdtemp(dir="/tmp")
+    os.environ['DATASERVER_DATA_DIR'] = cls.new_data_dir
+
 
 def _restore(cls):
-	shutil.rmtree(cls.new_data_dir, True)
-	os.environ['DATASERVER_DATA_DIR'] = cls.old_data_dir or '/tmp'
-	component.provideUtility(cls.old_manager, ITahrirBadgeManager)
+    shutil.rmtree(cls.new_data_dir, True)
+    os.environ['DATASERVER_DATA_DIR'] = cls.old_data_dir or '/tmp'
+    component.provideUtility(cls.old_manager, ITahrirBadgeManager)
+
 
 def _register_sample(cls):
-	import transaction
-	with transaction.manager:
-		cls.old_manager = component.getUtility(IBadgeManager)
-		component.getGlobalSiteManager().unregisterUtility( cls.old_manager )
-		bm = create_badge_manager(defaultSQLite=True)
-		component.provideUtility(bm, ITahrirBadgeManager)
-		generate_db(bm.db)
+    import transaction
+    with transaction.manager:
+        cls.old_manager = component.getUtility(IBadgeManager)
+        component.getGlobalSiteManager().unregisterUtility(cls.old_manager)
+        bm = create_badge_manager(defaultSQLite=True)
+        component.provideUtility(bm, ITahrirBadgeManager)
+        generate_db(bm.db)
+
 
 class SharedConfiguringTestLayer(ZopeComponentLayer,
-								 GCLayerMixin,
-								 ConfiguringLayerMixin,
-								 DSInjectorMixin):
+                                 GCLayerMixin,
+                                 ConfiguringLayerMixin,
+                                 DSInjectorMixin):
 
-	set_up_packages = ('nti.dataserver',
-					   'nti.app.client_preferences',
-					   'nti.app.products.courseware_badges')
+    set_up_packages = ('nti.dataserver',
+                       'nti.app.client_preferences',
+                       'nti.app.products.courseware_badges')
 
-	@classmethod
-	def setUp(cls):
-		cls.setUpPackages()
-		_change_ds_dir(cls)
-		_register_sample(cls)
+    @classmethod
+    def setUp(cls):
+        cls.setUpPackages()
+        _change_ds_dir(cls)
+        _register_sample(cls)
 
-	@classmethod
-	def tearDown(cls):
-		cls.tearDownPackages()
-		zope.testing.cleanup.cleanUp()
-		_restore(cls)
+    @classmethod
+    def tearDown(cls):
+        cls.tearDownPackages()
+        zope.testing.cleanup.cleanUp()
+        _restore(cls)
 
-	@classmethod
-	def testSetUp(cls, test=None):
-		cls.setUpTestDS(test)
+    @classmethod
+    def testSetUp(cls, test=None):
+        cls.setUpTestDS(test)
 
-	@classmethod
-	def testTearDown(cls):
-		pass
+    @classmethod
+    def testTearDown(cls):
+        pass
 
 import unittest
 
+
 class CourseBadgesTestCase(unittest.TestCase):
-	layer = SharedConfiguringTestLayer
+    layer = SharedConfiguringTestLayer
 
 from nti.app.products.courseware.tests import NotInstructedCourseApplicationTestLayer
 
+
 class CourseBadgesApplicationTestLayer(NotInstructedCourseApplicationTestLayer):
 
-	_create_user = False
+    _create_user = False
 
-	@classmethod
-	def setUp(cls):
-		_change_ds_dir(cls)
-		_register_sample(cls)
+    @classmethod
+    def setUp(cls):
+        _change_ds_dir(cls)
+        _register_sample(cls)
 
-	@classmethod
-	def tearDown(cls):
-		_restore(cls)
+    @classmethod
+    def tearDown(cls):
+        _restore(cls)

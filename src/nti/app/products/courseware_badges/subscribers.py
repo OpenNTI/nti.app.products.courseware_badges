@@ -18,11 +18,12 @@ from nti.app.products.courseware_badges import get_course_badges_catalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseVendorInfoSynchronized
 
+
 @component.adapter(ICourseInstance, ICourseVendorInfoSynchronized)
 def _course_instance_available(course, event):
-	catalog = get_course_badges_catalog()
-	if catalog is not None:
-		intids = component.getUtility(IIntIds)
-		doc_id = intids.queryId(course)
-		if doc_id is not None:
-			catalog.index_doc(doc_id, course)
+    catalog = get_course_badges_catalog()
+    if catalog is not None:
+        intids = component.getUtility(IIntIds)
+        doc_id = intids.queryId(course)
+        if doc_id is not None:
+            catalog.index_doc(doc_id, course)

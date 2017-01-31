@@ -32,8 +32,9 @@ from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTest
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
-import nti.dataserver.tests.mock_dataserver as mock_dataserver
 from nti.app.testing.decorators import WithSharedApplicationMockDS
+
+from nti.dataserver.tests import mock_dataserver
 
 
 class TestViews(ApplicationLayerTest):
@@ -64,7 +65,8 @@ class TestViews(ApplicationLayerTest):
         mock_scb_1.is_callable().with_args().returns(False)
         mock_scb_2.is_callable().with_args().returns(False)
 
-        entry_href = unquote('/dataserver2/%2B%2Betc%2B%2Bhostsites/platform.ou.edu/%2B%2Betc%2B%2Bsite/Courses/Fall2013/CLC3403_LawAndJustice/Badges')
+        entry_href = unquote(
+            '/dataserver2/%2B%2Betc%2B%2Bhostsites/platform.ou.edu/%2B%2Betc%2B%2Bsite/Courses/Fall2013/CLC3403_LawAndJustice/Badges')
         res = self.testapp.get(entry_href)
         assert_that(res.json_body, has_entry('Items', has_length(1)))
 
@@ -116,7 +118,7 @@ class TestViews(ApplicationLayerTest):
 
         # cannot see it
         path = '/dataserver2/users/sjohnson%40nextthought.com/EarnedCourseBadges'
-        res = self.testapp.get(path, 
+        res = self.testapp.get(path,
                                extra_environ=self._make_extra_environ("ichigo"))
         assert_that(res.json_body, has_entry('Items', has_length(0)))
 
@@ -126,14 +128,14 @@ class TestViews(ApplicationLayerTest):
         img_url = 'http://localhost/hosted_badge_images/tag_nextthought.com_2011-10_OU-HTML-CLC3403_LawAndJustice.course_badge.png'
         # now it can
         path = '/dataserver2/users/sjohnson%40nextthought.com/EarnedCourseBadges'
-        res = self.testapp.get(path, 
+        res = self.testapp.get(path,
                                extra_environ=self._make_extra_environ("ichigo"))
         assert_that(res.json_body, has_entry('Items', has_length(1)))
         assert_that(res.json_body, has_entry('Items',
                                              has_item(has_entry('image', img_url))))
 
         path = '/dataserver2/users/sjohnson%40nextthought.com/Badges/EarnedBadges'
-        res = self.testapp.get(path, 
+        res = self.testapp.get(path,
                                extra_environ=self._make_extra_environ("ichigo"))
         assert_that(res.json_body, has_entry('Items', has_length(1)))
         assert_that(res.json_body, has_entry('Items',

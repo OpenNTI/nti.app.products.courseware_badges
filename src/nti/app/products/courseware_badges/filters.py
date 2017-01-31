@@ -28,23 +28,25 @@ from nti.badges.interfaces import IBadgeClass
 
 from nti.dataserver.interfaces import IUser
 
+
 @component.adapter(IUser)
 @interface.implementer(IPrincipalUGDFilter)
 class _CourseBadgePrincipalUGDFilter(object):
 
-	def __init__(self, *args):
-		pass
+    def __init__(self, *args):
+        pass
 
-	def __call__(self, user, obj):
-		result = True
-		req = get_current_request()
-		if req is not None and IAssertionChange.providedBy(obj):
-			try:
-				assertion = obj.object
-				user = IUser(assertion)
-				badge = IBadgeClass(assertion)
-				if req.authenticated_userid != user.username:
-					result = not is_course_badge(badge.name) or show_course_badges(user)
-			except (POSError, TypeError):
-				result = False
-		return result
+    def __call__(self, user, obj):
+        result = True
+        req = get_current_request()
+        if req is not None and IAssertionChange.providedBy(obj):
+            try:
+                assertion = obj.object
+                user = IUser(assertion)
+                badge = IBadgeClass(assertion)
+                if req.authenticated_userid != user.username:
+                    result =   not is_course_badge( badge.name) \
+                            or show_course_badges(user)
+            except (POSError, TypeError):
+                result = False
+        return result

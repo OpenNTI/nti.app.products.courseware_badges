@@ -42,49 +42,55 @@ VIEW_BADGES = BADGES
 #: Earned basges view
 VIEW_EARNED_COURSE_BADGES = u'EarnedCourseBadges'
 
+
 def show_course_badges(user):
-	endInteraction()
-	try:
-		newInteraction(IParticipation(user))
-		prefs = component.getUtility(IPreferenceGroup, name='Badges.Course')
-		result = prefs.show_course_badges
-		return result
-	finally:
-		restoreInteraction()
+    endInteraction()
+    try:
+        newInteraction(IParticipation(user))
+        prefs = component.getUtility(IPreferenceGroup, name='Badges.Course')
+        result = prefs.show_course_badges
+        return result
+    finally:
+        restoreInteraction()
+
 
 def get_universe_of_course_badges_for_user(user):
-	"""
-	return the badges for the courses a user in enrolled in
-	"""
-	result = []
-	for enrollments in component.subscribers((user,), IPrincipalEnrollments):
-		for enrollment in enrollments.iter_enrollments():
-			course = ICourseInstance(enrollment)
-			adapted = ICourseBadgeCatalog(course)
-			result.append((course, adapted.iter_badges()))
-	return result
+    """
+    return the badges for the courses a user in enrolled in
+    """
+    result = []
+    for enrollments in component.subscribers((user,), IPrincipalEnrollments):
+        for enrollment in enrollments.iter_enrollments():
+            course = ICourseInstance(enrollment)
+            adapted = ICourseBadgeCatalog(course)
+            result.append((course, adapted.iter_badges()))
+    return result
+
 
 def get_course_badges_for_user(user):
-	"""
-	return the badges for the courses a user in enrolled in
-	"""
-	result = []
-	for _, badges in get_universe_of_course_badges_for_user(user):
-		result.extend(badges)
-	return result
+    """
+    return the badges for the courses a user in enrolled in
+    """
+    result = []
+    for _, badges in get_universe_of_course_badges_for_user(user):
+        result.extend(badges)
+    return result
+
 
 def get_earned_course_badges(user):
-	"""
-	return the earned course badges for a user
-	"""
-	result = []
-	for badge in get_course_badges_for_user(user):
-		if assertion_exists(user, badge):
-			result.append(badge)
-	return result
+    """
+    return the earned course badges for a user
+    """
+    result = []
+    for badge in get_course_badges_for_user(user):
+        if assertion_exists(user, badge):
+            result.append(badge)
+    return result
+
 
 def get_catalog_entry_for_badge(badge):
-	return ICourseCatalogEntry(badge, None)
+    return ICourseCatalogEntry(badge, None)
+
 
 def get_course_badges_catalog():
-	return component.queryUtility(ICatalog, COURSE_BADGES_CATALOG_NAME)
+    return component.queryUtility(ICatalog, COURSE_BADGES_CATALOG_NAME)
