@@ -28,6 +28,7 @@ from nti.app.testing.decorators import WithSharedApplicationMockDS
 
 from nti.dataserver.tests import mock_dataserver
 
+
 class TestAdminViews(ApplicationLayerTest):
 
     layer = CourseBadgesApplicationTestLayer

@@ -108,8 +108,8 @@ def install_course_badges_catalog(site_manager_container, intids=None):
     locate(catalog, site_manager_container, COURSE_BADGES_CATALOG_NAME)
     intids.register(catalog)
     lsm.registerUtility(catalog,
-					    provided=ICatalog, 
-					    name=COURSE_BADGES_CATALOG_NAME)
+                        provided=ICatalog, 
+                        name=COURSE_BADGES_CATALOG_NAME)
 
     for name, clazz in ((IX_SITE, CourseSiteIndex),
                         (IX_BADGES, CourseBadgesIndex),

@@ -103,7 +103,7 @@ def get_badge_type(badge):
     return result
 
 filename_pattern = re.compile("(.+\.course_.+_badge$)|(.+\.course_badge$)", 
-							  re.I | re.U)
+                              re.I | re.U)
 
 
 def is_course_badge_filename(filename):
@@ -123,7 +123,7 @@ def is_course_badge(badge):
     return result
 
 _all_badge_types = tuple('course_%s_badge' % x for x in COURSE_BADGE_TYPES) + \
-				   ('course_badge',)
+                   ('course_badge',)
 
 
 def find_course_badges_from_entry(context):

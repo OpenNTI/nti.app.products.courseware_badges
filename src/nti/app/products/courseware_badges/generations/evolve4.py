@@ -47,7 +47,7 @@ def do_evolve(context, generation=generation):
     component.provideUtility(mock_ds, IDataserver)
 
     with current_site(ds_folder):
-        assert	component.getSiteManager() == ds_folder.getSiteManager(), \
+        assert  component.getSiteManager() == ds_folder.getSiteManager(), \
                 "Hooks not installed?"
 
         lsm = ds_folder.getSiteManager()

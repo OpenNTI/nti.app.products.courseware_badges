@@ -25,7 +25,7 @@ from nti.schema.field import Bool
 COURSE_COMPLETION = u'completion'
 COURSE_BADGE_TYPES = (COURSE_COMPLETION,)
 COURSE_BADGE_TYPES_VOCABULARY = \
-	SimpleVocabulary([SimpleTerm(_x) for _x in COURSE_BADGE_TYPES])
+    SimpleVocabulary([SimpleTerm(_x) for _x in COURSE_BADGE_TYPES])
 
 
 class ICourseBadgeSettings(interface.Interface):
