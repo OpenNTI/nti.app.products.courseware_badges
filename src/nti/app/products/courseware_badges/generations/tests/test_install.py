@@ -17,13 +17,14 @@ from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
 
 from nti.app.products.courseware_badges.tests import SharedConfiguringTestLayer
 
-class TestFunctionalInstall(unittest.TestCase):
-	
-	layer = SharedConfiguringTestLayer
 
-	@WithMockDSTrans
-	def test_installed(self):
-		conn = mock_dataserver.current_transaction
-		root = conn.root()
-		generations = root['zope.generations']
-		assert_that( generations, has_key('nti.dataserver-courseware-badges'))
+class TestFunctionalInstall(unittest.TestCase):
+
+    layer = SharedConfiguringTestLayer
+
+    @WithMockDSTrans
+    def test_installed(self):
+        conn = mock_dataserver.current_transaction
+        root = conn.root()
+        generations = root['zope.generations']
+        assert_that(generations, has_key('nti.dataserver-courseware-badges'))

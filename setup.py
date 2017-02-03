@@ -4,39 +4,39 @@ from setuptools import setup, find_packages
 VERSION = '0.0.0'
 
 entry_points = {
-	'console_scripts': [
-		"nti_user_course_badges = nti.app.products.courseware_badges.scripts.nti_user_course_badges:main",
-	],
-	"z3c.autoinclude.plugin": [
-		'target = nti.app.products',
-	],
+    'console_scripts': [
+        "nti_user_course_badges = nti.app.products.courseware_badges.scripts.nti_user_course_badges:main",
+    ],
+    "z3c.autoinclude.plugin": [
+        'target = nti.app.products',
+    ],
 }
 
 setup(
-	name='nti.app.products.courseware_badges',
-	version=VERSION,
-	author='Jason Madden',
-	author_email='jason@nextthought.com',
-	description="NTI Course Badges Product Integration",
-	long_description=codecs.open('README.rst', encoding='utf-8').read(),
-	license='Proprietary',
-	keywords='Pyramid Preference',
-	classifiers=[
-		'Intended Audience :: Developers',
-		'Natural Language :: English',
-		'Operating System :: OS Independent',
-		'Programming Language :: Python :: 2',
-		'Programming Language :: Python :: 2.7',
-		'Programming Language :: Python :: 3',
-		'Programming Language :: Python :: 3.3',
-	],
-	packages=find_packages('src'),
-	package_dir={'': 'src'},
-	namespace_packages=['nti', 'nti.app', 'nti.app.products'],
-	install_requires=[
-		'setuptools',
-		'nti.app.products.badges',
-		'nti.app.products.courseware'
-	],
-	entry_points=entry_points
+    name='nti.app.products.courseware_badges',
+    version=VERSION,
+    author='Jason Madden',
+    author_email='jason@nextthought.com',
+    description="NTI Course Badges Product Integration",
+    long_description=codecs.open('README.rst', encoding='utf-8').read(),
+    license='Proprietary',
+    keywords='Pyramid Preference',
+    classifiers=[
+        'Intended Audience :: Developers',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+    ],
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
+    namespace_packages=['nti', 'nti.app', 'nti.app.products'],
+    install_requires=[
+        'setuptools',
+        'nti.app.products.badges',
+        'nti.app.products.courseware'
+    ],
+    entry_points=entry_points
 )
