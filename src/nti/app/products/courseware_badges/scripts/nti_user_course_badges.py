@@ -36,8 +36,10 @@ def _process_args(args):
 def main():
     arg_parser = argparse.ArgumentParser(description="User course badges")
     arg_parser.add_argument('username', help="The username")
-    arg_parser.add_argument('-v', '--verbose', help="Be verbose", action='store_true',
-                                                    dest='verbose')
+    arg_parser.add_argument('-v', '--verbose', 
+                            help="Be verbose", 
+                            action='store_true',
+                            dest='verbose')
     arg_parser.add_argument('--site', dest='site',
                             help="Application SITE.")
     args = arg_parser.parse_args()

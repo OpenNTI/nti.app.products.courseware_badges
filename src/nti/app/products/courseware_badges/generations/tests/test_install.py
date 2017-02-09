@@ -12,10 +12,11 @@ from hamcrest import assert_that
 
 import unittest
 
-from nti.dataserver.tests import mock_dataserver
-from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
-
 from nti.app.products.courseware_badges.tests import SharedConfiguringTestLayer
+
+from nti.dataserver.tests import mock_dataserver
+
+from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
 
 
 class TestFunctionalInstall(unittest.TestCase):
