@@ -19,7 +19,7 @@ from zope.location import locate
 
 from nti.app.products.courseware_badges.utils import get_all_context_badges
 
-from nti.common.string import to_unicode
+from nti.base._compat import unicode_
 
 from nti.contenttypes.courses.common import get_course_site_name
 
@@ -63,7 +63,7 @@ class ValidatingCatalogEntryID(object):
         if ICourseInstance.providedBy(obj):
             entry = ICourseCatalogEntry(obj, None)
             if entry is not None:
-                self.ntiid = to_unicode(entry.ntiid)
+                self.ntiid = unicode_(entry.ntiid)
 
     def __reduce__(self):
         raise TypeError()
