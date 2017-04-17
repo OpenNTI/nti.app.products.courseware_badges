@@ -57,6 +57,7 @@ class CourseBadgeSupplementalACLProvider(object):
 
         result = []
         for instructor in instructors:
-            ace_allowing(IPrincipal(instructor), ACT_READ, type(self))
-            ace_allowing(IPrincipal(instructor), ACT_AWARD_BADGE, type(self))
+            instructor = IPrincipal(instructor)
+            ace_allowing(instructor, ACT_READ, type(self))
+            ace_allowing(instructor, ACT_AWARD_BADGE, type(self))
         return acl_from_aces(result)
