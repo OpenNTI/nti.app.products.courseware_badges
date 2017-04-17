@@ -55,18 +55,27 @@ from nti.dataserver.interfaces import IUser
 from nti.site.site import get_component_hierarchy_names
 
 
-def get_badge_catalog_entries(name):
+def get_badge_courses(name, sites=None):
     result = []
     intids = component.getUtility(IIntIds)
-    badge_index = get_course_badges_catalog()[IX_BADGES]
-    course_uids = badge_index.values_to_documents.get(name)
-    for course_uid in course_uids or ():
+    query = {IX_BADGES: {'any_of': (name,)}}
+    if sites:
+        query[IX_SITE] = {'any_of': sites}
+    catalog = get_course_badges_catalog()
+    for course_uid in catalog.apply(query) or ():
         course = intids.queryObject(course_uid)
         if ICourseInstance.providedBy(course):
-            entry = ICourseCatalogEntry(course, None)
-            if entry is not None:
-                result.append(entry)
-    result.sort(key=lambda x: x.StartDate or ZERO_DATETIME, reverse=True)
+            result.append(course)
+    return result
+
+
+def get_badge_catalog_entries(name, sites=None):
+    courses = get_badge_courses(name, sites)
+    result = {ICourseCatalogEntry(x, None) for x in courses}
+    result.discard(None)
+    result = sorted(result,
+                    key=lambda x: x.StartDate or ZERO_DATETIME,
+                    reverse=True)
     return result
 
 
@@ -205,9 +214,9 @@ class _CoursePrincipalEarnableBadgeFilter(object):
             endDate = self._endDate(entry)
             startDate = self._startDate(entry)
             now = datetime.datetime.utcnow()
-            result =     (entry is not None) \
-                     and (now >= startDate) \
-                     and (not endDate or now <= endDate)
+            result = (entry is not None) \
+                 and (now >= startDate) \
+                 and (not endDate or now <= endDate)
         else:
             result = True
         return result
@@ -230,5 +239,7 @@ class _OpenBadgeAdapter(object):
 
 
 deprecated('_CatalogEntryBadgeCache', 'Use lastest index implementation')
+
+
 class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
     pass
