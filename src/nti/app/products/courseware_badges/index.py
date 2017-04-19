@@ -31,8 +31,13 @@ from nti.zope_catalog.catalog import Catalog
 from nti.zope_catalog.index import AttributeSetIndex
 from nti.zope_catalog.index import AttributeValueIndex as ValueIndex
 
+#: Course site
 IX_SITE = 'site'
+
+#: Course badge names
 IX_BADGES = 'badges'
+
+#: Course entry NTIID
 IX_ENTRY = IX_COURSE = 'course'
 
 COURSE_BADGES_CATALOG_NAME = 'nti.dataserver.++etc++course-badges-catalog'

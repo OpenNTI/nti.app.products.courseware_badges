@@ -239,7 +239,5 @@ class _OpenBadgeAdapter(object):
 
 
 deprecated('_CatalogEntryBadgeCache', 'Use lastest index implementation')
-
-
 class _CatalogEntryBadgeCache(LastModifiedDict, Contained):
     pass
