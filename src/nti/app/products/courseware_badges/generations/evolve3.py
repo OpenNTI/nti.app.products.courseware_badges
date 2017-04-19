@@ -26,6 +26,8 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.dataserver.interfaces import IDataserver
 from nti.dataserver.interfaces import IOIDResolver
 
+from nti.site.hostpolicy import get_all_host_sites
+
 
 @interface.implementer(IDataserver)
 class MockDataserver(object):
@@ -61,15 +63,14 @@ def do_evolve(context, generation=generation):
     component.provideUtility(mock_ds, IDataserver)
 
     with current_site(ds_folder):
-        assert   component.getSiteManager() == ds_folder.getSiteManager(), \
-                "Hooks not installed?"
+        assert component.getSiteManager() == ds_folder.getSiteManager(), \
+               "Hooks not installed?"
 
         lsm = ds_folder.getSiteManager()
         intids = lsm.getUtility(IIntIds)
         catalog = install_course_badges_catalog(ds_folder, intids)
 
-        sites = ds_folder['++etc++hostsites']
-        for site in sites.values():
+        for site in get_all_host_sites():
             with current_site(site):
                 _index_courses(site, catalog, intids)
 
