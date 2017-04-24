@@ -29,6 +29,8 @@ from nti.app.products.courseware_badges.interfaces import COURSE_BADGE_TYPES
 
 from nti.badges.openbadges.interfaces import IBadgeClass
 
+from nti.contentlibrary.interfaces import IRenderableContentPackage
+
 from nti.contenttypes.courses import get_course_vendor_info
 
 from nti.contenttypes.courses.common import get_course_packages
@@ -102,7 +104,7 @@ def get_badge_type(badge):
     result = get_badge_type_from_filename(filename)
     return result
 
-filename_pattern = re.compile("(.+\.course_.+_badge$)|(.+\.course_badge$)", 
+filename_pattern = re.compile("(.+\.course_.+_badge$)|(.+\.course_badge$)",
                               re.I | re.U)
 
 
@@ -214,7 +216,8 @@ def get_all_context_badges(context):
     # for legacy badges scan the content packages
     if not result and course is not None:
         for pack in get_course_packages(course):
-            result.extend(get_course_badges(pack.ntiid))
+            if not IRenderableContentPackage.providedBy(pack):
+                result.extend(get_course_badges(pack.ntiid))
     return result
 
 
