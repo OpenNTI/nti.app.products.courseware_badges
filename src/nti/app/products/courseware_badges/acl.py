@@ -14,6 +14,8 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from zope.cachedescriptors.property import Lazy
+
 from zope.security.interfaces import IPrincipal
 
 from nti.app.products.badges.interfaces import ACT_AWARD_BADGE
@@ -30,8 +32,6 @@ from nti.dataserver.authorization_acl import ace_allowing
 from nti.dataserver.authorization_acl import acl_from_aces
 
 from nti.dataserver.interfaces import ISupplementalACLProvider
-
-from nti.property.property import Lazy
 
 from nti.site.site import get_component_hierarchy_names
 
