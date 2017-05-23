@@ -4,11 +4,12 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+import six
 import datetime
 
 from zope import component
@@ -58,7 +59,9 @@ from nti.site.site import get_component_hierarchy_names
 def get_badge_courses(name, sites=None):
     result = []
     intids = component.getUtility(IIntIds)
-    query = {IX_BADGES: {'any_of': (name,)}}
+    query = {
+        IX_BADGES: {'any_of': (name,)}
+    }
     if sites:
         query[IX_SITE] = {'any_of': sites}
     catalog = get_course_badges_catalog()
@@ -79,8 +82,8 @@ def get_badge_catalog_entries(name, sites=None):
     return result
 
 
-def get_badge_catalog_entry_ntiids(name):
-    result = get_badge_catalog_entries(name)
+def get_badge_catalog_entry_ntiids(name, sites=None):
+    result = get_badge_catalog_entries(name, sites)
     return [x.ntiid for x in result]
 
 
@@ -88,12 +91,13 @@ def is_course_badge(name, *args):
     return bool(get_badge_catalog_entry_ntiids(name))
 
 
-def get_badge_names(ntiid, intids=None):
+def get_badge_names(context):
     result = ()
-    entry = find_catalog_entry(ntiid)
-    intids = component.getUtility(IIntIds) if intids is None else intids
-    if entry is not None:
-        course = ICourseInstance(entry)
+    intids = component.getUtility(IIntIds)
+    if isinstance(context, six.string_types):
+        context = find_catalog_entry(context)
+    course = ICourseInstance(context, None)
+    if context is not None:
         course_uid = intids.queryId(course)
         badge_index = get_course_badges_catalog()[IX_BADGES]
         if course_uid is not None:
@@ -111,9 +115,9 @@ def course_badge_cache():
     for doc_id in catalog.apply(query) or ():
         course = intids.queryObject(doc_id)
         if ICourseInstance.providedBy(course):
-            entry = ICourseCatalogEntry(course)
-            badge_names = get_badge_names(entry.ntiid, intids=intids)
+            badge_names = get_badge_names(course)
             if badge_names:
+                entry = ICourseCatalogEntry(course)
                 result[entry.ntiid] = badge_names
     return result
 
@@ -129,11 +133,10 @@ class _CourseBadgeCatalog(object):
     def iter_badges(self):
         result = []
         entry = ICourseCatalogEntry(self.context, None)
-        ntiid = getattr(entry, 'ntiid', None) or u''
-        for name in get_badge_names(ntiid):
+        for name in get_badge_names(entry):
             badge = get_badge(name)
             if badge is not None:
-                badge = proxy(badge, ntiid)
+                badge = proxy(badge, entry.ntiid)
                 result.append(badge)
         return result
 
