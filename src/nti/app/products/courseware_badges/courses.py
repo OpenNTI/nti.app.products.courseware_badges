@@ -45,10 +45,10 @@ from nti.app.products.courseware_badges.utils import find_catalog_entry
 
 from nti.badges.openbadges.interfaces import IBadgeClass
 
+from nti.containers.dicts import LastModifiedDict
+
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
-
-from nti.dataserver.dicts import LastModifiedDict
 
 from nti.dataserver.interfaces import IUser
 
