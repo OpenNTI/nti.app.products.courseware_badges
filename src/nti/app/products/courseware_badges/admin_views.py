@@ -78,11 +78,11 @@ class CourseBadgeCacheView(AbstractAuthenticatedView):
 class RebuildCourseBadgeCacheView(AbstractAuthenticatedView):
 
     def __call__(self):
+        seen = set()
         intids = component.getUtility(IIntIds)
         badge_catalog = get_course_badges_catalog()
         for index in list(badge_catalog.values()):
             index.clear()
-        seen = set()
 
         def _builder():
             catalog = component.queryUtility(ICourseCatalog)
