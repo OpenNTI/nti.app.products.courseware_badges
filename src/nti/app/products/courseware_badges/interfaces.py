@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 from zope import interface
@@ -34,8 +34,8 @@ class ICourseBadgeSettings(interface.Interface):
     """
     taggedValue(TAG_EXTERNAL_PREFERENCE_GROUP, 'write')
 
-    show_course_badges = Bool(title="Enable/disable showing course badges",
-                              description="Enable/disable showing course badges",
+    show_course_badges = Bool(title=u"Enable/disable showing course badges",
+                              description=u"Enable/disable showing course badges",
                               default=False)
 
 

@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -22,8 +22,11 @@ from pyramid.view import view_defaults
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
+from nti.app.externalization.error import raise_json_error
+
 from nti.app.products.badges.views import BadgeAdminPathAdapter
 
+from nti.app.products.courseware_badges import MessageFactory as _
 from nti.app.products.courseware_badges import get_course_badges_catalog
 from nti.app.products.courseware_badges import get_universe_of_course_badges_for_user
 
@@ -111,11 +114,21 @@ class UserCourseBadgesView(AbstractAuthenticatedView):
         values = CaseInsensitiveDict(**self.request.params)
         username = values.get('username')
         if not username:
-            raise hexc.HTTPUnprocessableEntity("Must specify a username")
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                'message': _(u"Must specify a username."),
+                             },
+                             None)
 
         user = User.get_user(username)
         if user is None:
-            raise hexc.HTTPUnprocessableEntity("User cannot be found")
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                'message': _(u"User cannot be found."),
+                             },
+                             None)
 
         result = LocatedExternalDict()
         items = result[ITEMS] = {}

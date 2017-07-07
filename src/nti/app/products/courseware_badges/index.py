@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -19,7 +19,7 @@ from zope.location import locate
 
 from nti.app.products.courseware_badges.utils import get_all_context_badges
 
-from nti.base._compat import unicode_
+from nti.base._compat import text_
 
 from nti.contenttypes.courses.common import get_course_site_name
 
@@ -45,7 +45,7 @@ COURSE_BADGES_CATALOG_NAME = 'nti.dataserver.++etc++course-badges-catalog'
 
 class ValidatingCourseSiteName(object):
 
-    __slots__ = (b'site',)
+    __slots__ = ('site',)
 
     def __init__(self, obj, unused_default=None):
         if ICourseInstance.providedBy(obj):
@@ -62,13 +62,13 @@ class CourseSiteIndex(ValueIndex):
 
 class ValidatingCatalogEntryID(object):
 
-    __slots__ = (b'ntiid',)
+    __slots__ = ('ntiid',)
 
     def __init__(self, obj, unused_default=None):
         if ICourseInstance.providedBy(obj):
             entry = ICourseCatalogEntry(obj, None)
             if entry is not None:
-                self.ntiid = unicode_(entry.ntiid)
+                self.ntiid = text_(entry.ntiid)
 
     def __reduce__(self):
         raise TypeError()
@@ -81,7 +81,7 @@ class CatalogEntryIDIndex(ValueIndex):
 
 class ValidatingCourseBadges(object):
 
-    __slots__ = (b'badges',)
+    __slots__ = ('badges',)
 
     def __init__(self, obj, unused_default=None):
         if ICourseInstance.providedBy(obj):

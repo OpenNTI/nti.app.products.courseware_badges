@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -23,14 +23,14 @@ from nti.app.products.courseware_badges.utils import is_course_badge_filename
 
 from nti.appserver.interfaces import ITrustedTopLevelContainerContextProvider
 
+from nti.badges.interfaces import IBadgeClass
+from nti.badges.interfaces import IBadgeAssertion
+
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.dataserver.interfaces import IStreamChangeEvent
-
-from nti.badges.interfaces import IBadgeClass
-from nti.badges.interfaces import IBadgeAssertion
 
 
 def _compare_pseudo_ntiids(a, b):

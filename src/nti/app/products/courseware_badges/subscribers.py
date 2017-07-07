@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -20,7 +20,7 @@ from nti.contenttypes.courses.interfaces import ICourseVendorInfoSynchronized
 
 
 @component.adapter(ICourseInstance, ICourseVendorInfoSynchronized)
-def _course_instance_available(course, event):
+def _course_instance_available(course, _):
     catalog = get_course_badges_catalog()
     if catalog is not None:
         intids = component.getUtility(IIntIds)

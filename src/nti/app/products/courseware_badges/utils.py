@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -47,7 +47,7 @@ from nti.ntiids.ntiids import make_ntiid
 from nti.ntiids.ntiids import is_valid_ntiid_string
 from nti.ntiids.ntiids import find_object_with_ntiid
 
-ROOT = "tag:nextthought.com,2011-10:"
+ROOT = u"tag:nextthought.com,2011-10:"
 SAFE_ROOT = ROOT.replace(':', '_').replace(',', '_')
 
 
@@ -81,7 +81,7 @@ def get_base_image_filename(badge):
             filename = SAFE_ROOT + filename
     return filename
 
-type_pattern = re.compile("course_(.+)_badge", re.I | re.U)
+type_pattern = re.compile(r"course_(.+)_badge", re.I | re.U)
 
 
 def get_badge_type_from_filename(filename):
@@ -104,7 +104,7 @@ def get_badge_type(badge):
     result = get_badge_type_from_filename(filename)
     return result
 
-filename_pattern = re.compile("(.+\.course_.+_badge$)|(.+\.course_badge$)",
+filename_pattern = re.compile(r"(.+\.course_.+_badge$)|(.+\.course_badge$)",
                               re.I | re.U)
 
 
