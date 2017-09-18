@@ -14,7 +14,7 @@ import argparse
 
 from nti.app.products.courseware_badges import get_course_badges_for_user
 
-from nti.dataserver.users import User
+from nti.dataserver.users.users import User
 
 from nti.dataserver.utils import run_with_dataserver
 

@@ -26,7 +26,7 @@ from nti.app.products.courseware_badges import get_course_badges_catalog
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
-from nti.dataserver.users import User
+from nti.dataserver.users.users import User
 
 from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
 
