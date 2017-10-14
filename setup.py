@@ -51,7 +51,6 @@ setup(
     tests_require=TESTS_REQUIRE,
     install_requires=[
         'setuptools',
-        'docutils',
         'nti.app.client_preferences',
         'nti.app.products.badges',
         'nti.app.products.courseware',
