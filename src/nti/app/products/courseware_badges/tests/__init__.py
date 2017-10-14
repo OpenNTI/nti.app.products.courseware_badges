@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
-__docformat__ = "restructuredtext en"
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
@@ -13,11 +14,13 @@ import tempfile
 
 from zope import component
 
-from nti.badges.interfaces import IBadgeManager
-from nti.badges.tahrir.interfaces import ITahrirBadgeManager
-from nti.badges.tahrir.manager import create_badge_manager
-
 from nti.app.products.courseware_badges.tests.badges import generate_db
+
+from nti.badges.interfaces import IBadgeManager
+
+from nti.badges.tahrir.interfaces import ITahrirBadgeManager
+
+from nti.badges.tahrir.manager import create_badge_manager
 
 from nti.testing.layers import GCLayerMixin
 from nti.testing.layers import ZopeComponentLayer
@@ -79,11 +82,13 @@ class SharedConfiguringTestLayer(ZopeComponentLayer,
     def testTearDown(cls):
         pass
 
+
 import unittest
 
 
 class CourseBadgesTestCase(unittest.TestCase):
     layer = SharedConfiguringTestLayer
+
 
 from nti.app.products.courseware.tests import NotInstructedCourseApplicationTestLayer
 

@@ -4,10 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 from zope import component
 
@@ -16,6 +15,7 @@ from zope.catalog.interfaces import ICatalog
 from zope.preference.interfaces import IPreferenceGroup
 
 from zope.security.interfaces import IParticipation
+
 from zope.security.management import endInteraction
 from zope.security.management import newInteraction
 from zope.security.management import restoreInteraction
@@ -43,6 +43,8 @@ VIEW_BADGES = BADGES
 
 #: Earned basges view
 VIEW_EARNED_COURSE_BADGES = u'EarnedCourseBadges'
+
+logger = __import__('logging').getLogger(__name__)
 
 
 def show_course_badges(user):

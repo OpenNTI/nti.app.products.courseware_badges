@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
-__docformat__ = "restructuredtext en"
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 # disable: accessing protected members, too many methods
 # pylint: disable=I0011,W0212,R0904
@@ -19,14 +20,9 @@ from zope import component
 
 from zope.intid.interfaces import IIntIds
 
-from nti.badges.interfaces import IBadgeClass
-
 from nti.app.products.courseware_badges import get_course_badges_catalog
 
 from nti.app.products.courseware_badges.utils import get_course_badges
-
-from nti.contenttypes.courses.interfaces import ICourseCatalog
-from nti.contenttypes.courses.interfaces import ICourseInstance
 
 from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
 
@@ -34,7 +30,13 @@ from nti.app.testing.application_webtest import ApplicationLayerTest
 
 from nti.app.testing.decorators import WithSharedApplicationMockDS
 
-from nti.dataserver.tests import mock_dataserver 
+from nti.badges.interfaces import IBadgeClass
+
+from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseInstance
+
+from nti.dataserver.tests import mock_dataserver
+
 from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
 
 
@@ -42,7 +44,7 @@ class TestCourses(ApplicationLayerTest):
 
     layer = CourseBadgesApplicationTestLayer
 
-    default_origin = str('http://janux.ou.edu')
+    default_origin = 'http://janux.ou.edu'
 
     enrolled_courses_href = '/dataserver2/users/sjohnson@nextthought.com/Courses/EnrolledCourses'
 
@@ -76,8 +78,8 @@ class TestCourses(ApplicationLayerTest):
         res = self.testapp.get(earned_badges_path,
                                status=200)
         assert_that(res.json_body,
-                    has_entry(u'Items', has_item(has_entries('Class', 'Badge',
-                                                             'Type', 'Course'))))
+                    has_entry('Items', has_item(has_entries('Class', 'Badge',
+                                                            'Type', 'Course'))))
 
         ntiid = 'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.clc_3403_law_and_justice'
         badges = get_course_badges(ntiid)

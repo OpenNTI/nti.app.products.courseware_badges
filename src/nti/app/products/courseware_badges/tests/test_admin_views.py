@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
-__docformat__ = "restructuredtext en"
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
@@ -17,14 +18,14 @@ from zope.intid.interfaces import IIntIds
 
 from nti.app.products.courseware_badges import get_course_badges_catalog
 
-from nti.contenttypes.courses.interfaces import ICourseCatalog
-from nti.contenttypes.courses.interfaces import ICourseInstance
-
 from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
 from nti.app.testing.decorators import WithSharedApplicationMockDS
+
+from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseInstance
 
 from nti.dataserver.tests import mock_dataserver
 
@@ -33,7 +34,7 @@ class TestAdminViews(ApplicationLayerTest):
 
     layer = CourseBadgesApplicationTestLayer
 
-    default_origin = b'http://janux.ou.edu'
+    default_origin = 'http://janux.ou.edu'
 
     def _populate_cache(self):
         with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):

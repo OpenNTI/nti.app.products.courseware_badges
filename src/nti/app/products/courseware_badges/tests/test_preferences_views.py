@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
-__docformat__ = "restructuredtext en"
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
@@ -27,8 +28,8 @@ class TestPreferencesViews(ApplicationLayerTest):
         assert_that(res.json_body,
                     has_entries({'Class': 'Preference_Root',
                                  'href': '/dataserver2/users/sjohnson@nextthought.COM/++preferences++',
-                                 'Badges': has_entries({'Class': u'Preference_Badges',
-                                                        u'MimeType': u'application/vnd.nextthought.preference.badges',
-                                                        u'Course': {u'Class': u'Preference_Badges_Course',
-                                                                    u'MimeType': u'application/vnd.nextthought.preference.badges.course',
-                                                                    u'show_course_badges': False}})}))
+                                 'Badges': has_entries({'Class': 'Preference_Badges',
+                                                        'MimeType': 'application/vnd.nextthought.preference.badges',
+                                                        'Course': {'Class': 'Preference_Badges_Course',
+                                                                   'MimeType': 'application/vnd.nextthought.preference.badges.course',
+                                                                   'show_course_badges': False}})}))

@@ -4,10 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
 import re
@@ -49,6 +48,8 @@ from nti.ntiids.ntiids import find_object_with_ntiid
 
 ROOT = u"tag:nextthought.com,2011-10:"
 SAFE_ROOT = ROOT.replace(':', '_').replace(',', '_')
+
+logger = __import__('logging').getLogger(__name__)
 
 
 def base_root_ntiid(ntiid):
@@ -145,7 +146,7 @@ class CourseBadgeProxy(ProxyBase):
         lambda s: s.__dict__.get('_v_catalog_source_ntiid'),
         lambda s, v: s.__dict__.__setitem__('_v_catalog_source_ntiid', v))
 
-    def __new__(cls, base, ntiid):
+    def __new__(cls, base, unused_ntiid):
         return ProxyBase.__new__(cls, base)
 
     def __init__(self, base, ntiid):
