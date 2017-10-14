@@ -4,10 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 from zope import component
 from zope import interface
@@ -24,18 +23,18 @@ from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IExternalObjectDecorator
 from nti.externalization.interfaces import IExternalMappingDecorator
 
-from nti.externalization.singleton import SingletonDecorator
+from nti.externalization.singleton import Singleton
 
 from nti.links.links import Link
 
 LINKS = StandardExternalFields.LINKS
 
+logger = __import__('logging').getLogger(__name__)
+
 
 @component.adapter(ICourseInstance)
 @interface.implementer(IExternalMappingDecorator)
-class _CourseInstanceLinkDecorator(object):
-
-    __metaclass__ = SingletonDecorator
+class _CourseInstanceLinkDecorator(Singleton):
 
     def decorateExternalMapping(self, context, result):
         _links = result.setdefault(LINKS, [])
@@ -44,9 +43,7 @@ class _CourseInstanceLinkDecorator(object):
 
 @component.adapter(IBadgeClass)
 @interface.implementer(IExternalObjectDecorator)
-class _BadgeTypeAdder(object):
-
-    __metaclass__ = SingletonDecorator
+class _BadgeTypeAdder(Singleton):
 
     def decorateExternalObject(self, context, mapping):
         if is_course_badge(context.name):
