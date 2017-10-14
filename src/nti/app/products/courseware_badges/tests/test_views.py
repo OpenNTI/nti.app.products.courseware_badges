@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
-__docformat__ = "restructuredtext en"
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
@@ -15,7 +16,7 @@ from hamcrest import assert_that
 
 import fudge
 
-from urllib import unquote
+from six.moves.urllib_parse import unquote
 
 from zope import component
 
@@ -23,25 +24,25 @@ from zope.intid.interfaces import IIntIds
 
 from nti.app.products.courseware_badges import get_course_badges_catalog
 
-from nti.contenttypes.courses.interfaces import ICourseCatalog
-from nti.contenttypes.courses.interfaces import ICourseInstance
-
-from nti.dataserver.users.users import User
-
 from nti.app.products.courseware_badges.tests import CourseBadgesApplicationTestLayer
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
 from nti.app.testing.decorators import WithSharedApplicationMockDS
 
+from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseInstance
+
 from nti.dataserver.tests import mock_dataserver
+
+from nti.dataserver.users.users import User
 
 
 class TestViews(ApplicationLayerTest):
 
     layer = CourseBadgesApplicationTestLayer
 
-    default_origin = str('http://janux.ou.edu')
+    default_origin = 'http://janux.ou.edu'
     enrolled_courses_href = '/dataserver2/users/sjohnson@nextthought.com/Courses/EnrolledCourses'
 
     def _populate_cache(self):
@@ -66,7 +67,8 @@ class TestViews(ApplicationLayerTest):
         mock_scb_2.is_callable().with_args().returns(False)
 
         entry_href = unquote(
-            '/dataserver2/%2B%2Betc%2B%2Bhostsites/platform.ou.edu/%2B%2Betc%2B%2Bsite/Courses/Fall2013/CLC3403_LawAndJustice/Badges')
+            '/dataserver2/%2B%2Betc%2B%2Bhostsites/platform.ou.edu/%2B%2Betc%2B%2Bsite/Courses/Fall2013/CLC3403_LawAndJustice/Badges'
+        )
         res = self.testapp.get(entry_href)
         assert_that(res.json_body, has_entry('Items', has_length(1)))
 
@@ -74,7 +76,8 @@ class TestViews(ApplicationLayerTest):
         assert_that(item, has_entry('Type', 'Course'))
 
         res = self.testapp.get(
-            '/dataserver2/%2B%2Betc%2B%2Bhostsites/platform.ou.edu/%2B%2Betc%2B%2Bsite/Courses/Fall2013/CLC3403_LawAndJustice')
+            '/dataserver2/%2B%2Betc%2B%2Bhostsites/platform.ou.edu/%2B%2Betc%2B%2Bsite/Courses/Fall2013/CLC3403_LawAndJustice'
+        )
         assert_that(res.json_body,
                     has_entries('Class', 'CourseInstance',
                                 'Links', has_item(has_entries('rel', 'Badges',
