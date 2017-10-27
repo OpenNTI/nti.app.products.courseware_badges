@@ -87,7 +87,7 @@ class ValidatingCourseBadges(object):
     def __init__(self, obj, unused_default=None):
         if ICourseInstance.providedBy(obj):
             badges = get_all_context_badges(obj)
-            self.badges = list((x.name for x in badges)) if badges else ()
+            self.badges = list(x.name for x in badges) if badges else ()
 
     def __reduce__(self):
         raise TypeError()
