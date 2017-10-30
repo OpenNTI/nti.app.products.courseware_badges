@@ -118,7 +118,7 @@ class UserCourseBadgesView(AbstractAuthenticatedView):
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
-                                'message': _(u"Must specify a username."),
+                                 'message': _(u"Must specify a username."),
                              },
                              None)
 
@@ -127,7 +127,7 @@ class UserCourseBadgesView(AbstractAuthenticatedView):
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
-                                'message': _(u"User cannot be found."),
+                                 'message': _(u"User cannot be found."),
                              },
                              None)
 
