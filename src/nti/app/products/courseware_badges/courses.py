@@ -88,7 +88,7 @@ def get_badge_catalog_entry_ntiids(name, sites=None):
     return [x.ntiid for x in result]
 
 
-def is_course_badge(name, *args):
+def is_course_badge(name, *unused_args):
     return bool(get_badge_catalog_entry_ntiids(name))
 
 
@@ -212,6 +212,7 @@ class _CoursePrincipalEarnableBadgeFilter(object):
         return result
 
     def allow_badge(self, user, badge):
+        __traceback_info__ = user, badge
         is_cb = is_course_badge(badge.name)
         entry = self._get_entry(badge) if is_cb else None
         if is_cb:
