@@ -55,7 +55,7 @@ def _index_courses(index, intids):
             index.index_doc(doc_id, course)
 
 
-def do_evolve(context, generation=generation):
+def do_evolve(context, generation=generation):  # pylint: disable=redefined-outer-name
     conn = context.connection
     ds_folder = conn.root()['nti.dataserver']
 

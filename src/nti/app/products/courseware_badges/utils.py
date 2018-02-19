@@ -13,13 +13,13 @@ import re
 import six
 from collections import Mapping
 
+from pyramid.compat import is_nonstr_iter
+
 from zope import component
 
 from zope.proxy import ProxyBase
 
 from zope.traversing.api import traverse
-
-from pyramid.compat import is_nonstr_iter
 
 from nti.app.products.courseware_badges import get_all_badges
 
@@ -142,6 +142,7 @@ def find_course_badges_from_entry(context):
 
 class CourseBadgeProxy(ProxyBase):
 
+    # pylint: disable=property-on-old-class
     SourceNTIID = property(
         lambda s: s.__dict__.get('_v_catalog_source_ntiid'),
         lambda s, v: s.__dict__.__setitem__('_v_catalog_source_ntiid', v))
@@ -150,6 +151,7 @@ class CourseBadgeProxy(ProxyBase):
         return ProxyBase.__new__(cls, base)
 
     def __init__(self, base, ntiid):
+        # pylint: disable=non-parent-init-called
         ProxyBase.__init__(self, base)
         self.SourceNTIID = ntiid
 
@@ -193,7 +195,7 @@ def get_course_badges(course_iden):
     # in order to return new objects all the time, so they can be
     # proxied appropriately for the course in case multiple courses
     # shared a badge/
-    # TODO: Change code to avoid getting all badges
+    # NOTE: Change code to avoid getting all badges
     return find_course_badges_from_badges(course_iden, get_all_badges())
 
 

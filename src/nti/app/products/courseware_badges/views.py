@@ -51,9 +51,11 @@ class CourseBadgesView(AbstractAuthenticatedView):
         result[ITEMS] = items = []
         result.__parent__ = self.context
         result.__name__ = self.request.view_name
+        # pylint: disable=no-member
         self.request.response.last_modified = self.context.lastModified
         badge_catalog = ICourseBadgeCatalog(self.context, None)
         if badge_catalog is not None:
+            # pylint: disable=too-many-function-args
             items.extend(IBadgeClass(b) for b in badge_catalog.iter_badges())
         result[TOTAL] = result[ITEM_COUNT] = len(items)
         return result
@@ -72,6 +74,7 @@ class EarnedCourseBadgesView(AbstractAuthenticatedView):
         result[ITEMS] = items = []
         result.__parent__ = self.context
         result.__name__ = self.request.view_name
+        # pylint: disable=no-member
         if     self.remoteUser.username == self.context.username \
             or show_course_badges(self.context):
             badges = get_earned_course_badges(self.context)

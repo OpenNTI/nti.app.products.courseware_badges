@@ -49,7 +49,7 @@ def find_catalog_entry_from_badge(badge):
         result = find_catalog_entry(ntiid) if ntiid else None
         if result is not None:
             return result
-    except AttributeError:
+    except AttributeError:  # pragma: no cover
         pass
 
     # use index
@@ -75,7 +75,7 @@ def find_catalog_entry_from_badge(badge):
                     ntiids.add(getattr(bld, 'ntiid', None))
                     ntiids.add(getattr(bld, 'ContentPackageNTIID', None))
                     ntiids.update(p.ntiid for p in bld.ContentPackages or ())
-                except AttributeError:  # in case no ContentPackageBundle
+                except AttributeError:  # pragma: no cover
                     pass
             ntiids.discard(None)
             for ntiid in ntiids:
