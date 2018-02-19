@@ -67,6 +67,7 @@ def get_universe_of_course_badges_for_user(user):
         for enrollment in enrollments.iter_enrollments():
             course = ICourseInstance(enrollment)
             adapted = ICourseBadgeCatalog(course)
+            # pylint: disable=too-many-function-args
             result.append((course, adapted.iter_badges()))
     return result
 
@@ -76,7 +77,7 @@ def get_course_badges_for_user(user):
     return the badges for the courses a user in enrolled in
     """
     result = []
-    for _, badges in get_universe_of_course_badges_for_user(user):
+    for unused_course, badges in get_universe_of_course_badges_for_user(user):
         result.extend(badges)
     return result
 

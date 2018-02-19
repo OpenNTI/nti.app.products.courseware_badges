@@ -39,7 +39,7 @@ class MockDataserver(object):
         return None
 
 
-def do_evolve(context, generation=generation):
+def do_evolve(context, generation=generation):  # pylint: disable=redefined-outer-name
     conn = context.connection
     ds_folder = conn.root()['nti.dataserver']
 

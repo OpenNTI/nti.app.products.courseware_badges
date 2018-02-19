@@ -11,6 +11,8 @@ from __future__ import absolute_import
 import six
 import datetime
 
+from pyramid.threadlocal import get_current_request
+
 from zope import component
 from zope import interface
 
@@ -19,8 +21,6 @@ from zope.container.contained import Contained
 from zope.deprecation import deprecated
 
 from zope.intid.interfaces import IIntIds
-
-from pyramid.threadlocal import get_current_request
 
 from nti.app.products.badges import get_badge
 
@@ -212,6 +212,7 @@ class _CoursePrincipalEarnableBadgeFilter(object):
         return result
 
     def allow_badge(self, user, badge):
+        # pylint: disable=unused-variable
         __traceback_info__ = user, badge
         is_cb = is_course_badge(badge.name)
         entry = self._get_entry(badge) if is_cb else None

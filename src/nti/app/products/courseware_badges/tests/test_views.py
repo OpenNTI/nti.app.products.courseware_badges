@@ -5,8 +5,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-# disable: accessing protected members, too many methods
-# pylint: disable=W0212,R0904
+# pylint: disable=protected-access,too-many-public-methods,arguments-differ
 
 from hamcrest import has_item
 from hamcrest import has_entry
@@ -16,7 +15,7 @@ from hamcrest import assert_that
 
 import fudge
 
-from six.moves.urllib_parse import unquote
+from six.moves import urllib_parse
 
 from zope import component
 
@@ -66,7 +65,7 @@ class TestViews(ApplicationLayerTest):
         mock_scb_1.is_callable().with_args().returns(False)
         mock_scb_2.is_callable().with_args().returns(False)
 
-        entry_href = unquote(
+        entry_href = urllib_parse.unquote(
             '/dataserver2/%2B%2Betc%2B%2Bhostsites/platform.ou.edu/%2B%2Betc%2B%2Bsite/Courses/Fall2013/CLC3403_LawAndJustice/Badges'
         )
         res = self.testapp.get(entry_href)
@@ -81,7 +80,7 @@ class TestViews(ApplicationLayerTest):
         assert_that(res.json_body,
                     has_entries('Class', 'CourseInstance',
                                 'Links', has_item(has_entries('rel', 'Badges',
-                                                              'href', unquote(entry_href)))))
+                                                              'href', urllib_parse.unquote(entry_href)))))
 
         path = '/dataserver2/users/sjohnson%40nextthought.com/EarnedCourseBadges'
         res = self.testapp.get(path)
@@ -144,4 +143,4 @@ class TestViews(ApplicationLayerTest):
         assert_that(res.json_body, has_entry('Items',
                                              has_item(has_entries('href', '/dataserver2/OpenBadges/Law%20and%20Justice',
                                                                   'Type', 'Course',
-                                                                  'image', unquote(img_url)))))
+                                                                  'image', urllib_parse.unquote(img_url)))))

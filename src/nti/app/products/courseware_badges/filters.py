@@ -8,12 +8,12 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-from zope import component
-from zope import interface
+from pyramid.threadlocal import get_current_request
 
 from ZODB.POSException import POSError
 
-from pyramid.threadlocal import get_current_request
+from zope import component
+from zope import interface
 
 from nti.app.products.badges.interfaces import IAssertionChange
 
@@ -46,8 +46,8 @@ class _CourseBadgePrincipalUGDFilter(object):
                 user = IUser(assertion)
                 badge = IBadgeClass(assertion)
                 if req.authenticated_userid != user.username:
-                    result =   not is_course_badge( badge.name) \
-                            or show_course_badges(user)
+                    result = not is_course_badge(badge.name) \
+                          or show_course_badges(user)
             except (POSError, TypeError):
                 result = False
         return result
