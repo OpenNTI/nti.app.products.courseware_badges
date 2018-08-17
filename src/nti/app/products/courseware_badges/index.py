@@ -93,7 +93,7 @@ class ValidatingCourseBadges(object):
         raise TypeError()
 
 
-class CourseBadgesIndex(AttributeSetIndex):
+class CourseBadgesIndex(AttributeSetIndex):  # pylint: disable=inconsistent-mro
     default_field_name = 'badges'
     default_interface = ValidatingCourseBadges
 
@@ -114,7 +114,7 @@ def install_course_badges_catalog(site_manager_container, intids=None):
     locate(catalog, site_manager_container, COURSE_BADGES_CATALOG_NAME)
     intids.register(catalog)
     lsm.registerUtility(catalog,
-                        provided=ICatalog, 
+                        provided=ICatalog,
                         name=COURSE_BADGES_CATALOG_NAME)
 
     for name, clazz in ((IX_SITE, CourseSiteIndex),
