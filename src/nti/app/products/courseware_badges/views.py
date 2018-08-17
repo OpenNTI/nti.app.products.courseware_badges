@@ -23,6 +23,7 @@ from nti.app.products.courseware_badges.interfaces import ICourseBadgeCatalog
 from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
+from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.dataserver import authorization as nauth
 
@@ -51,14 +52,26 @@ class CourseBadgesView(AbstractAuthenticatedView):
         result[ITEMS] = items = []
         result.__parent__ = self.context
         result.__name__ = self.request.view_name
-        # pylint: disable=no-member
-        self.request.response.last_modified = self.context.lastModified
-        badge_catalog = ICourseBadgeCatalog(self.context, None)
+        # query course badge catalog
+        course = ICourseInstance(self.context)
+        badge_catalog = ICourseBadgeCatalog(course, None)
         if badge_catalog is not None:
             # pylint: disable=too-many-function-args
             items.extend(IBadgeClass(b) for b in badge_catalog.iter_badges())
         result[TOTAL] = result[ITEM_COUNT] = len(items)
+        # pylint: disable=no-member
+        self.request.response.last_modified = self.context.lastModified
         return result
+
+
+@view_config(route_name='objects.generic.traversal',
+             context=ICourseCatalogEntry,
+             request_method='GET',
+             permission=nauth.ACT_READ,
+             renderer='rest',
+             name=VIEW_BADGES)
+class CatalogEntryBadgesView(CourseBadgesView):
+    pass
 
 
 @view_config(route_name='objects.generic.traversal',
