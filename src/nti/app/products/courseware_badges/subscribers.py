@@ -21,7 +21,7 @@ logger = __import__('logging').getLogger(__name__)
 
 
 @component.adapter(ICourseInstance, ICourseVendorInfoSynchronized)
-def _course_instance_available(course, _):
+def _course_instance_available(course, unused_event=None):
     catalog = get_course_badges_catalog()
     if catalog is not None:
         intids = component.getUtility(IIntIds)
