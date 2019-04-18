@@ -40,9 +40,9 @@
 
 	<!-- ACL Providers -->
 	<subscriber factory=".acl.CourseBadgeSupplementalACLProvider"
-                for="nti.badges.interfaces.IBadgeClass" 
+                for="nti.badges.interfaces.IBadgeClass"
                 provides="nti.dataserver.interfaces.ISupplementalACLProvider" />
-                
+
 	<!-- Subscribers -->
 	<subscriber	factory=".courses._CourseErnableBadges"
 				provides="nti.app.products.badges.interfaces.IPrincipalErnableBadges"/>
@@ -65,6 +65,9 @@
 
 	<subscriber factory=".decorators._CourseInstanceLinkDecorator"
 				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
+
+	<subscriber factory=".decorators._UserLinkDecorator"
+                provides="nti.externalization.interfaces.IExternalMappingDecorator" />
 
 	<!-- Utilities -->
 	<utility factory=".courses._OpenBadgeAdapter" />

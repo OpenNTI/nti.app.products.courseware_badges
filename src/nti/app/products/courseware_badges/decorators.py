@@ -19,6 +19,8 @@ from nti.badges.interfaces import IBadgeClass
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
+from nti.coremetadata.interfaces import IUser
+
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IExternalObjectDecorator
 from nti.externalization.interfaces import IExternalMappingDecorator
@@ -35,6 +37,18 @@ logger = __import__('logging').getLogger(__name__)
 @component.adapter(ICourseInstance)
 @interface.implementer(IExternalMappingDecorator)
 class _CourseInstanceLinkDecorator(Singleton):
+
+    def decorateExternalMapping(self, context, result):
+        _links = result.setdefault(LINKS, [])
+        _links.append(Link(context, elements=(VIEW_BADGES,), rel=VIEW_BADGES))
+
+
+@component.adapter(IUser)
+@interface.implementer(IExternalMappingDecorator)
+class _UserLinkDecorator(Singleton):
+    """
+    Marker rel saying badges are enabled.
+    """
 
     def decorateExternalMapping(self, context, result):
         _links = result.setdefault(LINKS, [])
