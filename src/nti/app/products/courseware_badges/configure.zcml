@@ -66,9 +66,6 @@
 	<subscriber factory=".decorators._CourseInstanceLinkDecorator"
 				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
 
-	<subscriber factory=".decorators._UserLinkDecorator"
-                provides="nti.externalization.interfaces.IExternalMappingDecorator" />
-
 	<!-- Utilities -->
 	<utility factory=".courses._OpenBadgeAdapter" />
 
