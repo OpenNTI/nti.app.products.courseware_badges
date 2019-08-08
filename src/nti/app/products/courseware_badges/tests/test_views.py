@@ -144,3 +144,11 @@ class TestViews(ApplicationLayerTest):
                                              has_item(has_entries('href', '/dataserver2/OpenBadges/Law%20and%20Justice',
                                                                   'Type', 'Course',
                                                                   'image', urllib_parse.unquote(img_url)))))
+
+        # Clean up
+        # and award
+        name = 'Law and Justice'
+        award_badge_path = '/dataserver2/BadgeAdmin/@@Revoke'
+        self.testapp.post_json(award_badge_path,
+                               {"username": self.default_username,
+                                "badge": name})
