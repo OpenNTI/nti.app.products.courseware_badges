@@ -81,8 +81,9 @@ class TestCourses(ApplicationLayerTest):
                                                             'Type', 'Course'))))
 
         ntiid = 'tag:nextthought.com,2011-10:OU-HTML-CLC3403_LawAndJustice.clc_3403_law_and_justice'
-        badges = get_course_badges(ntiid)
-        assert_that(badges, has_length(1))
+        with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
+            badges = get_course_badges(ntiid)
+            assert_that(badges, has_length(1))
 
-        cp = IBadgeClass(badges[0], None)
-        assert_that(cp, is_not(none()))
+            cp = IBadgeClass(badges[0], None)
+            assert_that(cp, is_not(none()))
