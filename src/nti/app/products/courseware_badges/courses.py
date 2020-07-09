@@ -221,7 +221,7 @@ class _CoursePrincipalEarnableBadgeFilter(object):
             startDate = self._startDate(entry)
             now = datetime.datetime.utcnow()
             result = (entry is not None) \
-                 and (now >= startDate) \
+                 and (not startDate or now >= startDate) \
                  and (not endDate or now <= endDate)
         else:
             result = True
