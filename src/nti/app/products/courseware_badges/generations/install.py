@@ -14,7 +14,7 @@ from zope.intid.interfaces import IIntIds
 
 from nti.app.products.courseware_badges.index import install_course_badges_catalog
 
-generation = 4
+generation = 5
 
 logger = __import__('logging').getLogger(__name__)
 
@@ -32,13 +32,8 @@ class _CoursewareBadgesSchemaManager(SchemaManager):
 
 
 def install_catalog(context):
-    conn = context.connection
-    root = conn.root()
-    dataserver_folder = root['nti.dataserver']
-    lsm = dataserver_folder.getSiteManager()
-    intids = lsm.getUtility(IIntIds)
-    install_course_badges_catalog(dataserver_folder, intids)
+    pass
 
 
 def evolve(context):
-    install_catalog(context)
+    pass
