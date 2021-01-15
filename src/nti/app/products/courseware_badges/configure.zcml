@@ -10,4 +10,9 @@
 	<include package="zope.component" />
 	<include package="zope.security" />
 
+
+    <!-- Generations -->
+    <utility factory=".generations.install._CoursewareBadgesSchemaManager"
+             name="nti.dataserver-courseware-badges"
+             provides="zope.generations.interfaces.IInstallableSchemaManager" />
 </configure>
