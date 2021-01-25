@@ -15,6 +15,8 @@ from zope.catalog.interfaces import ICatalog
 
 from zope.component.hooks import site as current_site
 
+from zope.intid.interfaces import IIntIds
+
 from nti.app.products.courseware_badges.index import COURSE_BADGES_CATALOG_NAME
 
 from nti.dataserver.interfaces import IDataserver
@@ -52,9 +54,13 @@ def do_evolve(context, generation=generation):  # pylint: disable=redefined-oute
                "Hooks not installed?"
 
         lsm = ds_folder.getSiteManager()
+        intids = lsm.getUtility(IIntIds)
         badge_catalog = lsm.queryUtility(ICatalog, name=COURSE_BADGES_CATALOG_NAME)
         if badge_catalog is not None:
+            for idx in badge_catalog.values():
+                intids.unregister(idx)
             lsm.unregisterUtility(provided=ICatalog, name=COURSE_BADGES_CATALOG_NAME)
+            intids.unregister(badge_catalog)
 
     component.getGlobalSiteManager().unregisterUtility(mock_ds, IDataserver)
     logger.info('Evolution %s done.', generation)
